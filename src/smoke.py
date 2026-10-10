@@ -62,9 +62,30 @@ def model_pipeline():
     assert any(m['path']==str(folder/'adapter') for m in discover())
     print('PASS: tokenization, per-layer QKV freezing, backward, adapter save/reload, discovery')
 
+def training_pipeline(kind):
+    from copy import deepcopy
+    from config import OUTPUT_ROOT
+    from utils.training import train
+    from utils.models import load_model
+    from utils.runs import write_json
+    config=deepcopy(TRAIN_DEFAULTS)
+    config.update(model=str(OUTPUT_ROOT/'smoke/tiny-base'),local_data=str(OUTPUT_ROOT/'smoke/data.json'),
+        max_steps=2,batch_size=2,eval_batch_size=2,logging_steps=1,warmup_steps=0,max_length=128,
+        epochs=1,local_files_only=True,ranks=[dict(q=2,k=0,v=1),dict(q=0,k=1,v=0)])
+    path=new_run(kind,config)
+    train(config,path,kind)
+    assert read_json(path/'status.json')['status']=='completed'
+    assert list((path/'tensorboard').glob('events.*'))
+    assert read_json(path/'result.json')['best_checkpoint']
+    model,tokenizer=load_model(dict(type=kind,path=str(path/'final')),True,device='cpu')
+    output=model.generate(**tokenizer('MR: name[Test]\nText:',return_tensors='pt'),max_new_tokens=2,pad_token_id=tokenizer.eos_token_id)
+    assert output.shape[1]>0
+    write_json(OUTPUT_ROOT/f'smoke/{kind}-run.json',{'path':str(path)})
+    print(f'PASS: {kind} training, evaluation, checkpoint, best reload, TensorBoard, final generation')
+
 if __name__ == '__main__':
     require_lora()
     parser = argparse.ArgumentParser()
-    parser.add_argument('stage', choices=['runtime','models'])
+    parser.add_argument('stage', choices=['runtime','models','lora'])
     args = parser.parse_args()
-    {'runtime':runtime,'models':model_pipeline}[args.stage]()
+    {'runtime':runtime,'models':model_pipeline,'lora':lambda:training_pipeline('lora')}[args.stage]()
