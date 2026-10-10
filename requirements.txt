@@ -1,0 +1,11 @@
+# Python 3.10, conda lora; CUDA torch installed separately.
+torch==2.14.0
+transformers==5.17.0
+datasets==2.21.0
+peft==0.21.0
+accelerate==1.15.0
+streamlit==1.65.0
+tensorboard==2.21.0
+nltk==3.10.3
+pycocoevalcap==1.2
+pandas==2.3.3
