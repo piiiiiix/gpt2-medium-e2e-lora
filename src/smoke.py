@@ -44,9 +44,12 @@ def model_pipeline():
         target=f'Restaurant {i} serves Italian food.',references=[f'Restaurant {i} serves Italian food.']) for i in range(4)]
     write_json(folder/'data.json',dict(train=rows,validation=rows,test=rows))
     assert any(x!=-100 for x in tokenize(rows[0],tokenizer,128)['labels'])
-    ranks=[dict(q=2,k=0,v=1),dict(q=0,k=3,v=0)]
+    ranks=dict(q=2,k=0,v=1)
     model=attach(tiny,ranks,alpha=32,dropout=0)
     assert 'k' not in model.transformer.h[0].attn.c_attn.branches
+    assert all(layer.attn.c_attn.branches['q'].a.out_features==2 and
+        layer.attn.c_attn.branches['v'].a.out_features==1 and 'k' not in layer.attn.c_attn.branches
+        for layer in model.transformer.h)
     assert all(not p.requires_grad for n,p in model.named_parameters() if '.branches.' not in n)
     ids=torch.tensor([[1,2,3,4]])
     model(ids,labels=ids).loss.backward()
@@ -60,8 +63,17 @@ def model_pipeline():
     save_adapter(model,folder/'adapter',dict(model=str(folder/'tiny-base'),ranks=ranks,alpha=32,dropout=0))
     reloaded=load_adapter(GPT2LMHeadModel.from_pretrained(folder/'tiny-base'),folder/'adapter').eval()
     torch.testing.assert_close(reloaded(ids).logits,expected)
+    save_adapter(model,folder/'legacy-adapter',dict(model=str(folder/'tiny-base'),
+        ranks=[ranks.copy() for _ in range(2)],alpha=32,dropout=0))
+    legacy=load_adapter(GPT2LMHeadModel.from_pretrained(folder/'tiny-base'),folder/'legacy-adapter').eval()
+    torch.testing.assert_close(legacy(ids).logits,expected)
+    k_only=attach(GPT2LMHeadModel.from_pretrained(folder/'tiny-base'),dict(q=0,k=3,v=0),dropout=0)
+    assert all(set(layer.attn.c_attn.branches)=={'k'} and
+        layer.attn.c_attn.branches['k'].a.out_features==3 for layer in k_only.transformer.h)
+    k_only(ids,labels=ids).loss.backward()
+    assert all(layer.attn.c_attn.branches['k'].b.weight.grad is not None for layer in k_only.transformer.h)
     assert any(m['path']==str(folder/'adapter') for m in discover())
-    print('PASS: tokenization, per-layer QKV freezing, backward, adapter save/reload, discovery')
+    print('PASS: tokenization, model-wide independent QKV ranks, K freezing, backward, adapter save/reload, discovery')
 
 def training_pipeline(kind):
     from copy import deepcopy
@@ -72,7 +84,7 @@ def training_pipeline(kind):
     config=deepcopy(TRAIN_DEFAULTS)
     config.update(model=str(OUTPUT_ROOT/'smoke/tiny-base'),local_data=str(OUTPUT_ROOT/'smoke/data.json'),
         max_steps=2,batch_size=2,eval_batch_size=2,logging_steps=1,warmup_steps=0,max_length=128,
-        epochs=1,local_files_only=True,smoke=True,ranks=[dict(q=2,k=0,v=1),dict(q=0,k=1,v=0)])
+        epochs=1,local_files_only=True,smoke=True,ranks=dict(q=2,k=0,v=1))
     path=new_run(kind,config)
     train(config,path,kind)
     assert read_json(path/'status.json')['status']=='completed'
@@ -124,9 +136,15 @@ def frontend_pipeline():
     existing_pids={read_json(p,{}).get('pid') for p in OUTPUT_ROOT.rglob('tensorboard_server.json')}
     app=AppTest.from_file(str(Path(__file__).with_name('app.py')),default_timeout=30).run()
     assert not app.exception
-    app.button[1].click().run() # 全部冻结
+    app.number_input(key='q_rank').set_value(8).run()
+    app.number_input(key='k_rank').set_value(2).run()
+    app.number_input(key='v_rank').set_value(0).run()
+    assert app.number_input(key='q_rank').value==8 and app.number_input(key='k_rank').value==2
+    assert app.number_input(key='v_rank').value==0
+    assert not app.get('data_editor')
+    app.button(key='freeze_qkv').click().run()
     assert not app.exception
-    assert all(v==0 for row in app.session_state['rank_rows'] for k,v in row.items() if k!='layer')
+    assert all(app.number_input(key=key).value==0 for key in ('q_rank','k_rank','v_rank'))
     for page in ['测试 / benchmark','历史测试记录','任务进度']:
         app.radio(key='page').set_value(page).run()
         assert not app.exception
@@ -208,11 +226,11 @@ def guards_pipeline():
     model=GPT2LMHeadModel.from_pretrained(OUTPUT_ROOT/'smoke/tiny-base').eval()
     ids=torch.tensor([[1,2,3]])
     expected=model(ids).logits.detach()
-    attach(model,[dict(q=0,k=0,v=0) for _ in range(2)])
+    attach(model,dict(q=0,k=0,v=0))
     assert not any(p.requires_grad for p in model.parameters())
     torch.testing.assert_close(model(ids).logits,expected)
     try:
-        validate_ranks([dict(q=-1,k=0,v=0)],1)
+        validate_ranks(dict(q=-1,k=0,v=0),1)
         raise AssertionError('Negative rank accepted')
     except ValueError:
         pass

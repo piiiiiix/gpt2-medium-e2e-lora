@@ -50,8 +50,13 @@ def validate(config,kind):
         raise ValueError('Select fp32 on CPU')
     if not 0<=config['label_smoothing']<1:
         raise ValueError('label_smoothing must be in [0,1)')
-    if kind=='lora' and not any(v>0 for row in config['ranks'] for v in row.values()):
-        raise ValueError('All QKV projections are frozen. Use Base testing, or enable at least one rank for training.')
+    if kind=='lora':
+        if not isinstance(config['ranks'],dict):
+            raise ValueError('Use one model-wide ranks object: {"q":4,"k":0,"v":4}; per-layer settings are not supported for new training.')
+        from utils.qkv_lora import validate_ranks
+        validate_ranks(config['ranks'],1)
+        if not any(v>0 for v in config['ranks'].values()):
+            raise ValueError('All QKV projections are frozen. Use Base testing, or enable at least one rank for training.')
 
 def train(config,path,kind):
     with running(path,kind,config):

@@ -38,7 +38,8 @@ def new_run(kind, config):
     if training:
         tag = f"lr{config['learning_rate']:g}_e{config['epochs']}_b{config['batch_size']}_ga{config['gradient_accumulation']}_s{config['seed']}"
         if kind == 'lora':
-            tag += '_qkv' + digest(config['ranks'])
+            ranks=config['ranks']
+            tag += f"_q{ranks['q']}k{ranks['k']}v{ranks['v']}" if isinstance(ranks,dict) else '_legacyqkv'+digest(ranks)
     else:
         tag = f"{config['model']['type']}_{digest(config['model'])}_{config['split']}_n{config['samples'] or 'all'}_t{config['max_new_tokens']}_beam{config['num_beams']}_" + '-'.join(config['metrics'])
     tag = re.sub(r'[^a-zA-Z0-9_.-]', '-', tag)

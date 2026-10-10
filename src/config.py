@@ -12,7 +12,7 @@ TRAIN_DEFAULTS = dict(model=MODEL_NAME, dataset=DATASET_NAME, learning_rate=2e-4
     dropout=0.1, alpha=32, seed=42, precision='fp32', max_length=512,
     gradient_checkpointing=True, logging_steps=10, max_steps=-1, smoke=False,
     train_samples=None, eval_samples=None, local_data=None, local_files_only=False,
-    ranks=[dict(q=4, k=0, v=4) for _ in range(24)])
+    ranks=dict(q=4, k=0, v=4))
 # FFT defaults are a comparison implementation profile, not Table 11 LoRA values.
 FFT_DEFAULTS = {**TRAIN_DEFAULTS, 'learning_rate': 2e-5}
 EVAL_DEFAULTS = dict(dataset=DATASET_NAME, split='validation', samples=None,

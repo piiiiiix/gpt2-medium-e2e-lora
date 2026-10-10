@@ -72,24 +72,19 @@ if page=='训练':
         config.update(batch_size=1,gradient_accumulation=8,eval_batch_size=1,precision='bf16')
     st.caption('LoRA 默认值来自 V2 附录 D.3 / 表 11；FFT 为独立比较配置。')
     if kind=='lora':
-        st.subheader('逐层 QKV rank')
-        st.caption('每个投影 rank=0：完全冻结，不挂 LoRA。原模型基础权重始终冻结。')
+        st.subheader('Q、K、V 的 LoRA rank')
+        st.caption('三个设置统一应用到所有 Transformer 层。rank=0：冻结该投影，不挂 LoRA。')
+        def freeze_qkv():
+            for key in ('q_rank','k_rank','v_rank'):
+                st.session_state[key]=0
+        for key,default in [('q_rank',4),('k_rank',0),('v_rank',4)]:
+            st.session_state.setdefault(key,default)
         with st.container(horizontal=True):
-            q=st.number_input('批量 Q',0,1024,4,key='bulk_q')
-            k=st.number_input('批量 K',0,1024,0,key='bulk_k')
-            v=st.number_input('批量 V',0,1024,4,key='bulk_v')
-            if st.button('应用到全部层'):
-                st.session_state['rank_rows']=[dict(layer=i,q=int(q),k=int(k),v=int(v)) for i in range(24)]
-                st.session_state['rank_version']=st.session_state.get('rank_version',0)+1
-            if st.button('全部冻结'):
-                st.session_state['rank_rows']=[dict(layer=i,q=0,k=0,v=0) for i in range(24)]
-                st.session_state['rank_version']=st.session_state.get('rank_version',0)+1
-        rows=st.session_state.setdefault('rank_rows',[dict(layer=i,**r) for i,r in enumerate(config['ranks'])])
-        table=st.data_editor(pd.DataFrame(rows),disabled=['layer'],hide_index=True,
-            key=f"rank_editor_{st.session_state.get('rank_version',0)}",num_rows='fixed',
-            column_config={x:st.column_config.NumberColumn(x.upper(),min_value=0,max_value=1024,step=1) for x in ['q','k','v']},
-            alt='24 层 Q K V 的独立 rank')
-        config['ranks']=[{key:int(row[key]) for key in ['q','k','v']} for row in table.to_dict('records')]
+            q=st.number_input('Q rank',0,1024,value=None,step=1,key='q_rank')
+            k=st.number_input('K rank',0,1024,value=None,step=1,key='k_rank')
+            v=st.number_input('V rank',0,1024,value=None,step=1,key='v_rank')
+            st.button('全部冻结',key='freeze_qkv',on_click=freeze_qkv)
+        config['ranks']=dict(q=int(q or 0),k=int(k or 0),v=int(v or 0))
     with st.form('training_config'):
         a,b,c=st.columns(3)
         config['learning_rate']=a.number_input('学习率',min_value=1e-9,value=config['learning_rate'],format='%.7f')
@@ -118,7 +113,7 @@ if page=='训练':
     st.caption(f"有效 batch size：{config['batch_size']*config['gradient_accumulation']}。")
     duration(config,kind)
     if submitted:
-        if kind=='lora' and not any(v for row in config['ranks'] for v in row.values()):
+        if kind=='lora' and not any(config['ranks'].values()):
             st.error('全部投影已冻结，没有可训练参数；请启用至少一个 rank，或使用 Base 测试。')
         else:
             start([(kind,config)])

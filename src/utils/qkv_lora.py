@@ -1,4 +1,4 @@
-"""Independent per-layer Q/K/V LoRA on GPT-2's fused Conv1D.
+"""Model-wide independent Q/K/V ranks on GPT-2's fused Conv1D.
 
 Adapter format is project-specific, not a PEFT adapter. Base weights never change.
 """
@@ -9,13 +9,19 @@ import torch
 from torch import nn
 
 def validate_ranks(ranks, layers):
-    if len(ranks) != layers:
-        raise ValueError(f'Expected {layers} QKV rank rows, got {len(ranks)}')
-    for row in ranks:
+    if isinstance(ranks,dict):
+        rows=[ranks]*layers
+    else:
+        # Loading old artifacts only; new training accepts a single QKV dict.
+        if not isinstance(ranks,list) or len(ranks)!=layers:
+            raise ValueError('Expected one QKV rank object')
+        rows=ranks
+    for row in rows:
         if set(row) != {'q','k','v'}:
             raise ValueError('Every rank row must contain q, k, v')
         if any(isinstance(v, bool) or not isinstance(v, int) or v < 0 for v in row.values()):
             raise ValueError('QKV ranks must be nonnegative integers; 0 freezes a projection')
+    return rows
 
 class Branch(nn.Module):
     def __init__(self, width, rank, alpha, dropout):
@@ -46,12 +52,12 @@ class QKVLoRA(nn.Module):
             for key,piece in zip(('q','k','v'),pieces)], dim=-1)
 
 def attach(model, ranks, alpha=32, dropout=.1):
-    validate_ranks(ranks, len(model.transformer.h))
+    rows=validate_ranks(ranks, len(model.transformer.h))
     if alpha <= 0 or not 0 <= dropout < 1:
         raise ValueError('alpha must be positive; dropout must be in [0,1)')
     for parameter in model.parameters():
         parameter.requires_grad_(False)
-    for layer, row in zip(model.transformer.h,ranks):
+    for layer, row in zip(model.transformer.h,rows):
         layer.attn.c_attn = QKVLoRA(layer.attn.c_attn,row,alpha,dropout)
     return model
 

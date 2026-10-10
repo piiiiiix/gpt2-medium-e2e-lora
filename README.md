@@ -1,6 +1,6 @@
 # GPT-2 Medium E2E LoRA
 
-GPT-2 Medium 的 Base、逐层 QKV LoRA、全参数微调（FFT）训练与 E2E 评测工作台。参考平行目录的 small 项目，前端与后端分离，所有代码位于 src。
+GPT-2 Medium 的 Base、Q/K/V 独立 LoRA、全参数微调（FFT）训练与 E2E 评测工作台。参考平行目录的 small 项目，前端与后端分离，所有代码位于 src。
 
 ## 环境与启动
 
@@ -24,7 +24,7 @@ python -s -m streamlit run src/app.py
 
 ## 前端
 
-- **训练**：LoRA / FFT，超参数、精度和少量样本设置；24 层的 Q、K、V rank 独立编辑，支持批量赋值与全部冻结。rank=0 没有 adapter 分支；全部冻结时可测试 Base，但不能启动无参数训练。
+- **训练**：LoRA / FFT，超参数、精度和少量样本设置；只有 Q rank、K rank、V rank 三个模型级设置，各自独立调整，统一应用到所有 Transformer 层，无需逐层配置。rank=0 没有 adapter 分支；全部冻结时可测试 Base，但不能启动无参数训练。
 - **测试 / benchmark**：仅扫描 medium 内有效模型和 checkpoint；支持多个模型与一个、多个或全部指标，任务按顺序执行，避免抢占 GPU。
 - **历史测试记录**：从磁盘恢复记录，按类型、状态、日期 / 模型文本、指标筛选；查看和下载全部明细，使用已有预测重新评分。
 - **任务进度**：后台状态、进度、日志、显存 / 温度 / GPU 占用率、耗时和预计完成时间。刷新或关闭前端不结束后台任务。
@@ -32,7 +32,7 @@ python -s -m streamlit run src/app.py
 
 ## 默认参数与显存配置
 
-LoRA 论文参数见 [参数来源.md](参数来源.md)。默认 Q=4、K=0、V=4，alpha=32；适配器分支按 alpha/r 缩放。每层可改不同 rank，K 也可启用。GPT-2 合并的 QKV 层由项目的独立分支实现，基础模型权重被冻结。
+LoRA 论文参数见 [参数来源.md](参数来源.md)。默认 Q=4、K=0、V=4，alpha=32；适配器分支按 alpha/r 缩放。Q、K、V 可以分别使用不同 rank 或关闭，例如 Q=8、K=0、V=4；同一投影在所有层使用同一个 rank，各层分别学习自己的 adapter 权重。当前 Hugging Face GPT-2 Small 和 Medium 都将 QKV 存在合并的 c_attn 中；项目在该合并层上分别添加 Q/K/V 分支，基础模型权重被冻结。
 
 论文有效 batch=8，默认 micro batch=8 / accumulation=1。显存不足时可显式改 micro batch=1、accumulation=8、eval batch=1；精度和最大长度为单独可调的硬件设置，实际配置会保存。不要把冒烟的 warmup=0、max_steps=1 当作完整训练设置。
 
@@ -53,10 +53,11 @@ python -s src/run_benchmarks.py --config outputs/my_benchmark_config.json
 
 无 --config 时使用默认参数。CLI 每次新建运行目录；--run-dir 仅供已排队任务使用，禁止覆盖完成记录。
 
-LoRA 覆盖配置示例（ranks 数组必须有 24 行；以下只演示其他参数）：
+LoRA 覆盖配置示例（ranks 只有 Q、K、V 三项，不使用逐层数组）：
 
 ```json
 {
+  "ranks": {"q": 8, "k": 0, "v": 4},
   "batch_size": 1,
   "gradient_accumulation": 8,
   "eval_batch_size": 1,
@@ -126,6 +127,8 @@ python -s src/smoke.py guards
 微型模型用于快速验证算法与集成；medium-* 使用真正的 24 层 GPT-2 Medium，训练只跑 1 step，评测只取 2 个样本。完整训练、完整测试集和多个随机种子的论文实验尚需单独启动。
 
 本项目使用自定义 QKV adapter 格式 `medium-qkv-lora-v1`，通过本项目加载器重载。它不是可直接传给 PEFT 的 adapter；检查点的原模型基础权重来自其 adapter_config.json 中记录的模型。
+
+新训练只接受模型级 QKV rank 对象；旧版逐层数组格式仅保留加载兼容，已有实验记录和模型不删除、不覆盖。
 
 ## 版本管理
 
