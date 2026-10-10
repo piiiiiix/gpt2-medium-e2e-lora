@@ -9,3 +9,6 @@ tensorboard==2.21.0
 nltk==3.10.3
 pycocoevalcap==1.2
 pandas==2.3.3
+
+# Code formatting and static checks, installed in conda lora.
+ruff==0.17.0

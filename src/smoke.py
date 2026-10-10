@@ -1,268 +1,444 @@
-"""Incremental smoke checks; all artifacts stay under outputs/smoke."""
+"""逐步冒烟测试入口：验证运行管理、模型、训练、评测、前端和异常边界。
+
+微型模型用于快速检查，medium-* 使用真实 GPT-2 Medium；结果均标记为冒烟。"""
+
 import argparse
 import json
 import time
 from pathlib import Path
+
 from config import TRAIN_DEFAULTS, require_lora
-from utils.runs import new_run, running, read_json
+from utils.runs import new_run, read_json, running
+
 
 def runtime():
-    config={**TRAIN_DEFAULTS,'smoke':True}
-    path = new_run('lora', config)
-    with running(path, 'lora', config):
-        print('runtime smoke passed')
-        time.sleep(.1)
-    assert read_json(path/'status.json')['status']=='completed'
-    assert json.loads((path/'gpu.jsonl').read_text().splitlines()[0])
-    failed = new_run('fft', config)
+    """验证成功与失败任务的状态、耗时、标准输出及 GPU 日志能够持久保存。"""
+    config = {**TRAIN_DEFAULTS, "smoke": True}
+    path = new_run("lora", config)
+    with running(path, "lora", config):
+        print("runtime smoke passed")
+        time.sleep(0.1)
+    assert read_json(path / "status.json")["status"] == "completed"
+    assert json.loads((path / "gpu.jsonl").read_text().splitlines()[0])
+    failed = new_run("fft", config)
     try:
-        with running(failed,'fft',config):
-            raise RuntimeError('deliberate smoke failure')
+        with running(failed, "fft", config):
+            raise RuntimeError("deliberate smoke failure")
     except RuntimeError:
         pass
-    assert read_json(failed/'status.json')['status']=='failed'
-    print('PASS: runtime success/failure status, log, GPU telemetry')
+    assert read_json(failed / "status.json")["status"] == "failed"
+    print("PASS: runtime success/failure status, log, GPU telemetry")
+
 
 def model_pipeline():
+    """验证独立 QKV rank、冻结、反向传播、adapter 重载及旧格式兼容。"""
     import torch
-    from transformers import GPT2Config, GPT2LMHeadModel, AutoTokenizer
-    from utils.qkv_lora import attach, save_adapter, load_adapter
+    from transformers import AutoTokenizer, GPT2Config, GPT2LMHeadModel
+
+    from config import OUTPUT_ROOT
     from utils.data import tokenize
     from utils.models import discover
+    from utils.qkv_lora import attach, load_adapter, save_adapter
     from utils.runs import write_json
-    from config import OUTPUT_ROOT
-    folder=OUTPUT_ROOT/'smoke'
-    folder.mkdir(parents=True,exist_ok=True)
+
+    folder = OUTPUT_ROOT / "smoke"
+    folder.mkdir(parents=True, exist_ok=True)
     torch.manual_seed(42)
-    tokenizer=AutoTokenizer.from_pretrained('openai-community/gpt2',local_files_only=True)
-    tokenizer.pad_token=tokenizer.eos_token
-    tiny=GPT2LMHeadModel(GPT2Config(vocab_size=len(tokenizer),n_layer=2,n_head=2,n_embd=32,n_positions=128,
-        eos_token_id=tokenizer.eos_token_id,pad_token_id=tokenizer.eos_token_id))
-    tiny.save_pretrained(folder/'tiny-base')
-    tokenizer.save_pretrained(folder/'tiny-base')
-    rows=[dict(meaning_representation=f'name[Restaurant {i}], food[Italian]',
-        target=f'Restaurant {i} serves Italian food.',references=[f'Restaurant {i} serves Italian food.']) for i in range(4)]
-    write_json(folder/'data.json',dict(train=rows,validation=rows,test=rows))
-    assert any(x!=-100 for x in tokenize(rows[0],tokenizer,128)['labels'])
-    ranks=dict(q=2,k=0,v=1)
-    model=attach(tiny,ranks,alpha=32,dropout=0)
-    assert 'k' not in model.transformer.h[0].attn.c_attn.branches
-    assert all(layer.attn.c_attn.branches['q'].a.out_features==2 and
-        layer.attn.c_attn.branches['v'].a.out_features==1 and 'k' not in layer.attn.c_attn.branches
-        for layer in model.transformer.h)
-    assert all(not p.requires_grad for n,p in model.named_parameters() if '.branches.' not in n)
-    ids=torch.tensor([[1,2,3,4]])
-    model(ids,labels=ids).loss.backward()
-    assert all(p.grad is None for n,p in model.named_parameters() if '.branches.' not in n)
+    tokenizer = AutoTokenizer.from_pretrained("openai-community/gpt2", local_files_only=True)
+    tokenizer.pad_token = tokenizer.eos_token
+    tiny = GPT2LMHeadModel(
+        GPT2Config(
+            vocab_size=len(tokenizer),
+            n_layer=2,
+            n_head=2,
+            n_embd=32,
+            n_positions=128,
+            eos_token_id=tokenizer.eos_token_id,
+            pad_token_id=tokenizer.eos_token_id,
+        )
+    )
+    tiny.save_pretrained(folder / "tiny-base")
+    tokenizer.save_pretrained(folder / "tiny-base")
+    rows = [
+        dict(
+            meaning_representation=f"name[Restaurant {i}], food[Italian]",
+            target=f"Restaurant {i} serves Italian food.",
+            references=[f"Restaurant {i} serves Italian food."],
+        )
+        for i in range(4)
+    ]
+    write_json(folder / "data.json", dict(train=rows, validation=rows, test=rows))
+    assert any(x != -100 for x in tokenize(rows[0], tokenizer, 128)["labels"])
+    ranks = dict(q=2, k=0, v=1)
+    model = attach(tiny, ranks, alpha=32, dropout=0)
+    assert "k" not in model.transformer.h[0].attn.c_attn.branches
+    assert all(
+        layer.attn.c_attn.branches["q"].a.out_features == 2
+        and layer.attn.c_attn.branches["v"].a.out_features == 1
+        and "k" not in layer.attn.c_attn.branches
+        for layer in model.transformer.h
+    )
+    assert all(not p.requires_grad for n, p in model.named_parameters() if ".branches." not in n)
+    ids = torch.tensor([[1, 2, 3, 4]])
+    model(ids, labels=ids).loss.backward()
+    assert all(p.grad is None for n, p in model.named_parameters() if ".branches." not in n)
     with torch.no_grad():
-        for n,p in model.named_parameters():
-            if '.branches.' in n:
-                p.add_(.01)
+        for n, p in model.named_parameters():
+            if ".branches." in n:
+                p.add_(0.01)
     model.eval()
-    expected=model(ids).logits.detach()
-    save_adapter(model,folder/'adapter',dict(model=str(folder/'tiny-base'),ranks=ranks,alpha=32,dropout=0))
-    reloaded=load_adapter(GPT2LMHeadModel.from_pretrained(folder/'tiny-base'),folder/'adapter').eval()
-    torch.testing.assert_close(reloaded(ids).logits,expected)
-    save_adapter(model,folder/'legacy-adapter',dict(model=str(folder/'tiny-base'),
-        ranks=[ranks.copy() for _ in range(2)],alpha=32,dropout=0))
-    legacy=load_adapter(GPT2LMHeadModel.from_pretrained(folder/'tiny-base'),folder/'legacy-adapter').eval()
-    torch.testing.assert_close(legacy(ids).logits,expected)
-    k_only=attach(GPT2LMHeadModel.from_pretrained(folder/'tiny-base'),dict(q=0,k=3,v=0),dropout=0)
-    assert all(set(layer.attn.c_attn.branches)=={'k'} and
-        layer.attn.c_attn.branches['k'].a.out_features==3 for layer in k_only.transformer.h)
-    k_only(ids,labels=ids).loss.backward()
-    assert all(layer.attn.c_attn.branches['k'].b.weight.grad is not None for layer in k_only.transformer.h)
-    assert any(m['path']==str(folder/'adapter') for m in discover())
-    print('PASS: tokenization, model-wide independent QKV ranks, K freezing, backward, adapter save/reload, discovery')
+    expected = model(ids).logits.detach()
+    save_adapter(
+        model,
+        folder / "adapter",
+        dict(model=str(folder / "tiny-base"), ranks=ranks, alpha=32, dropout=0),
+    )
+    reloaded = load_adapter(
+        GPT2LMHeadModel.from_pretrained(folder / "tiny-base"), folder / "adapter"
+    ).eval()
+    torch.testing.assert_close(reloaded(ids).logits, expected)
+    save_adapter(
+        model,
+        folder / "legacy-adapter",
+        dict(
+            model=str(folder / "tiny-base"),
+            ranks=[ranks.copy() for _ in range(2)],
+            alpha=32,
+            dropout=0,
+        ),
+    )
+    legacy = load_adapter(
+        GPT2LMHeadModel.from_pretrained(folder / "tiny-base"), folder / "legacy-adapter"
+    ).eval()
+    torch.testing.assert_close(legacy(ids).logits, expected)
+    k_only = attach(
+        GPT2LMHeadModel.from_pretrained(folder / "tiny-base"), dict(q=0, k=3, v=0), dropout=0
+    )
+    assert all(
+        set(layer.attn.c_attn.branches) == {"k"}
+        and layer.attn.c_attn.branches["k"].a.out_features == 3
+        for layer in k_only.transformer.h
+    )
+    k_only(ids, labels=ids).loss.backward()
+    assert all(
+        layer.attn.c_attn.branches["k"].b.weight.grad is not None for layer in k_only.transformer.h
+    )
+    assert any(m["path"] == str(folder / "adapter") for m in discover())
+    print(
+        "PASS: tokenization, model-wide independent QKV ranks, "
+        "K freezing, backward, adapter save/reload, discovery"
+    )
+
 
 def training_pipeline(kind):
+    """用微型模型验证指定训练方式的更新、验证、checkpoint 和最终生成。"""
     from copy import deepcopy
+
     from config import OUTPUT_ROOT
-    from utils.training import train
     from utils.models import load_model
     from utils.runs import write_json
-    config=deepcopy(TRAIN_DEFAULTS)
-    config.update(model=str(OUTPUT_ROOT/'smoke/tiny-base'),local_data=str(OUTPUT_ROOT/'smoke/data.json'),
-        max_steps=2,batch_size=2,eval_batch_size=2,logging_steps=1,warmup_steps=0,max_length=128,
-        epochs=1,local_files_only=True,smoke=True,ranks=dict(q=2,k=0,v=1))
-    path=new_run(kind,config)
-    train(config,path,kind)
-    assert read_json(path/'status.json')['status']=='completed'
-    assert list((path/'tensorboard').glob('events.*'))
-    assert read_json(path/'result.json')['best_checkpoint']
-    model,tokenizer=load_model(dict(type=kind,path=str(path/'final')),True,device='cpu')
-    output=model.generate(**tokenizer('MR: name[Test]\nText:',return_tensors='pt'),max_new_tokens=2,pad_token_id=tokenizer.eos_token_id)
-    assert output.shape[1]>0
-    write_json(OUTPUT_ROOT/f'smoke/{kind}-run.json',{'path':str(path)})
-    print(f'PASS: {kind} training, evaluation, checkpoint, best reload, TensorBoard, final generation')
+    from utils.training import train
+
+    config = deepcopy(TRAIN_DEFAULTS)
+    config.update(
+        model=str(OUTPUT_ROOT / "smoke/tiny-base"),
+        local_data=str(OUTPUT_ROOT / "smoke/data.json"),
+        max_steps=2,
+        batch_size=2,
+        eval_batch_size=2,
+        logging_steps=1,
+        warmup_steps=0,
+        max_length=128,
+        epochs=1,
+        local_files_only=True,
+        smoke=True,
+        ranks=dict(q=2, k=0, v=1),
+    )
+    path = new_run(kind, config)
+    train(config, path, kind)
+    assert read_json(path / "status.json")["status"] == "completed"
+    assert list((path / "tensorboard").glob("events.*"))
+    assert read_json(path / "result.json")["best_checkpoint"]
+    model, tokenizer = load_model(dict(type=kind, path=str(path / "final")), True, device="cpu")
+    output = model.generate(
+        **tokenizer("MR: name[Test]\nText:", return_tensors="pt"),
+        max_new_tokens=2,
+        pad_token_id=tokenizer.eos_token_id,
+    )
+    assert output.shape[1] > 0
+    write_json(OUTPUT_ROOT / f"smoke/{kind}-run.json", {"path": str(path)})
+    print(
+        f"PASS: {kind} training, evaluation, checkpoint, best reload, TensorBoard, final generation"
+    )
+
 
 def evaluation_pipeline():
+    """验证三类模型的逐条预测、离线重评分一致性以及全部指标明细。"""
     from copy import deepcopy
-    from config import OUTPUT_ROOT,EVAL_DEFAULTS,METRICS
+
+    from config import EVAL_DEFAULTS, METRICS, OUTPUT_ROOT
     from utils.evaluation import evaluate
-    from utils.scoring import score,read_predictions
-    folder=OUTPUT_ROOT/'smoke'
-    for kind in ['base','lora','fft']:
-        path=str(folder/'tiny-base') if kind=='base' else read_json(folder/f'{kind}-run.json')['path']+'/final'
-        config=deepcopy(EVAL_DEFAULTS)
-        config.update(model=dict(type=kind,path=path),local_data=str(folder/'data.json'),
-            samples=2,max_new_tokens=8,num_beams=2,local_files_only=True,metrics=['BLEU','ROUGE-L','CIDEr'],smoke=True)
-        run=new_run('benchmarks',config)
-        evaluate(config,run)
-        assert len(read_predictions(run/'predictions.jsonl'))==2
-        original=read_json(run/'metrics.json')['metrics']
-        config['predictions']=str(run/'predictions.jsonl')
-        repeat=new_run('benchmarks',config)
-        evaluate(config,repeat)
-        assert read_json(repeat/'metrics.json')['metrics']==original
-    fixture=folder/'scores-fixture.jsonl'
-    with fixture.open('w',encoding='utf-8') as stream:
+    from utils.scoring import read_predictions, score
+
+    folder = OUTPUT_ROOT / "smoke"
+    for kind in ["base", "lora", "fft"]:
+        path = (
+            str(folder / "tiny-base")
+            if kind == "base"
+            else read_json(folder / f"{kind}-run.json")["path"] + "/final"
+        )
+        config = deepcopy(EVAL_DEFAULTS)
+        config.update(
+            model=dict(type=kind, path=path),
+            local_data=str(folder / "data.json"),
+            samples=2,
+            max_new_tokens=8,
+            num_beams=2,
+            local_files_only=True,
+            metrics=["BLEU", "ROUGE-L", "CIDEr"],
+            smoke=True,
+        )
+        run = new_run("benchmarks", config)
+        evaluate(config, run)
+        assert len(read_predictions(run / "predictions.jsonl")) == 2
+        original = read_json(run / "metrics.json")["metrics"]
+        config["predictions"] = str(run / "predictions.jsonl")
+        repeat = new_run("benchmarks", config)
+        evaluate(config, repeat)
+        assert read_json(repeat / "metrics.json")["metrics"] == original
+    fixture = folder / "scores-fixture.jsonl"
+    with fixture.open("w", encoding="utf-8") as stream:
         for i in range(4):
-            text=f'Restaurant number {i} serves very delicious Italian food near the city centre .'
-            stream.write(json.dumps(dict(id=i,target=text,prediction=text,references=[text]))+'\n')
-    score(fixture,METRICS,folder)
-    assert len(read_json(folder/'metrics.json')['metrics'])==8
-    assert all('scores' in r for r in read_predictions(folder/'sample_scores.jsonl'))
-    print('PASS: Base/LoRA/FFT generation, incremental rows, offline rescoring, all five metrics and per-sample scores')
+            text = (
+                f"Restaurant number {i} serves very delicious Italian food near the city centre ."
+            )
+            stream.write(
+                json.dumps(dict(id=i, target=text, prediction=text, references=[text])) + "\n"
+            )
+    score(fixture, METRICS, folder)
+    assert len(read_json(folder / "metrics.json")["metrics"]) == 8
+    assert all("scores" in r for r in read_predictions(folder / "sample_scores.jsonl"))
+    print(
+        "PASS: Base/LoRA/FFT generation, incremental rows, "
+        "offline rescoring, all five metrics and per-sample scores"
+    )
+
 
 def frontend_pipeline():
-    import sys
-    from config import OUTPUT_ROOT,EVAL_DEFAULTS
+    """用 AppTest 验证前端控件与页面，并检查独立后台任务和 TensorBoard 接口。"""
     from copy import deepcopy
-    from streamlit.testing.v1 import AppTest
-    from utils.jobs import launch,tensorboard,alive
-    from utils.runs import read_json
     from urllib.request import urlopen
-    existing_pids={read_json(p,{}).get('pid') for p in OUTPUT_ROOT.rglob('tensorboard_server.json')}
-    app=AppTest.from_file(str(Path(__file__).with_name('app.py')),default_timeout=30).run()
+
+    from streamlit.testing.v1 import AppTest
+
+    from config import EVAL_DEFAULTS, OUTPUT_ROOT
+    from utils.jobs import alive, launch, tensorboard
+    from utils.runs import read_json
+
+    existing_pids = {
+        read_json(p, {}).get("pid") for p in OUTPUT_ROOT.rglob("tensorboard_server.json")
+    }
+    app = AppTest.from_file(str(Path(__file__).with_name("app.py")), default_timeout=30).run()
     assert not app.exception
-    app.number_input(key='q_rank').set_value(8).run()
-    app.number_input(key='k_rank').set_value(2).run()
-    app.number_input(key='v_rank').set_value(0).run()
-    assert app.number_input(key='q_rank').value==8 and app.number_input(key='k_rank').value==2
-    assert app.number_input(key='v_rank').value==0
-    assert not app.get('data_editor')
-    app.button(key='freeze_qkv').click().run()
+    learning_rate = app.number_input(key="learning_rate")
+    assert learning_rate.proto.step == 1e-6
+    previous = learning_rate.value
+    # 表单内先验证按钮产生的值；未提交表单时，后端仍保留旧值。
+    learning_rate.increment()
+    assert abs(learning_rate.value - previous - 1e-6) < 1e-12
+    learning_rate.set_value(previous).run()
+    app.number_input(key="q_rank").set_value(8).run()
+    app.number_input(key="k_rank").set_value(2).run()
+    app.number_input(key="v_rank").set_value(0).run()
+    assert app.number_input(key="q_rank").value == 8 and app.number_input(key="k_rank").value == 2
+    assert app.number_input(key="v_rank").value == 0
+    assert not app.get("data_editor")
+    app.button(key="freeze_qkv").click().run()
     assert not app.exception
-    assert all(app.number_input(key=key).value==0 for key in ('q_rank','k_rank','v_rank'))
-    for page in ['测试 / benchmark','历史测试记录','任务进度']:
-        app.radio(key='page').set_value(page).run()
+    assert all(app.number_input(key=key).value == 0 for key in ("q_rank", "k_rank", "v_rank"))
+    for page in ["测试 / benchmark", "历史测试记录", "任务进度"]:
+        app.radio(key="page").set_value(page).run()
         assert not app.exception
-    config=deepcopy(EVAL_DEFAULTS)
-    config.update(model=dict(type='base',path=str(OUTPUT_ROOT/'smoke/tiny-base')),
-        local_data=str(OUTPUT_ROOT/'smoke/data.json'),samples=1,max_new_tokens=6,num_beams=1,
-        local_files_only=True,metrics=['BLEU'],smoke=True)
-    runs=launch([('tests',config),('benchmarks',config)])
-    deadline=time.monotonic()+90
-    while time.monotonic()<deadline:
-        statuses=[read_json(Path(r['path'])/'status.json')['status'] for r in runs]
-        if all(s in ('completed','failed') for s in statuses):
+    config = deepcopy(EVAL_DEFAULTS)
+    config.update(
+        model=dict(type="base", path=str(OUTPUT_ROOT / "smoke/tiny-base")),
+        local_data=str(OUTPUT_ROOT / "smoke/data.json"),
+        samples=1,
+        max_new_tokens=6,
+        num_beams=1,
+        local_files_only=True,
+        metrics=["BLEU"],
+        smoke=True,
+    )
+    runs = launch([("tests", config), ("benchmarks", config)])
+    deadline = time.monotonic() + 90
+    while time.monotonic() < deadline:
+        statuses = [read_json(Path(r["path"]) / "status.json")["status"] for r in runs]
+        if all(s in ("completed", "failed") for s in statuses):
             break
-        time.sleep(.5)
-    assert statuses==['completed','completed'],statuses
-    run=read_json(OUTPUT_ROOT/'smoke/lora-run.json')['path']
-    url=tensorboard(run)
-    deadline=time.monotonic()+30
-    success=False
-    while time.monotonic()<deadline:
+        time.sleep(0.5)
+    assert statuses == ["completed", "completed"], statuses
+    run = read_json(OUTPUT_ROOT / "smoke/lora-run.json")["path"]
+    url = tensorboard(run)
+    deadline = time.monotonic() + 30
+    success = False
+    while time.monotonic() < deadline:
         try:
-            with urlopen(url+'/data/plugin/scalars/tags',timeout=2) as response:
-                tags=json.loads(response.read())
+            with urlopen(url + "/data/plugin/scalars/tags", timeout=2) as response:
+                tags = json.loads(response.read())
                 assert tags
-                success=True
+                success = True
                 break
         except OSError:
-            time.sleep(.5)
-    assert success,'TensorBoard did not expose training scalars'
-    # Stop only the helper launched for this smoke check.
+            time.sleep(0.5)
+    assert success, "TensorBoard did not expose training scalars"
+    # 清理本次冒烟启动的 TensorBoard，保留此前已有的服务。
     import subprocess
-    for server in OUTPUT_ROOT.rglob('tensorboard_server.json'):
-        pid=read_json(server,{}).get('pid')
+
+    for server in OUTPUT_ROOT.rglob("tensorboard_server.json"):
+        pid = read_json(server, {}).get("pid")
         if pid not in existing_pids and alive(pid):
-            subprocess.run(['taskkill','/PID',str(pid),'/T'],capture_output=True)
-    print('PASS: four frontend pages, all-frozen control, detached sequential jobs, TensorBoard HTTP scalars')
+            subprocess.run(["taskkill", "/PID", str(pid), "/T"], capture_output=True)
+    print(
+        "PASS: four frontend pages, all-frozen control, "
+        "detached sequential jobs, TensorBoard HTTP scalars"
+    )
+
 
 def medium_pipeline(kind):
+    """用真实 GPT-2 Medium 执行指定模型类型的短训练或评测冒烟。"""
     from copy import deepcopy
-    from config import OUTPUT_ROOT,TRAIN_DEFAULTS,FFT_DEFAULTS,EVAL_DEFAULTS,MODEL_NAME
-    from utils.training import train
+
+    from config import EVAL_DEFAULTS, FFT_DEFAULTS, MODEL_NAME, OUTPUT_ROOT, TRAIN_DEFAULTS
     from utils.evaluation import evaluate
     from utils.runs import write_json
-    if kind=='base':
-        spec=dict(type='base',path=MODEL_NAME,name='GPT-2 Medium real smoke Base')
+    from utils.training import train
+
+    if kind == "base":
+        spec = dict(type="base", path=MODEL_NAME, name="GPT-2 Medium real smoke Base")
     else:
-        config=deepcopy(TRAIN_DEFAULTS if kind=='lora' else FFT_DEFAULTS)
-        config.update(max_steps=1,train_samples=2,eval_samples=2,batch_size=1,eval_batch_size=1,
-            gradient_accumulation=1,logging_steps=1,warmup_steps=0,max_length=128,precision='bf16',
-            local_files_only=True,smoke=True)
-        path=new_run(kind,config)
-        train(config,path,kind)
-        spec=dict(type=kind,path=str(path/'final'),name=f'GPT-2 Medium real smoke {kind}',training_run=str(path))
-        write_json(OUTPUT_ROOT/f'smoke/medium-{kind}-run.json',dict(path=str(path)))
-    config=deepcopy(EVAL_DEFAULTS)
-    config.update(model=spec,samples=2,max_new_tokens=12,local_files_only=True,smoke=True)
-    evaluation=new_run('benchmarks',config)
-    evaluate(config,evaluation)
-    assert read_json(evaluation/'status.json')['status']=='completed'
-    assert len(read_json(evaluation/'metrics.json')['metrics'])==8
-    write_json(OUTPUT_ROOT/f'smoke/medium-{kind}-eval.json',dict(path=str(evaluation)))
-    print(f'PASS: ACTUAL GPT-2 Medium {kind}, E2E samples, all metrics, telemetry and logs')
+        config = deepcopy(TRAIN_DEFAULTS if kind == "lora" else FFT_DEFAULTS)
+        config.update(
+            max_steps=1,
+            train_samples=2,
+            eval_samples=2,
+            batch_size=1,
+            eval_batch_size=1,
+            gradient_accumulation=1,
+            logging_steps=1,
+            warmup_steps=0,
+            max_length=128,
+            precision="bf16",
+            local_files_only=True,
+            smoke=True,
+        )
+        path = new_run(kind, config)
+        train(config, path, kind)
+        spec = dict(
+            type=kind,
+            path=str(path / "final"),
+            name=f"GPT-2 Medium real smoke {kind}",
+            training_run=str(path),
+        )
+        write_json(OUTPUT_ROOT / f"smoke/medium-{kind}-run.json", dict(path=str(path)))
+    config = deepcopy(EVAL_DEFAULTS)
+    config.update(model=spec, samples=2, max_new_tokens=12, local_files_only=True, smoke=True)
+    evaluation = new_run("benchmarks", config)
+    evaluate(config, evaluation)
+    assert read_json(evaluation / "status.json")["status"] == "completed"
+    assert len(read_json(evaluation / "metrics.json")["metrics"]) == 8
+    write_json(OUTPUT_ROOT / f"smoke/medium-{kind}-eval.json", dict(path=str(evaluation)))
+    print(f"PASS: ACTUAL GPT-2 Medium {kind}, E2E samples, all metrics, telemetry and logs")
+
 
 def guards_pipeline():
+    """验证路径边界、全部冻结、非法参数、非有限梯度和评分失败的数据保留。"""
     import torch
     from transformers import GPT2LMHeadModel
-    from config import OUTPUT_ROOT,PROJECT_ROOT,inside_project
-    from utils.qkv_lora import attach,validate_ranks
+
+    from config import OUTPUT_ROOT, PROJECT_ROOT, inside_project
+    from utils.qkv_lora import attach, validate_ranks
+    from utils.runs import estimate
     from utils.scoring import score
     from utils.training import Progress
-    from utils.runs import estimate
-    folder=OUTPUT_ROOT/'smoke/guards'
-    folder.mkdir(parents=True,exist_ok=True)
+
+    folder = OUTPUT_ROOT / "smoke/guards"
+    folder.mkdir(parents=True, exist_ok=True)
     try:
-        inside_project(PROJECT_ROOT.parent/'gpt2-small-e2e-lora')
-        raise AssertionError('Outside path accepted')
+        inside_project(PROJECT_ROOT.parent / "gpt2-small-e2e-lora")
+        raise AssertionError("Outside path accepted")
     except ValueError:
         pass
-    model=GPT2LMHeadModel.from_pretrained(OUTPUT_ROOT/'smoke/tiny-base').eval()
-    ids=torch.tensor([[1,2,3]])
-    expected=model(ids).logits.detach()
-    attach(model,dict(q=0,k=0,v=0))
+    model = GPT2LMHeadModel.from_pretrained(OUTPUT_ROOT / "smoke/tiny-base").eval()
+    ids = torch.tensor([[1, 2, 3]])
+    expected = model(ids).logits.detach()
+    attach(model, dict(q=0, k=0, v=0))
     assert not any(p.requires_grad for p in model.parameters())
-    torch.testing.assert_close(model(ids).logits,expected)
+    torch.testing.assert_close(model(ids).logits, expected)
     try:
-        validate_ranks(dict(q=-1,k=0,v=0),1)
-        raise AssertionError('Negative rank accepted')
+        validate_ranks(dict(q=-1, k=0, v=0), 1)
+        raise AssertionError("Negative rank accepted")
     except ValueError:
         pass
+
     class State:
-        global_step=1
-        epoch=1
+        """异常路径测试使用的最小 Trainer 状态对象，避免启动真实训练。"""
+
+        global_step = 1
+        epoch = 1
+
     try:
-        Progress(folder).on_log(None,State(),None,logs={'grad_norm':float('nan')})
-        raise AssertionError('NaN gradient accepted')
+        Progress(folder).on_log(None, State(), None, logs={"grad_norm": float("nan")})
+        raise AssertionError("NaN gradient accepted")
     except FloatingPointError:
         pass
-    prediction=folder/'predictions.jsonl'
-    prediction.write_text(json.dumps(dict(id=0,target='food',prediction='',references=['food']))+'\n')
+    prediction = folder / "predictions.jsonl"
+    prediction.write_text(
+        json.dumps(dict(id=0, target="food", prediction="", references=["food"])) + "\n"
+    )
     try:
-        score(prediction,['BLEU','NIST'],folder)
-        raise AssertionError('Undefined NIST should fail')
+        score(prediction, ["BLEU", "NIST"], folder)
+        raise AssertionError("Undefined NIST should fail")
     except RuntimeError:
         pass
-    result=read_json(folder/'metrics.json')
-    assert 'BLEU-4' in result['metrics'] and 'NIST' in result['errors']
-    assert prediction.exists() and (folder/'sample_scores.jsonl').exists()
-    assert estimate(TRAIN_DEFAULTS,'lora')==(None,0)
-    print('PASS: project containment, all-frozen logits, invalid ranks, NaN rejection, partial-score retention, smoke excluded from ETA')
+    result = read_json(folder / "metrics.json")
+    assert "BLEU-4" in result["metrics"] and "NIST" in result["errors"]
+    assert prediction.exists() and (folder / "sample_scores.jsonl").exists()
+    assert estimate(TRAIN_DEFAULTS, "lora") == (None, 0)
+    print(
+        "PASS: project containment, all-frozen logits, invalid ranks, "
+        "NaN rejection, partial-score retention, smoke excluded from ETA"
+    )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     require_lora()
     parser = argparse.ArgumentParser()
-    parser.add_argument('stage', choices=['runtime','models','lora','fft','evaluation','frontend',
-        'medium-base','medium-lora','medium-fft','guards'])
+    parser.add_argument(
+        "stage",
+        choices=[
+            "runtime",
+            "models",
+            "lora",
+            "fft",
+            "evaluation",
+            "frontend",
+            "medium-base",
+            "medium-lora",
+            "medium-fft",
+            "guards",
+        ],
+    )
     args = parser.parse_args()
-    {'runtime':runtime,'models':model_pipeline,'lora':lambda:training_pipeline('lora'),
-        'fft':lambda:training_pipeline('fft'),'evaluation':evaluation_pipeline,
-        'frontend':frontend_pipeline,'medium-base':lambda:medium_pipeline('base'),
-        'medium-lora':lambda:medium_pipeline('lora'),'medium-fft':lambda:medium_pipeline('fft'),
-        'guards':guards_pipeline}[args.stage]()
+    {
+        "runtime": runtime,
+        "models": model_pipeline,
+        "lora": lambda: training_pipeline("lora"),
+        "fft": lambda: training_pipeline("fft"),
+        "evaluation": evaluation_pipeline,
+        "frontend": frontend_pipeline,
+        "medium-base": lambda: medium_pipeline("base"),
+        "medium-lora": lambda: medium_pipeline("lora"),
+        "medium-fft": lambda: medium_pipeline("fft"),
+        "guards": guards_pipeline,
+    }[args.stage]()

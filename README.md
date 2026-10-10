@@ -133,3 +133,17 @@ python -s src/smoke.py guards
 ## 版本管理
 
 独立仓库：[piiiiiix/gpt2-medium-e2e-lora](https://github.com/piiiiiix/gpt2-medium-e2e-lora)。每个已验证 pipeline 单独提交并推送。notebooks 与 outputs 被 .gitignore 忽略；本地模型和实验日志仍完整保存，不随代码上传。
+
+## 代码阅读与格式
+
+所有 Python 文件、类和具名函数均有中文职责说明；关键配置和流程另有必要的中文注释。学习率加减按钮每次调整 `0.000001`（`1e-6`），可直接输入更小数值，最低为 `1e-9`。表单中的修改在点击启动训练后提交。
+
+使用 `pyproject.toml` 统一 Ruff 格式，行宽上限 100，长表达式和字符串按语义换行。开发工具同样装在 conda `lora` 中：
+
+```powershell
+python -s -m pip install --no-user ruff==0.17.0
+python -s -m ruff format src
+python -s -m ruff check src
+```
+
+VSCode 可安装 Ruff 扩展并选择其作为 Python 格式化器；检查规则从项目配置读取。
