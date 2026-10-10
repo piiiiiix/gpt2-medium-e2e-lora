@@ -1,6 +1,7 @@
 """Shared Trainer pipeline, with project-specific QKV adapter checkpoints."""
 import json
 import time
+import math
 from pathlib import Path
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, DataCollatorForSeq2Seq, Trainer, TrainingArguments, TrainerCallback, set_seed
@@ -17,6 +18,9 @@ class Progress(TrainerCallback):
     def on_log(self,args,state,control,logs=None,**kwargs):
         with (self.path/'training.jsonl').open('a',encoding='utf-8') as stream:
             stream.write(json.dumps({'step':state.global_step,'epoch':state.epoch,**(logs or {})},default=str)+'\n')
+        for key in ('loss','eval_loss','grad_norm'):
+            if key in (logs or {}) and not math.isfinite(float(logs[key])):
+                raise FloatingPointError(f'Non-finite {key}; inspect training.jsonl. Try bf16/fp32 or adjust configuration.')
     def on_step_end(self,args,state,control,**kwargs):
         elapsed=time.perf_counter()-self.started
         write_json(self.path/'progress.json',dict(completed=state.global_step,total=state.max_steps,
@@ -79,6 +83,7 @@ def train(config,path,kind):
                     model.enable_input_require_grads()
             write_json(path/'parameters.json',dict(total=sum(p.numel() for p in model.parameters()),
                 trainable=sum(p.numel() for p in model.parameters() if p.requires_grad)))
+            before={name:p.detach().flatten()[:64].cpu().clone() for name,p in model.named_parameters() if p.requires_grad}
             args=TrainingArguments(output_dir=str(path/'checkpoints'),
                 per_device_train_batch_size=config['batch_size'],per_device_eval_batch_size=config['eval_batch_size'],
                 gradient_accumulation_steps=config['gradient_accumulation'],learning_rate=config['learning_rate'],
@@ -99,10 +104,14 @@ def train(config,path,kind):
                 callbacks=[TensorBoardCallback(tb_writer=writer),Progress(path)],**extras)
             try:
                 result=trainer.train()
+                updated=any(not torch.equal(before[name],p.detach().flatten()[:64].cpu())
+                    for name,p in model.named_parameters() if name in before)
+                if not updated:
+                    raise RuntimeError('No sampled trainable weights changed; optimizer updates may have been skipped.')
                 trainer.save_model(str(path/'final'))
                 tokenizer.save_pretrained(path/'final')
                 write_json(path/'result.json',dict(metrics=result.metrics,best_checkpoint=trainer.state.best_model_checkpoint,
-                    best_eval_loss=trainer.state.best_metric,final=str(path/'final')))
+                    best_eval_loss=trainer.state.best_metric,final=str(path/'final'),weight_update_verified=updated))
             finally:
                 write_json(path/'train_log.json',trainer.state.log_history)
                 writer.flush()

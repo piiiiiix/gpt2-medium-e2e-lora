@@ -171,7 +171,7 @@ def medium_pipeline(kind):
     else:
         config=deepcopy(TRAIN_DEFAULTS if kind=='lora' else FFT_DEFAULTS)
         config.update(max_steps=1,train_samples=2,eval_samples=2,batch_size=1,eval_batch_size=1,
-            gradient_accumulation=1,logging_steps=1,warmup_steps=0,max_length=128,precision='fp16',
+            gradient_accumulation=1,logging_steps=1,warmup_steps=0,max_length=128,precision='bf16',
             local_files_only=True)
         path=new_run(kind,config)
         train(config,path,kind)
