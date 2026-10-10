@@ -86,6 +86,7 @@ def training_pipeline(kind):
 if __name__ == '__main__':
     require_lora()
     parser = argparse.ArgumentParser()
-    parser.add_argument('stage', choices=['runtime','models','lora'])
+    parser.add_argument('stage', choices=['runtime','models','lora','fft'])
     args = parser.parse_args()
-    {'runtime':runtime,'models':model_pipeline,'lora':lambda:training_pipeline('lora')}[args.stage]()
+    {'runtime':runtime,'models':model_pipeline,'lora':lambda:training_pipeline('lora'),
+        'fft':lambda:training_pipeline('fft')}[args.stage]()
