@@ -83,10 +83,39 @@ def training_pipeline(kind):
     write_json(OUTPUT_ROOT/f'smoke/{kind}-run.json',{'path':str(path)})
     print(f'PASS: {kind} training, evaluation, checkpoint, best reload, TensorBoard, final generation')
 
+def evaluation_pipeline():
+    from copy import deepcopy
+    from config import OUTPUT_ROOT,EVAL_DEFAULTS,METRICS
+    from utils.evaluation import evaluate
+    from utils.scoring import score,read_predictions
+    folder=OUTPUT_ROOT/'smoke'
+    for kind in ['base','lora','fft']:
+        path=str(folder/'tiny-base') if kind=='base' else read_json(folder/f'{kind}-run.json')['path']+'/final'
+        config=deepcopy(EVAL_DEFAULTS)
+        config.update(model=dict(type=kind,path=path),local_data=str(folder/'data.json'),
+            samples=2,max_new_tokens=8,num_beams=2,local_files_only=True,metrics=['BLEU','ROUGE-L','CIDEr'])
+        run=new_run('benchmarks',config)
+        evaluate(config,run)
+        assert len(read_predictions(run/'predictions.jsonl'))==2
+        original=read_json(run/'metrics.json')['metrics']
+        config['predictions']=str(run/'predictions.jsonl')
+        repeat=new_run('benchmarks',config)
+        evaluate(config,repeat)
+        assert read_json(repeat/'metrics.json')['metrics']==original
+    fixture=folder/'scores-fixture.jsonl'
+    with fixture.open('w',encoding='utf-8') as stream:
+        for i in range(4):
+            text=f'Restaurant number {i} serves very delicious Italian food near the city centre .'
+            stream.write(json.dumps(dict(id=i,target=text,prediction=text,references=[text]))+'\n')
+    score(fixture,METRICS,folder)
+    assert len(read_json(folder/'metrics.json')['metrics'])==8
+    assert all('scores' in r for r in read_predictions(folder/'sample_scores.jsonl'))
+    print('PASS: Base/LoRA/FFT generation, incremental rows, offline rescoring, all five metrics and per-sample scores')
+
 if __name__ == '__main__':
     require_lora()
     parser = argparse.ArgumentParser()
-    parser.add_argument('stage', choices=['runtime','models','lora','fft'])
+    parser.add_argument('stage', choices=['runtime','models','lora','fft','evaluation'])
     args = parser.parse_args()
     {'runtime':runtime,'models':model_pipeline,'lora':lambda:training_pipeline('lora'),
-        'fft':lambda:training_pipeline('fft')}[args.stage]()
+        'fft':lambda:training_pipeline('fft'),'evaluation':evaluation_pipeline}[args.stage]()
