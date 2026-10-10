@@ -10,7 +10,7 @@ TRAIN_DEFAULTS = dict(model=MODEL_NAME, dataset=DATASET_NAME, learning_rate=2e-4
     epochs=5, batch_size=8, eval_batch_size=8, gradient_accumulation=1,
     weight_decay=0.01, warmup_steps=500, label_smoothing=0.1,
     dropout=0.1, alpha=32, seed=42, precision='fp32', max_length=512,
-    gradient_checkpointing=True, logging_steps=10, max_steps=-1,
+    gradient_checkpointing=True, logging_steps=10, max_steps=-1, smoke=False,
     train_samples=None, eval_samples=None, local_data=None, local_files_only=False,
     ranks=[dict(q=4, k=0, v=4) for _ in range(24)])
 # FFT defaults are a comparison implementation profile, not Table 11 LoRA values.
@@ -18,7 +18,7 @@ FFT_DEFAULTS = {**TRAIN_DEFAULTS, 'learning_rate': 2e-5}
 EVAL_DEFAULTS = dict(dataset=DATASET_NAME, split='validation', samples=None,
     metrics=METRICS.copy(), max_new_tokens=60, num_beams=10, length_penalty=0.9,
     no_repeat_ngram_size=4, seed=42, local_data=None, local_files_only=False,
-    model=dict(type='base', path=MODEL_NAME, name='GPT-2 Medium'), predictions=None)
+    model=dict(type='base', path=MODEL_NAME, name='GPT-2 Medium'), predictions=None, smoke=False)
 GPU_INTERVAL_SECONDS = 2.0
 
 def require_lora():

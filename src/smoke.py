@@ -7,15 +7,16 @@ from config import TRAIN_DEFAULTS, require_lora
 from utils.runs import new_run, running, read_json
 
 def runtime():
-    path = new_run('lora', TRAIN_DEFAULTS)
-    with running(path, 'lora', TRAIN_DEFAULTS):
+    config={**TRAIN_DEFAULTS,'smoke':True}
+    path = new_run('lora', config)
+    with running(path, 'lora', config):
         print('runtime smoke passed')
         time.sleep(.1)
     assert read_json(path/'status.json')['status']=='completed'
     assert json.loads((path/'gpu.jsonl').read_text().splitlines()[0])
-    failed = new_run('fft', TRAIN_DEFAULTS)
+    failed = new_run('fft', config)
     try:
-        with running(failed,'fft',TRAIN_DEFAULTS):
+        with running(failed,'fft',config):
             raise RuntimeError('deliberate smoke failure')
     except RuntimeError:
         pass
@@ -71,7 +72,7 @@ def training_pipeline(kind):
     config=deepcopy(TRAIN_DEFAULTS)
     config.update(model=str(OUTPUT_ROOT/'smoke/tiny-base'),local_data=str(OUTPUT_ROOT/'smoke/data.json'),
         max_steps=2,batch_size=2,eval_batch_size=2,logging_steps=1,warmup_steps=0,max_length=128,
-        epochs=1,local_files_only=True,ranks=[dict(q=2,k=0,v=1),dict(q=0,k=1,v=0)])
+        epochs=1,local_files_only=True,smoke=True,ranks=[dict(q=2,k=0,v=1),dict(q=0,k=1,v=0)])
     path=new_run(kind,config)
     train(config,path,kind)
     assert read_json(path/'status.json')['status']=='completed'
@@ -93,7 +94,7 @@ def evaluation_pipeline():
         path=str(folder/'tiny-base') if kind=='base' else read_json(folder/f'{kind}-run.json')['path']+'/final'
         config=deepcopy(EVAL_DEFAULTS)
         config.update(model=dict(type=kind,path=path),local_data=str(folder/'data.json'),
-            samples=2,max_new_tokens=8,num_beams=2,local_files_only=True,metrics=['BLEU','ROUGE-L','CIDEr'])
+            samples=2,max_new_tokens=8,num_beams=2,local_files_only=True,metrics=['BLEU','ROUGE-L','CIDEr'],smoke=True)
         run=new_run('benchmarks',config)
         evaluate(config,run)
         assert len(read_predictions(run/'predictions.jsonl'))==2
@@ -120,6 +121,7 @@ def frontend_pipeline():
     from utils.jobs import launch,tensorboard,alive
     from utils.runs import read_json
     from urllib.request import urlopen
+    existing_pids={read_json(p,{}).get('pid') for p in OUTPUT_ROOT.rglob('tensorboard_server.json')}
     app=AppTest.from_file(str(Path(__file__).with_name('app.py')),default_timeout=30).run()
     assert not app.exception
     app.button[1].click().run() # 全部冻结
@@ -131,7 +133,7 @@ def frontend_pipeline():
     config=deepcopy(EVAL_DEFAULTS)
     config.update(model=dict(type='base',path=str(OUTPUT_ROOT/'smoke/tiny-base')),
         local_data=str(OUTPUT_ROOT/'smoke/data.json'),samples=1,max_new_tokens=6,num_beams=1,
-        local_files_only=True,metrics=['BLEU'])
+        local_files_only=True,metrics=['BLEU'],smoke=True)
     runs=launch([('tests',config),('benchmarks',config)])
     deadline=time.monotonic()+90
     while time.monotonic()<deadline:
@@ -156,8 +158,10 @@ def frontend_pipeline():
     assert success,'TensorBoard did not expose training scalars'
     # Stop only the helper launched for this smoke check.
     import subprocess
-    pid=read_json(Path(run)/'tensorboard_server.json')['pid']
-    subprocess.run(['taskkill','/PID',str(pid),'/T'],capture_output=True)
+    for server in OUTPUT_ROOT.rglob('tensorboard_server.json'):
+        pid=read_json(server,{}).get('pid')
+        if pid not in existing_pids and alive(pid):
+            subprocess.run(['taskkill','/PID',str(pid),'/T'],capture_output=True)
     print('PASS: four frontend pages, all-frozen control, detached sequential jobs, TensorBoard HTTP scalars')
 
 def medium_pipeline(kind):
@@ -172,13 +176,13 @@ def medium_pipeline(kind):
         config=deepcopy(TRAIN_DEFAULTS if kind=='lora' else FFT_DEFAULTS)
         config.update(max_steps=1,train_samples=2,eval_samples=2,batch_size=1,eval_batch_size=1,
             gradient_accumulation=1,logging_steps=1,warmup_steps=0,max_length=128,precision='bf16',
-            local_files_only=True)
+            local_files_only=True,smoke=True)
         path=new_run(kind,config)
         train(config,path,kind)
         spec=dict(type=kind,path=str(path/'final'),name=f'GPT-2 Medium real smoke {kind}',training_run=str(path))
         write_json(OUTPUT_ROOT/f'smoke/medium-{kind}-run.json',dict(path=str(path)))
     config=deepcopy(EVAL_DEFAULTS)
-    config.update(model=spec,samples=2,max_new_tokens=12,local_files_only=True)
+    config.update(model=spec,samples=2,max_new_tokens=12,local_files_only=True,smoke=True)
     evaluation=new_run('benchmarks',config)
     evaluate(config,evaluation)
     assert read_json(evaluation/'status.json')['status']=='completed'
@@ -186,13 +190,61 @@ def medium_pipeline(kind):
     write_json(OUTPUT_ROOT/f'smoke/medium-{kind}-eval.json',dict(path=str(evaluation)))
     print(f'PASS: ACTUAL GPT-2 Medium {kind}, E2E samples, all metrics, telemetry and logs')
 
+def guards_pipeline():
+    import torch
+    from transformers import GPT2LMHeadModel
+    from config import OUTPUT_ROOT,PROJECT_ROOT,inside_project
+    from utils.qkv_lora import attach,validate_ranks
+    from utils.scoring import score
+    from utils.training import Progress
+    from utils.runs import estimate
+    folder=OUTPUT_ROOT/'smoke/guards'
+    folder.mkdir(parents=True,exist_ok=True)
+    try:
+        inside_project(PROJECT_ROOT.parent/'gpt2-small-e2e-lora')
+        raise AssertionError('Outside path accepted')
+    except ValueError:
+        pass
+    model=GPT2LMHeadModel.from_pretrained(OUTPUT_ROOT/'smoke/tiny-base').eval()
+    ids=torch.tensor([[1,2,3]])
+    expected=model(ids).logits.detach()
+    attach(model,[dict(q=0,k=0,v=0) for _ in range(2)])
+    assert not any(p.requires_grad for p in model.parameters())
+    torch.testing.assert_close(model(ids).logits,expected)
+    try:
+        validate_ranks([dict(q=-1,k=0,v=0)],1)
+        raise AssertionError('Negative rank accepted')
+    except ValueError:
+        pass
+    class State:
+        global_step=1
+        epoch=1
+    try:
+        Progress(folder).on_log(None,State(),None,logs={'grad_norm':float('nan')})
+        raise AssertionError('NaN gradient accepted')
+    except FloatingPointError:
+        pass
+    prediction=folder/'predictions.jsonl'
+    prediction.write_text(json.dumps(dict(id=0,target='food',prediction='',references=['food']))+'\n')
+    try:
+        score(prediction,['BLEU','NIST'],folder)
+        raise AssertionError('Undefined NIST should fail')
+    except RuntimeError:
+        pass
+    result=read_json(folder/'metrics.json')
+    assert 'BLEU-4' in result['metrics'] and 'NIST' in result['errors']
+    assert prediction.exists() and (folder/'sample_scores.jsonl').exists()
+    assert estimate(TRAIN_DEFAULTS,'lora')==(None,0)
+    print('PASS: project containment, all-frozen logits, invalid ranks, NaN rejection, partial-score retention, smoke excluded from ETA')
+
 if __name__ == '__main__':
     require_lora()
     parser = argparse.ArgumentParser()
     parser.add_argument('stage', choices=['runtime','models','lora','fft','evaluation','frontend',
-        'medium-base','medium-lora','medium-fft'])
+        'medium-base','medium-lora','medium-fft','guards'])
     args = parser.parse_args()
     {'runtime':runtime,'models':model_pipeline,'lora':lambda:training_pipeline('lora'),
         'fft':lambda:training_pipeline('fft'),'evaluation':evaluation_pipeline,
         'frontend':frontend_pipeline,'medium-base':lambda:medium_pipeline('base'),
-        'medium-lora':lambda:medium_pipeline('lora'),'medium-fft':lambda:medium_pipeline('fft')}[args.stage]()
+        'medium-lora':lambda:medium_pipeline('lora'),'medium-fft':lambda:medium_pipeline('fft'),
+        'guards':guards_pipeline}[args.stage]()

@@ -40,13 +40,15 @@ def tb_button(model,key):
     run=model.get('training_run')
     if run:
         st.caption(f"训练运行：{Path(run).name}")
-        if st.button('打开训练 TensorBoard',key=key):
+        if list((Path(run)/'tensorboard').glob('events.*')):
             try:
-                st.session_state[key+'_url']=tensorboard(run)
+                with st.spinner('正在准备训练 TensorBoard…'):
+                    url=tensorboard(run)
+                st.link_button('打开训练 TensorBoard',url)
             except Exception as exc:
                 st.error(str(exc))
-        if key+'_url' in st.session_state:
-            st.link_button('进入 TensorBoard',st.session_state[key+'_url'])
+        else:
+            st.caption('该训练运行没有 TensorBoard event 文件。')
         with st.expander('训练数据与配置'):
             st.json(read_json(Path(run)/'data_summary.json',{}))
             st.json(model.get('training_config',{}))
@@ -65,6 +67,9 @@ def duration(config,kind):
 if page=='训练':
     kind=st.segmented_control('训练方式',['lora','fft'],default='lora',key='train_kind') or 'lora'
     config=deepcopy(TRAIN_DEFAULTS if kind=='lora' else FFT_DEFAULTS)
+    profile=st.selectbox('训练配置',['论文默认 / 独立 FFT 默认','8GB 显存适配'])
+    if profile=='8GB 显存适配':
+        config.update(batch_size=1,gradient_accumulation=8,eval_batch_size=1,precision='bf16')
     st.caption('LoRA 默认值来自 V2 附录 D.3 / 表 11；FFT 为独立比较配置。')
     if kind=='lora':
         st.subheader('逐层 QKV rank')
@@ -99,7 +104,7 @@ if page=='训练':
         config['dropout']=a.number_input('Dropout',min_value=0.,max_value=.99,value=config['dropout'])
         if kind=='lora':
             config['alpha']=b.number_input('LoRA alpha',min_value=1,value=config['alpha'])
-        config['precision']=c.selectbox('精度',['fp32','fp16','bf16'])
+        config['precision']=c.selectbox('精度',['fp32','fp16','bf16'],index=['fp32','fp16','bf16'].index(config['precision']))
         config['gradient_checkpointing']=st.checkbox('梯度检查点',value=config['gradient_checkpointing'])
         config['max_length']=st.number_input('最大训练长度',min_value=32,max_value=1024,value=config['max_length'])
         config['logging_steps']=st.number_input('日志间隔（steps）',min_value=1,value=config['logging_steps'])
@@ -108,6 +113,7 @@ if page=='训练':
             e=st.number_input('验证样本数，0=全部',min_value=0,value=0)
             steps=st.number_input('最大 steps，0=按 epochs',min_value=0,value=0)
             config.update(train_samples=n or None,eval_samples=e or None,max_steps=steps or -1)
+            config['smoke']=st.checkbox('将本次运行标记为冒烟测试',value=False)
         submitted=st.form_submit_button('启动训练',type='primary')
     st.caption(f"有效 batch size：{config['batch_size']*config['gradient_accumulation']}。")
     duration(config,kind)
@@ -135,6 +141,7 @@ elif page=='测试 / benchmark':
         config['num_beams']=st.number_input('Beam size',min_value=1,value=10)
         config['length_penalty']=st.number_input('Length penalty',value=.9)
         config['no_repeat_ngram_size']=st.number_input('No repeat ngram size',min_value=0,value=4)
+        config['smoke']=st.checkbox('将本次评测标记为冒烟测试',value=False)
         submitted=st.form_submit_button('启动评测',type='primary')
     if selected:
         duration({**config,'model':options[selected[0]]},kind)
@@ -162,6 +169,8 @@ elif page=='历史测试记录':
         record=items[index]
         path=Path(record['path'])
         st.json({k:v for k,v in record.items() if k!='config'})
+        if record['config'].get('smoke'):
+            st.caption('冒烟测试记录')
         st.json(read_json(path/'metrics.json',{}))
         with st.expander('运行配置'):
             st.json(record['config'])
@@ -224,6 +233,11 @@ else:
             try:
                 gpu=pd.read_json(path/'gpu.jsonl',lines=True)
                 st.dataframe(gpu.tail(20),alt='GPU 占用率、核心温度及显存采样')
+                for label,column in [('GPU 占用率（%）','utilization_percent'),('核心温度（°C）','temperature_celsius'),('显存（MiB）','memory_used_mib')]:
+                    if column in gpu and 'gpu' in gpu:
+                        chart=gpu[['time','gpu',column]].copy()
+                        chart[column]=pd.to_numeric(chart[column],errors='coerce')
+                        st.line_chart(chart,x='time',y=column,color='gpu',alt=label+'随时间变化')
             except ValueError:
                 st.caption('GPU 采样正在写入。')
     progress_panel()

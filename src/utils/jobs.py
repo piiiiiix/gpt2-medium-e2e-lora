@@ -5,6 +5,7 @@ import os
 import socket
 import subprocess
 import sys
+import time
 from pathlib import Path
 from config import OUTPUT_ROOT, PROJECT_ROOT, inside_project, require_lora
 from utils.runs import new_run, write_json, read_json, now
@@ -47,6 +48,7 @@ def launch(tasks):
             raise RuntimeError('已有任务批次正在运行；请待其完成再启动，避免 GPU 任务竞争。')
         lock.unlink()
     descriptor=os.open(lock,os.O_CREAT|os.O_EXCL|os.O_WRONLY)
+    os.write(descriptor,json.dumps(dict(pid=os.getpid(),starting=True)).encode())
     os.close(descriptor)
     try:
         runs=[dict(kind=kind,path=str(new_run(kind,config))) for kind,config in tasks]
@@ -79,4 +81,13 @@ def tensorboard(training_run):
             stdout=log,stderr=log,creationflags=hidden_flags())
     metadata=dict(pid=proc.pid,url=f'http://127.0.0.1:{port}',logdir=str(logdir))
     write_json(path/'tensorboard_server.json',metadata)
-    return metadata['url']
+    deadline=time.monotonic()+15
+    while time.monotonic()<deadline:
+        if proc.poll() is not None:
+            raise RuntimeError('TensorBoard 启动失败，请查看 tensorboard_server.log。')
+        try:
+            with socket.create_connection(('127.0.0.1',port),timeout=.2):
+                return metadata['url']
+        except OSError:
+            time.sleep(.1)
+    raise RuntimeError('TensorBoard 启动超时，请查看 tensorboard_server.log 后重试。')

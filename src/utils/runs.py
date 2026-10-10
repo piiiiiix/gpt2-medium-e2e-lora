@@ -65,6 +65,7 @@ class Tee:
 def running(path, kind, config):
     require_lora()
     path = inside_project(path)
+    write_json(path / 'config.json', config)
     metadata = dict(kind=kind, status='running', started=now(), pid=os.getpid(),
         config_hash=digest(config), hardware=GPUMonitor.sample(), python=sys.executable)
     write_json(path / 'status.json', metadata)
@@ -114,7 +115,8 @@ def estimate(config, kind):
     signature = {k:config.get(k) for k in keys}
     current_gpu = [r.get('uuid') for r in GPUMonitor.sample()]
     durations = [r['elapsed_seconds'] for r in history()
-        if r['status']=='completed' and r['kind']==kind
+        if r['status']=='completed' and r['kind']==kind and not r['config'].get('smoke')
+        and (Path(r['path'])/('result.json' if kind in ('lora','fft') else 'metrics.json')).exists()
         and {k:r['config'].get(k) for k in keys}==signature
         and [g.get('uuid') for g in r.get('hardware',[])]==current_gpu]
     return (sum(durations)/len(durations), len(durations)) if durations else (None, 0)

@@ -28,7 +28,7 @@ python -s -m streamlit run src/app.py
 - **测试 / benchmark**：仅扫描 medium 内有效模型和 checkpoint；支持多个模型与一个、多个或全部指标，任务按顺序执行，避免抢占 GPU。
 - **历史测试记录**：从磁盘恢复记录，按类型、状态、日期 / 模型文本、指标筛选；查看和下载全部明细，使用已有预测重新评分。
 - **任务进度**：后台状态、进度、日志、显存 / 温度 / GPU 占用率、耗时和预计完成时间。刷新或关闭前端不结束后台任务。
-- 选择有训练记录的模型后，点击“打开训练 TensorBoard”准备服务，再通过“进入 TensorBoard”链接查看对应运行；保存的训练数据摘要也可以在页面中展开查看。
+- 选择有训练记录的模型后，自动准备该运行的本地 TensorBoard 服务，“打开训练 TensorBoard”按钮直接跳转；保存的训练数据摘要也可以在页面中展开查看。
 
 ## 默认参数与显存配置
 
@@ -96,7 +96,7 @@ outputs/
 
 GPU 数据为 **整张设备** 的占用率（%）、核心温度（°C）、显存已用 / 总量（MiB），不是当前进程专属用量。缺失指标记录原因。采样器独立放在 src/utils/gpu_monitor.py，由每个任务管理生命周期。
 
-耗时估算使用同配置、同 GPU 的成功记录均值；无可比数据时显示暂无估算，运行进度产生后可按 steps / 样本更新。
+耗时估算使用同配置、同 GPU 的成功记录均值，排除标记为冒烟的记录；无可比数据时显示暂无估算，运行进度产生后可按 steps / 样本更新。
 
 ## 评分口径
 
@@ -120,6 +120,7 @@ python -s src/smoke.py frontend
 python -s src/smoke.py medium-base
 python -s src/smoke.py medium-lora
 python -s src/smoke.py medium-fft
+python -s src/smoke.py guards
 ```
 
 微型模型用于快速验证算法与集成；medium-* 使用真正的 24 层 GPT-2 Medium，训练只跑 1 step，评测只取 2 个样本。完整训练、完整测试集和多个随机种子的论文实验尚需单独启动。
