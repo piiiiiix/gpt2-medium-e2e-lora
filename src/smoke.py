@@ -160,11 +160,39 @@ def frontend_pipeline():
     subprocess.run(['taskkill','/PID',str(pid),'/T'],capture_output=True)
     print('PASS: four frontend pages, all-frozen control, detached sequential jobs, TensorBoard HTTP scalars')
 
+def medium_pipeline(kind):
+    from copy import deepcopy
+    from config import OUTPUT_ROOT,TRAIN_DEFAULTS,FFT_DEFAULTS,EVAL_DEFAULTS,MODEL_NAME
+    from utils.training import train
+    from utils.evaluation import evaluate
+    from utils.runs import write_json
+    if kind=='base':
+        spec=dict(type='base',path=MODEL_NAME,name='GPT-2 Medium real smoke Base')
+    else:
+        config=deepcopy(TRAIN_DEFAULTS if kind=='lora' else FFT_DEFAULTS)
+        config.update(max_steps=1,train_samples=2,eval_samples=2,batch_size=1,eval_batch_size=1,
+            gradient_accumulation=1,logging_steps=1,warmup_steps=0,max_length=128,precision='fp16',
+            local_files_only=True)
+        path=new_run(kind,config)
+        train(config,path,kind)
+        spec=dict(type=kind,path=str(path/'final'),name=f'GPT-2 Medium real smoke {kind}',training_run=str(path))
+        write_json(OUTPUT_ROOT/f'smoke/medium-{kind}-run.json',dict(path=str(path)))
+    config=deepcopy(EVAL_DEFAULTS)
+    config.update(model=spec,samples=2,max_new_tokens=12,local_files_only=True)
+    evaluation=new_run('benchmarks',config)
+    evaluate(config,evaluation)
+    assert read_json(evaluation/'status.json')['status']=='completed'
+    assert len(read_json(evaluation/'metrics.json')['metrics'])==8
+    write_json(OUTPUT_ROOT/f'smoke/medium-{kind}-eval.json',dict(path=str(evaluation)))
+    print(f'PASS: ACTUAL GPT-2 Medium {kind}, E2E samples, all metrics, telemetry and logs')
+
 if __name__ == '__main__':
     require_lora()
     parser = argparse.ArgumentParser()
-    parser.add_argument('stage', choices=['runtime','models','lora','fft','evaluation','frontend'])
+    parser.add_argument('stage', choices=['runtime','models','lora','fft','evaluation','frontend',
+        'medium-base','medium-lora','medium-fft'])
     args = parser.parse_args()
     {'runtime':runtime,'models':model_pipeline,'lora':lambda:training_pipeline('lora'),
         'fft':lambda:training_pipeline('fft'),'evaluation':evaluation_pipeline,
-        'frontend':frontend_pipeline}[args.stage]()
+        'frontend':frontend_pipeline,'medium-base':lambda:medium_pipeline('base'),
+        'medium-lora':lambda:medium_pipeline('lora'),'medium-fft':lambda:medium_pipeline('fft')}[args.stage]()
