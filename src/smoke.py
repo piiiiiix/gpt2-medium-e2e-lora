@@ -112,10 +112,59 @@ def evaluation_pipeline():
     assert all('scores' in r for r in read_predictions(folder/'sample_scores.jsonl'))
     print('PASS: Base/LoRA/FFT generation, incremental rows, offline rescoring, all five metrics and per-sample scores')
 
+def frontend_pipeline():
+    import sys
+    from config import OUTPUT_ROOT,EVAL_DEFAULTS
+    from copy import deepcopy
+    from streamlit.testing.v1 import AppTest
+    from utils.jobs import launch,tensorboard,alive
+    from utils.runs import read_json
+    from urllib.request import urlopen
+    app=AppTest.from_file(str(Path(__file__).with_name('app.py')),default_timeout=30).run()
+    assert not app.exception
+    app.button[1].click().run() # 全部冻结
+    assert not app.exception
+    assert all(v==0 for row in app.session_state['rank_rows'] for k,v in row.items() if k!='layer')
+    for page in ['测试 / benchmark','历史测试记录','任务进度']:
+        app.radio(key='page').set_value(page).run()
+        assert not app.exception
+    config=deepcopy(EVAL_DEFAULTS)
+    config.update(model=dict(type='base',path=str(OUTPUT_ROOT/'smoke/tiny-base')),
+        local_data=str(OUTPUT_ROOT/'smoke/data.json'),samples=1,max_new_tokens=6,num_beams=1,
+        local_files_only=True,metrics=['BLEU'])
+    runs=launch([('tests',config),('benchmarks',config)])
+    deadline=time.monotonic()+90
+    while time.monotonic()<deadline:
+        statuses=[read_json(Path(r['path'])/'status.json')['status'] for r in runs]
+        if all(s in ('completed','failed') for s in statuses):
+            break
+        time.sleep(.5)
+    assert statuses==['completed','completed'],statuses
+    run=read_json(OUTPUT_ROOT/'smoke/lora-run.json')['path']
+    url=tensorboard(run)
+    deadline=time.monotonic()+30
+    success=False
+    while time.monotonic()<deadline:
+        try:
+            with urlopen(url+'/data/plugin/scalars/tags',timeout=2) as response:
+                tags=json.loads(response.read())
+                assert tags
+                success=True
+                break
+        except OSError:
+            time.sleep(.5)
+    assert success,'TensorBoard did not expose training scalars'
+    # Stop only the helper launched for this smoke check.
+    import subprocess
+    pid=read_json(Path(run)/'tensorboard_server.json')['pid']
+    subprocess.run(['taskkill','/PID',str(pid),'/T'],capture_output=True)
+    print('PASS: four frontend pages, all-frozen control, detached sequential jobs, TensorBoard HTTP scalars')
+
 if __name__ == '__main__':
     require_lora()
     parser = argparse.ArgumentParser()
-    parser.add_argument('stage', choices=['runtime','models','lora','fft','evaluation'])
+    parser.add_argument('stage', choices=['runtime','models','lora','fft','evaluation','frontend'])
     args = parser.parse_args()
     {'runtime':runtime,'models':model_pipeline,'lora':lambda:training_pipeline('lora'),
-        'fft':lambda:training_pipeline('fft'),'evaluation':evaluation_pipeline}[args.stage]()
+        'fft':lambda:training_pipeline('fft'),'evaluation':evaluation_pipeline,
+        'frontend':frontend_pipeline}[args.stage]()
