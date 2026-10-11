@@ -30,6 +30,14 @@ python -s -m streamlit run src/app.py
 - **任务进度**：后台状态、进度、日志、显存 / 温度 / GPU 占用率、耗时和预计完成时间。刷新或关闭前端不结束后台任务。
 - 选择有训练记录的模型后，自动准备该运行的本地 TensorBoard 服务，“打开训练 TensorBoard”按钮直接跳转；保存的训练数据摘要也可以在页面中展开查看。
 
+## 待训练池与批量训练
+
+在训练页配置一组 LoRA / FFT 参数，填写可选任务名称并点击“加入待训练池”。每项独立保存完整参数快照，继续改表单不会修改此前入池的配置。可混合添加多组 LoRA 和 FFT。
+
+展开某项后点击“开始这一项”，或点击“全部开始”提交当前所有待训练项。后台按添加顺序逐个运行，上一项结束后才启动下一项；某项失败会保留错误和日志并继续下一项。已有训练或测试批次运行时，启动会提示等待，池中参数仍保留。
+
+池保存于 `outputs/training_pool`，刷新页面、重启前端后仍存在；点击“刷新训练池状态”查看状态，运行进度与日志在“任务进度”页查看。已提交项不能重复启动或移除；需重新训练时重新加入一项。尚未提交的项可以移除。“全部开始”后新加入的配置留在待训练池，等待下一次启动。
+
 ## 默认参数与显存配置
 
 LoRA 论文参数见 [参数来源.md](参数来源.md)。默认 Q=4、K=0、V=4，alpha=32；适配器分支按 alpha/r 缩放。Q、K、V 可以分别使用不同 rank 或关闭，例如 Q=8、K=0、V=4；同一投影在所有层使用同一个 rank，各层分别学习自己的 adapter 权重。当前 Hugging Face GPT-2 Small 和 Medium 都将 QKV 存在合并的 c_attn 中；项目在该合并层上分别添加 Q/K/V 分支，基础模型权重被冻结。
@@ -118,6 +126,7 @@ python -s src/smoke.py lora
 python -s src/smoke.py fft
 python -s src/smoke.py evaluation
 python -s src/smoke.py frontend
+python -s src/smoke.py training-pool
 python -s src/smoke.py medium-base
 python -s src/smoke.py medium-lora
 python -s src/smoke.py medium-fft

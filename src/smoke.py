@@ -305,6 +305,83 @@ def frontend_pipeline():
     )
 
 
+def training_pool_pipeline():
+    """验证训练池参数快照、刷新保留、单项启动、整池串行训练与重复提交保护。"""
+    import time
+    from copy import deepcopy
+    from uuid import uuid4
+
+    from streamlit.testing.v1 import AppTest
+
+    from config import OUTPUT_ROOT
+    from utils import training_pool
+    from utils.runs import write_json
+
+    training_pool.POOL_ROOT = OUTPUT_ROOT / "smoke" / ("pool-" + uuid4().hex)
+    app = AppTest.from_file(str(Path(__file__).with_name("app.py")), default_timeout=30).run()
+    app.text_input(key="pool_name").set_value("前端参数快照")
+    app.button(key="enqueue_training").click().run()
+    assert not app.exception
+    entry = training_pool.entries()[0]
+    assert entry["name"] == "前端参数快照" and entry["status"] == "pending"
+    app.number_input(key="q_rank").set_value(8).run()
+    assert training_pool.entries()[0]["config"]["ranks"]["q"] == 4
+    config = deepcopy(TRAIN_DEFAULTS)
+    config.update(
+        model=str(OUTPUT_ROOT / "smoke/tiny-base"),
+        local_data=str(OUTPUT_ROOT / "smoke/data.json"),
+        max_steps=1,
+        batch_size=2,
+        eval_batch_size=2,
+        logging_steps=1,
+        warmup_steps=0,
+        max_length=128,
+        epochs=1,
+        local_files_only=True,
+        smoke=True,
+    )
+    entry["config"] = config
+    write_json(training_pool.POOL_ROOT / f"{entry['id']}.json", entry)
+    app.button(key="start_pool_" + entry["id"]).click().run()
+    assert not app.exception
+
+    def wait_finished(count):
+        """等待微型后台训练结束，确认所有池项成功且按顺序执行。"""
+        deadline = time.monotonic() + 120
+        while time.monotonic() < deadline:
+            pool = training_pool.entries()
+            if (
+                len(pool) == count
+                and all(item["status"] == "completed" for item in pool)
+                and not (OUTPUT_ROOT / "jobs/active.lock").exists()
+            ):
+                return pool
+            assert not any(item["status"] == "failed" for item in pool), pool
+            time.sleep(0.5)
+        raise AssertionError("训练池冒烟超时")
+
+    wait_finished(1)
+    first = training_pool.add("lora", config, "第二项 LoRA")
+    second = training_pool.add("fft", config, "第三项 FFT")
+    removable = training_pool.add("lora", config, "可移除项")
+    training_pool.remove(removable["id"])
+    config["learning_rate"] = 1e-8
+    assert training_pool.entries()[1]["config"]["learning_rate"] != 1e-8
+    app.button(key="refresh_training_pool").click().run()
+    app.button(key="start_pool_all").click().run()
+    assert not app.exception
+    assert not app.error
+    pool = wait_finished(3)
+    statuses = [read_json(OUTPUT_ROOT / item["run"] / "status.json") for item in pool]
+    assert statuses[1]["ended"] <= statuses[2]["started"]
+    try:
+        training_pool.start_pending([first["id"], second["id"]])
+        raise AssertionError("已提交任务被重复启动")
+    except ValueError:
+        pass
+    print("PASS: persistent training pool, snapshots, single/all UI launch, serial LoRA/FFT")
+
+
 def medium_pipeline(kind):
     """用真实 GPT-2 Medium 执行指定模型类型的短训练或评测冒烟。"""
     from copy import deepcopy
@@ -423,6 +500,7 @@ if __name__ == "__main__":
             "fft",
             "evaluation",
             "frontend",
+            "training-pool",
             "medium-base",
             "medium-lora",
             "medium-fft",
@@ -437,6 +515,7 @@ if __name__ == "__main__":
         "fft": lambda: training_pipeline("fft"),
         "evaluation": evaluation_pipeline,
         "frontend": frontend_pipeline,
+        "training-pool": training_pool_pipeline,
         "medium-base": lambda: medium_pipeline("base"),
         "medium-lora": lambda: medium_pipeline("lora"),
         "medium-fft": lambda: medium_pipeline("fft"),

@@ -11,7 +11,16 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import pandas as pd
 import streamlit as st
 
-from config import EVAL_DEFAULTS, FFT_DEFAULTS, METRICS, PROJECT_ROOT, TRAIN_DEFAULTS, require_lora
+from config import (
+    EVAL_DEFAULTS,
+    FFT_DEFAULTS,
+    METRICS,
+    OUTPUT_ROOT,
+    PROJECT_ROOT,
+    TRAIN_DEFAULTS,
+    require_lora,
+)
+from utils import training_pool
 from utils.jobs import alive, launch, tensorboard
 from utils.models import discover
 from utils.runs import HK, estimate, history, read_json
@@ -168,14 +177,55 @@ if page == "训练":
             steps = st.number_input("最大 steps，0=按 epochs", min_value=0, value=0)
             config.update(train_samples=n or None, eval_samples=e or None, max_steps=steps or -1)
             config["smoke"] = st.checkbox("将本次运行标记为冒烟测试", value=False)
+        pool_name = st.text_input("任务名称（可选）", key="pool_name")
         submitted = st.form_submit_button("启动训练", type="primary")
+        enqueue = st.form_submit_button("加入待训练池", key="enqueue_training")
     st.caption(f"有效 batch size：{config['batch_size'] * config['gradient_accumulation']}。")
     duration(config, kind)
-    if submitted:
+    if submitted or enqueue:
         if kind == "lora" and not any(config["ranks"].values()):
             st.error("全部投影已冻结，没有可训练参数；请启用至少一个 rank，或使用 Base 测试。")
-        else:
+        elif submitted:
             start([(kind, config)])
+        else:
+            try:
+                training_pool.add(kind, config, pool_name)
+                st.success("已保存参数快照到待训练池。")
+            except Exception as exc:
+                st.error(str(exc))
+
+    st.subheader("待训练池")
+    st.button("刷新训练池状态", key="refresh_training_pool")
+    st.caption("参数保存到 medium 的 outputs；全部开始按添加顺序串行执行，关闭页面不影响训练。")
+    pool = training_pool.entries()
+    pending = [entry for entry in pool if entry["status"] == "pending"]
+    if st.button("全部开始", key="start_pool_all", disabled=not pending):
+        try:
+            st.session_state["last_runs"] = training_pool.start_pending(
+                [entry["id"] for entry in pending]
+            )
+            records.clear()
+            st.rerun()
+        except Exception as exc:
+            st.error(str(exc))
+    if not pool:
+        st.info("待训练池为空，先配置参数并点击“加入待训练池”。")
+    for entry in pool:
+        with st.expander(f"{entry['name']} · {entry['kind']} · {entry['status']}"):
+            st.json(entry["config"])
+            if entry.get("run"):
+                st.caption(f"运行目录：{OUTPUT_ROOT / entry['run']}")
+            if entry["status"] == "pending":
+                if st.button("开始这一项", key="start_pool_" + entry["id"]):
+                    try:
+                        st.session_state["last_runs"] = training_pool.start_pending([entry["id"]])
+                        records.clear()
+                        st.rerun()
+                    except Exception as exc:
+                        st.error(str(exc))
+                if st.button("移除", key="remove_pool_" + entry["id"]):
+                    training_pool.remove(entry["id"])
+                    st.rerun()
 
 elif page == "测试 / benchmark":
     if st.button("刷新模型列表"):
