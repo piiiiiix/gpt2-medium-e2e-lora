@@ -4,6 +4,16 @@ GPT-2 Medium 的 Base、Q/K/V 独立 LoRA、全参数微调（FFT）训练与 E2
 
 ## 环境与启动
 
+在 Git Bash / Bash 中运行根目录启动脚本，它会定位项目并使用已有 conda `lora` 环境：
+
+```bash
+bash setup.sh
+# 可选：指定端口
+bash setup.sh --server.port 8502
+```
+
+脚本不自动安装依赖；首次使用请按下方命令准备环境。无需提前激活 lora。
+
 统一使用名称全小写的 Conda **lora** 环境。禁用用户 site-packages，保证依赖来自该环境：
 
 ```powershell
