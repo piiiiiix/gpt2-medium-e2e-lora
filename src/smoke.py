@@ -123,7 +123,7 @@ def model_pipeline():
     assert all(
         layer.attn.c_attn.branches["k"].b.weight.grad is not None for layer in k_only.transformer.h
     )
-    assert any(m["path"] == str(folder / "adapter") for m in discover())
+    assert any(m["path"] == str(folder / "adapter") for m in discover(include_smoke=True))
     print(
         "PASS: tokenization, model-wide independent QKV ranks, "
         "K freezing, backward, adapter save/reload, discovery"
@@ -283,7 +283,7 @@ def frontend_pipeline():
     # 从现存冒烟运行选择 TensorBoard，避免归档后旧路径索引失效。
     run = next(
         record["path"]
-        for record in history()
+        for record in history(include_smoke=True)
         if record["kind"] == "lora"
         and record["status"] == "completed"
         and record["config"].get("smoke")
@@ -439,12 +439,20 @@ def resume_pipeline():
                 pass
         assert read_json(interrupted / "status.json")["status"] == "interrupted"
         assert available(interrupted)[-1].name == "checkpoint-2"
-        app = AppTest.from_file(str(Path(__file__).with_name("app.py")), default_timeout=30).run()
-        app.radio(key="page").set_value("任务进度").run()
-        index = next(i for i, item in enumerate(history()) if item["path"] == str(interrupted))
-        app.selectbox(key="progress_run").set_value(index).run()
-        app.button(key="resume_training_" + interrupted.name).click().run()
-        assert not app.exception and not app.error
+        # 测试专用：显式允许冒烟记录，实际前端始终只显示正式运行。
+        with patch("utils.runs.history", return_value=history(include_smoke=True)):
+            app = AppTest.from_file(
+                str(Path(__file__).with_name("app.py")), default_timeout=30
+            ).run()
+            app.radio(key="page").set_value("任务进度").run()
+            index = next(
+                i
+                for i, item in enumerate(history(include_smoke=True))
+                if item["path"] == str(interrupted)
+            )
+            app.selectbox(key="progress_run").set_value(index).run()
+            app.button(key="resume_training_" + interrupted.name).click().run()
+            assert not app.exception and not app.error
         deadline = time.monotonic() + 120
         while time.monotonic() < deadline:
             status = read_json(interrupted / "status.json")
@@ -508,6 +516,49 @@ def stop_pipeline():
         assert read_json(Path(run["path"]) / "status.json")["status"] == "interrupted"
     assert not (Path(runs[1]["path"]) / "training.jsonl").exists()
     print("PASS: UI stop, step checkpoint, child exit, later seed cancelled, lock released")
+
+
+def formal_records_pipeline():
+    """验证目录与标记双重排除冒烟，检查前端正式页面及 TensorBoard 聚合范围。"""
+    from uuid import uuid4
+
+    from streamlit.testing.v1 import AppTest
+
+    from config import OUTPUT_ROOT
+    from tensorboard_launcher import logdir_spec
+    from utils.models import discover
+    from utils.runs import history, write_json
+
+    fixture = OUTPUT_ROOT / ("scan-fixture-" + uuid4().hex)
+    fixture.mkdir()
+    try:
+        write_json(fixture / "config.json", dict(smoke=True))
+        write_json(fixture / "status.json", dict(kind="fft", status="completed"))
+        (fixture / "model.safetensors").touch()
+        assert str(fixture) not in [model["path"] for model in discover()]
+        assert str(fixture) not in [record["path"] for record in history()]
+        assert str(fixture) in [model["path"] for model in discover(include_smoke=True)]
+        assert str(fixture) in [record["path"] for record in history(include_smoke=True)]
+        for model in discover()[1:]:
+            assert "smoke" not in Path(model["path"]).relative_to(OUTPUT_ROOT).parts
+            assert not model["training_config"].get("smoke")
+        for record in history():
+            assert "smoke" not in Path(record["path"]).relative_to(OUTPUT_ROOT).parts
+            assert not record["config"].get("smoke")
+        spec = logdir_spec()
+        from tensorboard.backend.event_processing.data_ingester import _parse_event_files_spec
+
+        for path in _parse_event_files_spec(spec):
+            assert "smoke" not in Path(path).relative_to(OUTPUT_ROOT).parts
+        app = AppTest.from_file(str(Path(__file__).with_name("app.py")), default_timeout=30).run()
+        for page in ("测试 / benchmark", "历史测试记录", "任务进度"):
+            app.radio(key="page").set_value(page).run()
+            assert not app.exception
+        print("PASS: formal model/history filtering, legacy smoke flag, UI pages, TensorBoard spec")
+    finally:
+        for name in ("config.json", "status.json", "model.safetensors"):
+            (fixture / name).unlink(missing_ok=True)
+        fixture.rmdir()
 
 
 def medium_pipeline(kind):
@@ -631,6 +682,7 @@ if __name__ == "__main__":
             "training-pool",
             "resume",
             "stop",
+            "formal-records",
             "medium-base",
             "medium-lora",
             "medium-fft",
@@ -648,6 +700,7 @@ if __name__ == "__main__":
         "training-pool": training_pool_pipeline,
         "resume": resume_pipeline,
         "stop": stop_pipeline,
+        "formal-records": formal_records_pipeline,
         "medium-base": lambda: medium_pipeline("base"),
         "medium-lora": lambda: medium_pipeline("lora"),
         "medium-fft": lambda: medium_pipeline("fft"),

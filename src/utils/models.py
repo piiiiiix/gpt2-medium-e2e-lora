@@ -7,14 +7,15 @@ from config import MODEL_NAME, PROJECT_ROOT, inside_project
 from utils.runs import read_json
 
 
-def discover():
-    """扫描项目内有效权重与 adapter，关联训练记录，并保留独立 Base 选项。"""
+def discover(include_smoke=False):
+    """扫描正式权重与 adapter，默认排除冒烟；内部测试可显式包含冒烟。"""
     models = [dict(type="base", path=MODEL_NAME, name="GPT-2 Medium (Base)")]
     for directory, folders, files in os.walk(PROJECT_ROOT, followlinks=False):
         folders[:] = [
             f
             for f in folders
             if f not in (".git", "nltk_data", "notebooks", "__pycache__")
+            and (include_smoke or f != "smoke")
             and (Path(directory) / f).resolve().is_relative_to(PROJECT_ROOT)
         ]
         path = Path(directory)
@@ -28,6 +29,9 @@ def discover():
             continue
         training = next((p for p in [path, *path.parents] if (p / "status.json").exists()), None)
         metadata = read_json(training / "status.json", {}) if training else {}
+        training_config = read_json(training / "config.json", {}) if training else {}
+        if training_config.get("smoke") and not include_smoke:
+            continue
         models.append(
             dict(
                 type=kind,
@@ -35,7 +39,7 @@ def discover():
                 name=str(path.relative_to(PROJECT_ROOT)),
                 training_run=str(training) if training else None,
                 trained=metadata.get("started"),
-                training_config=read_json(training / "config.json", {}) if training else {},
+                training_config=training_config,
             )
         )
     return models

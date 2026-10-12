@@ -1,2 +1,2 @@
 # Windows 启动脚本使用 CRLF，确保 cmd.exe 正确执行。
-run.bat text eol=crlf
+*.bat text eol=crlf

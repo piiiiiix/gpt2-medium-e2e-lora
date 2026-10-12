@@ -174,22 +174,27 @@ def running(path, kind, config):
                 write_json(path / "status.json", metadata)
 
 
-def history():
-    """从 outputs 读取合法运行目录的状态及配置，按运行名称逆序返回。"""
+def history(include_smoke=False):
+    """读取正式运行状态及配置并排序；内部测试可显式包含冒烟记录。"""
     records = []
     if OUTPUT_ROOT.exists():
         for path in OUTPUT_ROOT.rglob("status.json"):
+            if not include_smoke and "smoke" in path.relative_to(OUTPUT_ROOT).parts:
+                continue
             try:
                 inside_project(path)
             except ValueError:
                 continue
             status = read_json(path)
+            config = read_json(path.parent / "config.json", {})
+            if config.get("smoke") and not include_smoke:
+                continue
             if status:
                 records.append(
                     dict(
                         path=str(path.parent),
                         **status,
-                        config=read_json(path.parent / "config.json", {}),
+                        config=config,
                     )
                 )
     return sorted(records, key=lambda x: x["path"], reverse=True)

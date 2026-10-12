@@ -32,6 +32,16 @@ python -s -m streamlit run src/app.py
 
 首次运行需要获取官方 `openai-community/gpt2-medium` 和 `GEM/e2e_nlg`。模型及数据使用 Hugging Face 缓存；项目模型扫描只扫描本项目内目录，Base 独立使用模型标识。
 
+## 独立启动 TensorBoard
+
+```powershell
+.\run_tensorboard.bat
+# 可选：指定端口
+.\run_tensorboard.bat --port 6007
+```
+
+默认打开地址为 http://127.0.0.1:6006；脚本仅汇总 medium 的正式 LoRA / FFT 训练日志，不包括冒烟。使用 conda lora，不安装依赖。
+
 ## 前端
 
 - **训练**：LoRA / FFT，超参数、精度和少量样本设置；只有 Q rank、K rank、V rank 三个模型级设置，各自独立调整，统一应用到所有 Transformer 层，无需逐层配置。rank=0 没有 adapter 分支；全部冻结时可测试 Base，但不能启动无参数训练。
@@ -149,6 +159,7 @@ python -s src/smoke.py frontend
 python -s src/smoke.py training-pool
 python -s src/smoke.py resume
 python -s src/smoke.py stop
+python -s src/smoke.py formal-records
 python -s src/smoke.py medium-base
 python -s src/smoke.py medium-lora
 python -s src/smoke.py medium-fft
@@ -178,3 +189,7 @@ python -s -m ruff check src
 ```
 
 VSCode 可安装 Ruff 扩展并选择其作为 Python 格式化器；检查规则从项目配置读取。
+
+## 正式记录与需求维护
+
+模型列表、历史测试记录及任务进度默认排除 outputs/smoke 与配置标记 smoke=true 的内容。冒烟文件仍完整保留，内部冒烟测试可显式访问。每次用户提出的修改须先整理并补入需求文档.md，同时更新使用说明与实施记录，再提交推送。
