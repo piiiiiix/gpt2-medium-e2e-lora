@@ -70,7 +70,7 @@ def new_run(kind, config):
         )
     tag = re.sub(r"[^a-zA-Z0-9_.-]", "-", tag)
     path = (
-        OUTPUT_ROOT
+        (OUTPUT_ROOT / "smoke" if config.get("smoke") else OUTPUT_ROOT)
         / folder
         / (datetime.now(HK).strftime("%Y%m%d_%H%M%S_%f") + "_" + tag + "_" + digest(config))
     )
@@ -118,6 +118,20 @@ def running(path, kind, config):
         hardware=GPUMonitor.sample(),
         python=sys.executable,
     )
+    attempts = read_json(path / "attempts.json", [])
+    metadata["first_started"] = next(
+        (attempt["status"]["started"] for attempt in attempts if attempt["status"].get("started")),
+        metadata["started"],
+    )
+    previous_seconds = 0
+    for attempt in attempts:
+        state = attempt["status"]
+        seconds = state.get("elapsed_seconds")
+        if seconds is None and state.get("started") and state.get("ended"):
+            seconds = (
+                datetime.fromisoformat(state["ended"]) - datetime.fromisoformat(state["started"])
+            ).total_seconds()
+        previous_seconds += seconds or 0
     write_json(path / "status.json", metadata)
     import importlib.metadata
 
@@ -156,6 +170,7 @@ def running(path, kind, config):
             finally:
                 monitor.stop()
                 metadata.update(ended=now(), elapsed_seconds=time.perf_counter() - started)
+                metadata["total_elapsed_seconds"] = previous_seconds + metadata["elapsed_seconds"]
                 write_json(path / "status.json", metadata)
 
 

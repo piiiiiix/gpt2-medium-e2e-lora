@@ -8,6 +8,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
+from uuid import uuid4
 
 from config import OUTPUT_ROOT, PROJECT_ROOT, inside_project, require_lora
 from utils.runs import new_run, now, read_json, write_json
@@ -49,7 +50,7 @@ def hidden_flags():
     return getattr(subprocess, "CREATE_NO_WINDOW", 0)
 
 
-def launch(tasks):
+def launch(tasks, existing_runs=None):
     """创建运行目录与批次锁，启动脱离前端生命周期的后台 worker。"""
     require_lora()
     folder = OUTPUT_ROOT / "jobs"
@@ -64,8 +65,39 @@ def launch(tasks):
     os.write(descriptor, json.dumps(dict(pid=os.getpid(), starting=True)).encode())
     os.close(descriptor)
     try:
-        runs = [dict(kind=kind, path=str(new_run(kind, config))) for kind, config in tasks]
-        batch = folder / (Path(runs[0]["path"]).name + ".json")
+        if existing_runs is None:
+            runs = [dict(kind=kind, path=str(new_run(kind, config))) for kind, config in tasks]
+        else:
+            runs = existing_runs
+            for run, (_, config) in zip(runs, tasks):
+                path = inside_project(run["path"])
+                previous = read_json(path / "status.json")
+                attempts = read_json(path / "attempts.json", [])
+                attempts.append(
+                    dict(
+                        status=previous,
+                        resumed_at=now(),
+                        checkpoint=config["resume_from_checkpoint"],
+                    )
+                )
+                write_json(path / "attempts.json", attempts)
+                (path / "stop.request.json").unlink(missing_ok=True)
+                write_json(path / "config.json", config)
+                checkpoint_state = read_json(
+                    Path(config["resume_from_checkpoint"]) / "trainer_state.json"
+                )
+                write_json(
+                    path / "progress.json",
+                    dict(
+                        completed=checkpoint_state["global_step"],
+                        total=checkpoint_state["max_steps"],
+                        phase="resuming",
+                    ),
+                )
+                write_json(
+                    path / "status.json", dict(kind=run["kind"], status="queued", created=now())
+                )
+        batch = folder / (Path(runs[0]["path"]).name + "_" + uuid4().hex[:8] + ".json")
         write_json(batch, dict(status="queued", runs=runs, created=now()))
         with (folder / "worker.log").open("a", encoding="utf-8") as log:
             proc = subprocess.Popen(
@@ -80,6 +112,54 @@ def launch(tasks):
     except BaseException:
         lock.unlink(missing_ok=True)
         raise
+
+
+def stop_batch():
+    """请求当前 worker 停止整个批次；由 worker 停止子进程且取消后续排队项。"""
+    require_lora()
+    lock = read_json(OUTPUT_ROOT / "jobs/active.lock", {})
+    if not lock.get("batch") or not alive(lock.get("pid")):
+        raise ValueError("当前没有存活的后台批次。")
+    batch = inside_project(lock["batch"])
+    write_json(batch.with_suffix(".stop"), dict(requested=now(), reason="用户停止整个批次"))
+    return batch
+
+
+def terminate_tree(process):
+    """停止 worker 自己创建的任务进程树，并等待文件写入进程退出。"""
+    if process.poll() is not None:
+        return
+    if os.name == "nt":
+        result = subprocess.run(
+            ["taskkill", "/PID", str(process.pid), "/T", "/F"],
+            capture_output=True,
+            creationflags=hidden_flags(),
+        )
+        if result.returncode and process.poll() is None:
+            raise RuntimeError("任务进程树未能停止，请查看后台日志。")
+    else:
+        os.killpg(process.pid, 15)
+    process.wait(timeout=15)
+
+
+def resume_training(run, checkpoint):
+    """用原参数在原目录续训，恢复完整 Trainer 状态并保留上次运行状态记录。"""
+    from utils.checkpoints import validate
+
+    path = inside_project(run)
+    status = read_json(path / "status.json", {})
+    stopped = status.get("status") in ("interrupted", "failed") or (
+        status.get("status") == "running" and not alive(status.get("pid"))
+    )
+    if status.get("kind") not in ("lora", "fft") or not stopped:
+        raise ValueError("只能恢复已停止或失败的训练。")
+    checkpoint = validate(path, checkpoint)
+    state = read_json(checkpoint / "trainer_state.json")
+    if state["global_step"] >= state["max_steps"]:
+        raise ValueError("该断点已完成计划训练步数，没有剩余训练可恢复。")
+    config = read_json(path / "config.json")
+    config["resume_from_checkpoint"] = str(checkpoint)
+    return launch([(status["kind"], config)], [dict(kind=status["kind"], path=str(path))])
 
 
 def tensorboard(training_run):

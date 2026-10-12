@@ -21,7 +21,8 @@ from config import (
     require_lora,
 )
 from utils import training_pool
-from utils.jobs import alive, launch, tensorboard
+from utils.checkpoints import available
+from utils.jobs import alive, launch, resume_training, stop_batch, tensorboard
 from utils.models import discover
 from utils.runs import HK, estimate, history, read_json
 
@@ -331,6 +332,13 @@ elif page == "历史测试记录":
 
 else:
     st.subheader("任务进度")
+    st.caption("停止会取消当前整个批次；训练优先在 step 结束后保存断点，90 秒超时则强制停止。")
+    if st.button("停止当前批次", key="stop_batch", type="primary"):
+        try:
+            stop_batch()
+            st.success("停止请求已发送，当前任务结束后不会启动后续排队项。")
+        except Exception as exc:
+            st.error(str(exc))
 
     @st.fragment(run_every=3)
     def progress_panel():
@@ -348,6 +356,29 @@ else:
         record = items[chosen]
         path = Path(record["path"])
         st.caption(f"{record['kind']} · {record['status']}")
+        stopped = record["status"] in ("interrupted", "failed") or (
+            record["status"] == "running" and not alive(record.get("pid"))
+        )
+        if record["kind"] in ("lora", "fft") and stopped:
+            checkpoints = available(path)
+            if checkpoints:
+                checkpoint = st.selectbox(
+                    "续训 checkpoint",
+                    checkpoints,
+                    index=len(checkpoints) - 1,
+                    format_func=lambda p: p.name,
+                    key="resume_checkpoint_" + path.name,
+                )
+                st.caption("恢复原参数、权重、优化器、学习率调度器与步数；不会自动继续其他 seed。")
+                if st.button("断点续训", key="resume_training_" + path.name):
+                    try:
+                        resume_training(path, checkpoint)
+                        records.clear()
+                        st.success("已提交断点续训，请刷新任务状态。")
+                    except Exception as exc:
+                        st.error(str(exc))
+            else:
+                st.caption("没有完整 checkpoint，无法断点续训；未开始的 seed 请重新加入待训练池。")
         if record["status"] == "running" and not alive(record.get("pid")):
             st.warning("任务进程已退出，未写入完成状态，请查看 process.log。")
         state = read_json(path / "progress.json", {})
@@ -370,9 +401,13 @@ else:
         elif record["status"] in ("queued", "running"):
             st.caption("暂无历史估算，等待运行进度。")
         if record.get("elapsed_seconds") is not None:
-            st.metric("总耗时（秒）", f"{record['elapsed_seconds']:.1f}")
+            elapsed = record.get("total_elapsed_seconds", record["elapsed_seconds"])
+            st.metric("累计运行耗时（秒）", f"{elapsed:.1f}")
         for filename in ["run.log", "process.log"]:
             if (path / filename).exists():
+                st.caption(
+                    "训练内部日志" if filename == "run.log" else "后台进程日志（含重复输出）"
+                )
                 with (path / filename).open("rb") as stream:
                     stream.seek(max(0, (path / filename).stat().st_size - 16000))
                     content = stream.read().decode("utf-8", errors="replace")

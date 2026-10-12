@@ -48,6 +48,16 @@ python -s -m streamlit run src/app.py
 
 池保存于 `outputs/training_pool`，刷新页面、重启前端后仍存在；点击“刷新训练池状态”查看状态，运行进度与日志在“任务进度”页查看。已提交项不能重复启动或移除；需重新训练时重新加入一项。尚未提交的项可以移除。“全部开始”后新加入的配置留在待训练池，等待下一次启动。
 
+## 停止与断点续训
+
+在“任务进度”页点击“停止当前批次”，会取消整个批次，后续 seed 不再启动。LoRA / FFT 优先在当前 step 结束后保存完整 checkpoint 再退出；90 秒内未能退出则强制停止进程树，此时只能使用先前完整保存的断点。测试任务直接停止。关闭 Streamlit 或在前端终端按 Ctrl+C 不会停止独立后台任务。
+
+选择已停止或失败的训练，页面会列出此运行的完整 checkpoint，默认选最新一个，点击“断点续训”即可恢复。没有 checkpoint 的未开始任务需要重新加入待训练池。续训只恢复所选任务，不会自动继续此前取消的其他 seed。
+
+恢复包含模型 / adapter 权重、优化器、学习率调度器、随机状态和 Trainer 步数。使用原训练参数与原输出目录，epochs 表示原计划总轮数；旧日志继续保留，历史状态记录在 attempts.json。续训不会从零开始，但未保存的 step 需要重跑。当前已停止的真实 FFT seed 42 可从 checkpoint-8382（epoch 2）继续；此功能添加后未自动启动正式续训。
+
+“任务进度”中的两块日志分别标为训练内部日志（run.log）和后台进程日志（process.log）；后者包含前者的重复输出，并不表示重新训练。
+
 ## 默认参数与显存配置
 
 LoRA 论文参数见 [参数来源.md](参数来源.md)。默认 Q=4、K=0、V=4，alpha=32；适配器分支按 alpha/r 缩放。Q、K、V 可以分别使用不同 rank 或关闭，例如 Q=8、K=0、V=4；同一投影在所有层使用同一个 rank，各层分别学习自己的 adapter 权重。当前 Hugging Face GPT-2 Small 和 Medium 都将 QKV 存在合并的 c_attn 中；项目在该合并层上分别添加 Q/K/V 分支，基础模型权重被冻结。
@@ -137,6 +147,8 @@ python -s src/smoke.py fft
 python -s src/smoke.py evaluation
 python -s src/smoke.py frontend
 python -s src/smoke.py training-pool
+python -s src/smoke.py resume
+python -s src/smoke.py stop
 python -s src/smoke.py medium-base
 python -s src/smoke.py medium-lora
 python -s src/smoke.py medium-fft
@@ -151,7 +163,7 @@ python -s src/smoke.py guards
 
 ## 版本管理
 
-独立仓库：[piiiiiix/gpt2-medium-e2e-lora](https://github.com/piiiiiix/gpt2-medium-e2e-lora)。每个已验证 pipeline 单独提交并推送。notebooks 与 outputs 被 .gitignore 忽略；本地模型和实验日志仍完整保存，不随代码上传。
+独立仓库：[piiiiiix/gpt2-medium-e2e-lora](https://github.com/piiiiiix/gpt2-medium-e2e-lora)。每个已验证 pipeline 单独提交并推送。新的冒烟运行直接写入 outputs/smoke 下对应分类。notebooks 与 outputs 被 .gitignore 忽略；本地模型和实验日志仍完整保存，不随代码上传。
 
 ## 代码阅读与格式
 

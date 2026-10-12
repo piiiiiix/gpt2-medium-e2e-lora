@@ -29,6 +29,7 @@ class Progress(TrainerCallback):
         """设置本次运行路径与进度计时起点。"""
         self.path = path
         self.started = time.perf_counter()
+        self.initial_step = None
 
     def on_log(self, args, state, control, logs=None, **kwargs):
         """保存 Trainer 日志，并在 loss、eval_loss 或 grad_norm 非有限时终止任务。"""
@@ -49,6 +50,11 @@ class Progress(TrainerCallback):
     def on_step_end(self, args, state, control, **kwargs):
         """每个训练 step 结束后保存进度，并按已用时间估算剩余时间。"""
         elapsed = time.perf_counter() - self.started
+        if (self.path / "stop.request.json").exists():
+            control.should_training_stop = True
+            control.should_save = True
+        if self.initial_step is None:
+            self.initial_step = state.global_step - 1
         write_json(
             self.path / "progress.json",
             dict(
@@ -56,7 +62,7 @@ class Progress(TrainerCallback):
                 total=state.max_steps,
                 phase="training",
                 remaining_seconds=elapsed
-                / state.global_step
+                / max(1, state.global_step - self.initial_step)
                 * (state.max_steps - state.global_step),
             ),
         )
@@ -80,6 +86,10 @@ class AdapterTrainer(Trainer):
         """训练结束后恢复验证损失最低的 adapter checkpoint。"""
         if self.state.best_model_checkpoint:
             restore(self.model, self.state.best_model_checkpoint)
+
+    def _load_from_checkpoint(self, resume_from_checkpoint, model=None):
+        """恢复自定义 QKV adapter；优化器、调度器和随机状态由 Trainer 恢复。"""
+        restore(model if model is not None else self.model, resume_from_checkpoint)
 
 
 def validate(config, kind):
@@ -119,6 +129,11 @@ def validate(config, kind):
 
 def train(config, path, kind):
     """运行完整训练链路：数据处理、模型构建、训练验证、最佳模型保存和日志落盘。"""
+    checkpoint = config.get("resume_from_checkpoint")
+    if checkpoint:
+        from utils.checkpoints import validate as validate_checkpoint
+
+        checkpoint = str(validate_checkpoint(path, checkpoint))
     with running(path, kind, config):
         validate(config, kind)
         set_seed(config["seed"])
@@ -223,7 +238,9 @@ def train(config, path, kind):
                 **extras,
             )
             try:
-                result = trainer.train()
+                result = trainer.train(resume_from_checkpoint=checkpoint)
+                if (path / "stop.request.json").exists():
+                    raise KeyboardInterrupt("用户停止训练；已保存 step 边界 checkpoint。")
                 updated = any(
                     not torch.equal(before[name], p.detach().flatten()[:64].cpu())
                     for name, p in model.named_parameters()

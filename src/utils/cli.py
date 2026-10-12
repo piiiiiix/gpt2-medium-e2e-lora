@@ -18,7 +18,7 @@ def arguments(defaults, kind):
         overrides = read_json(inside_project(args.config))
         if not isinstance(overrides, dict):
             raise ValueError("Config must contain a JSON object")
-        unknown = set(overrides) - set(config)
+        unknown = set(overrides) - set(config) - {"resume_from_checkpoint"}
         if unknown:
             raise ValueError(f"Unknown config keys: {unknown}")
         config.update(overrides)

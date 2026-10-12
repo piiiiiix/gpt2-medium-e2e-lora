@@ -278,7 +278,17 @@ def frontend_pipeline():
             break
         time.sleep(0.5)
     assert statuses == ["completed", "completed"], statuses
-    run = read_json(OUTPUT_ROOT / "smoke/lora-run.json")["path"]
+    from utils.runs import history
+
+    # 从现存冒烟运行选择 TensorBoard，避免归档后旧路径索引失效。
+    run = next(
+        record["path"]
+        for record in history()
+        if record["kind"] == "lora"
+        and record["status"] == "completed"
+        and record["config"].get("smoke")
+        and list((Path(record["path"]) / "tensorboard").glob("events.*"))
+    )
     url = tensorboard(run)
     deadline = time.monotonic() + 30
     success = False
@@ -380,6 +390,124 @@ def training_pool_pipeline():
     except ValueError:
         pass
     print("PASS: persistent training pool, snapshots, single/all UI launch, serial LoRA/FFT")
+
+
+def resume_pipeline():
+    """验证 LoRA / FFT 续训与连续训练结果一致，并检查前端续训按钮。"""
+    from copy import deepcopy
+    from unittest.mock import patch
+
+    import torch
+    from streamlit.testing.v1 import AppTest
+
+    from config import OUTPUT_ROOT
+    from utils.checkpoints import available
+    from utils.models import load_model
+    from utils.runs import history
+    from utils.training import Progress, train
+
+    def interrupt_saved(self, args, state, control, **kwargs):
+        """完整保存首轮断点后模拟中断，保留原计划总步数。"""
+        if state.global_step == 2:
+            raise KeyboardInterrupt("smoke: interrupt after complete checkpoint")
+
+    for kind in ("lora", "fft"):
+        config = deepcopy(TRAIN_DEFAULTS)
+        config.update(
+            model=str(OUTPUT_ROOT / "smoke/tiny-base"),
+            local_data=str(OUTPUT_ROOT / "smoke/data.json"),
+            epochs=2,
+            max_steps=-1,
+            batch_size=2,
+            eval_batch_size=2,
+            warmup_steps=0,
+            logging_steps=1,
+            max_length=128,
+            local_files_only=True,
+            smoke=True,
+            dropout=0,
+            ranks=dict(q=2, k=0, v=1),
+        )
+        continuous = new_run(kind, config)
+        train(config, continuous, kind)
+        interrupted = new_run(kind, config)
+        with patch.object(Progress, "on_save", interrupt_saved):
+            try:
+                train(config, interrupted, kind)
+                raise AssertionError("未触发中断")
+            except KeyboardInterrupt:
+                pass
+        assert read_json(interrupted / "status.json")["status"] == "interrupted"
+        assert available(interrupted)[-1].name == "checkpoint-2"
+        app = AppTest.from_file(str(Path(__file__).with_name("app.py")), default_timeout=30).run()
+        app.radio(key="page").set_value("任务进度").run()
+        index = next(i for i, item in enumerate(history()) if item["path"] == str(interrupted))
+        app.selectbox(key="progress_run").set_value(index).run()
+        app.button(key="resume_training_" + interrupted.name).click().run()
+        assert not app.exception and not app.error
+        deadline = time.monotonic() + 120
+        while time.monotonic() < deadline:
+            status = read_json(interrupted / "status.json")
+            assert status["status"] != "failed", status
+            if status["status"] == "completed" and not (OUTPUT_ROOT / "jobs/active.lock").exists():
+                break
+            time.sleep(0.5)
+        assert status["status"] == "completed", status
+        rows = [
+            json.loads(line) for line in (interrupted / "training.jsonl").read_text().splitlines()
+        ]
+        assert [row["step"] for row in rows if "loss" in row] == [1, 2, 3, 4]
+        assert read_json(interrupted / "attempts.json")[0]["status"]["status"] == "interrupted"
+        expected, _ = load_model(dict(type=kind, path=str(continuous / "final")), True, "cpu")
+        actual, _ = load_model(dict(type=kind, path=str(interrupted / "final")), True, "cpu")
+        for name, value in expected.state_dict().items():
+            torch.testing.assert_close(value, actual.state_dict()[name], rtol=1e-5, atol=1e-6)
+    print("PASS: LoRA/FFT complete state resume matches continuous training; UI resume")
+
+
+def stop_pipeline():
+    """验证停止按钮保存 step 断点，并取消批次后续任务。"""
+    from copy import deepcopy
+
+    from streamlit.testing.v1 import AppTest
+
+    from config import OUTPUT_ROOT
+    from utils.checkpoints import available
+    from utils.jobs import launch
+
+    config = deepcopy(TRAIN_DEFAULTS)
+    config.update(
+        model=str(OUTPUT_ROOT / "smoke/tiny-base"),
+        local_data=str(OUTPUT_ROOT / "smoke/data.json"),
+        epochs=100,
+        max_steps=2000,
+        batch_size=2,
+        eval_batch_size=2,
+        warmup_steps=0,
+        logging_steps=1,
+        max_length=128,
+        local_files_only=True,
+        smoke=True,
+    )
+    runs = launch([("lora", config), ("fft", config)])
+    first = Path(runs[0]["path"])
+    deadline = time.monotonic() + 120
+    while not (first / "progress.json").exists() and time.monotonic() < deadline:
+        time.sleep(0.1)
+    assert (first / "progress.json").exists()
+    app = AppTest.from_file(str(Path(__file__).with_name("app.py")), default_timeout=30).run()
+    app.radio(key="page").set_value("任务进度").run()
+    app.button(key="stop_batch").click().run()
+    assert not app.exception and not app.error
+    deadline = time.monotonic() + 120
+    while (OUTPUT_ROOT / "jobs/active.lock").exists() and time.monotonic() < deadline:
+        time.sleep(0.5)
+    assert not (OUTPUT_ROOT / "jobs/active.lock").exists()
+    assert available(first)
+    for run in runs:
+        assert read_json(Path(run["path"]) / "status.json")["status"] == "interrupted"
+    assert not (Path(runs[1]["path"]) / "training.jsonl").exists()
+    print("PASS: UI stop, step checkpoint, child exit, later seed cancelled, lock released")
 
 
 def medium_pipeline(kind):
@@ -501,6 +629,8 @@ if __name__ == "__main__":
             "evaluation",
             "frontend",
             "training-pool",
+            "resume",
+            "stop",
             "medium-base",
             "medium-lora",
             "medium-fft",
@@ -516,6 +646,8 @@ if __name__ == "__main__":
         "evaluation": evaluation_pipeline,
         "frontend": frontend_pipeline,
         "training-pool": training_pool_pipeline,
+        "resume": resume_pipeline,
+        "stop": stop_pipeline,
         "medium-base": lambda: medium_pipeline("base"),
         "medium-lora": lambda: medium_pipeline("lora"),
         "medium-fft": lambda: medium_pipeline("fft"),
