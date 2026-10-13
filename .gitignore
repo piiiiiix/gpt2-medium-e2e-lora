@@ -1,5 +1,7 @@
-/notebooks/
-/outputs/
+/notebooks/**
+!/notebooks/.gitkeep
+/outputs/**
+!/outputs/.gitkeep
 __pycache__/
 *.py[cod]
 .env
