@@ -3,6 +3,7 @@
 import json
 import subprocess
 import threading
+import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 
 
@@ -23,7 +24,7 @@ class GPUMonitor:
             result = subprocess.run(
                 [
                     "nvidia-smi",
-                    "--query-gpu=index,uuid,name,utilization.gpu,temperature.gpu,memory.used,memory.total",
+                    "--query-gpu=index,uuid,name,utilization.gpu,temperature.gpu,memory.used,memory.total,power.draw,power.limit,clocks.current.graphics,clocks.current.sm,clocks.current.memory,pstate,clocks_event_reasons.active",
                     "--format=csv,noheader,nounits",
                 ],
                 capture_output=True,
@@ -46,8 +47,50 @@ class GPUMonitor:
                         memory_used_mib=fields[5],
                         memory_total_mib=fields[6],
                         scope="whole_device",
+                        **dict(
+                            zip(
+                                (
+                                    "power_draw_watts",
+                                    "power_limit_watts",
+                                    "core_clock_mhz",
+                                    "sm_clock_mhz",
+                                    "memory_clock_mhz",
+                                    "performance_state",
+                                    "clock_event_reasons_active",
+                                ),
+                                (
+                                    None if value in ("N/A", "[N/A]", "[Not Supported]") else value
+                                    for value in fields[7:]
+                                ),
+                            )
+                        ),
                     )
                 )
+            # 电压没有通用 CSV 查询字段；单独查询，失败不丢弃其他采样。
+            try:
+                voltage = subprocess.run(
+                    ["nvidia-smi", "-q", "-x", "-d", "VOLTAGE"],
+                    capture_output=True,
+                    text=True,
+                    timeout=8,
+                    check=True,
+                    creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+                )
+                devices = ET.fromstring(voltage.stdout).findall("gpu")
+                for record, device in zip(records, devices):
+                    value = device.findtext("voltage/graphics_volt")
+                    record["core_voltage_mv"] = (
+                        float(value.split()[0]) if value and "N/A" not in value else None
+                    )
+            except Exception as exc:
+                for record in records:
+                    record["voltage_unavailable_reason"] = str(exc)
+            for record in records:
+                if record.get("core_voltage_mv") is None:
+                    record["core_voltage_mv"] = None
+                    record.setdefault(
+                        "voltage_unavailable_reason", "Driver did not report graphics voltage"
+                    )
             return records
         except Exception as exc:
             return [dict(time=stamp, unavailable=True, reason=str(exc))]

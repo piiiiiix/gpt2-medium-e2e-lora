@@ -27,10 +27,10 @@ def elapsed_between(started, ended):
     try:
         values = []
         for value in (started, ended):
-            # Python 3.10 的 ISO 解析器最多支持六位微秒；只截断秒的小数部分。
+            # Python 3.10 只接受三位或六位小数，统一补齐或截断到六位。
             normalized = re.sub(
-                r"(?<=\d{2}:\d{2}:\d{2})\.(\d{6})\d+",
-                r".\1",
+                r"(?<=\d{2}:\d{2}:\d{2})\.(\d+)",
+                lambda match: "." + match.group(1)[:6].ljust(6, "0"),
                 value.strip(),
             )
             if normalized.endswith("Z"):

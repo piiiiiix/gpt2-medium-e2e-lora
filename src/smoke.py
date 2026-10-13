@@ -576,6 +576,13 @@ def timestamps_pipeline():
     from utils.runs import elapsed_between, write_json
 
     assert (
+        elapsed_between(
+            "2026-10-11T17:31:21.91346+08:00",
+            "2026-10-12T15:25:54.4977937+08:00",
+        )
+        == 78872.584333
+    )
+    assert (
         elapsed_between("2026-10-12T14:25:54.4977937+08:00", "2026-10-12T15:25:54.4977937+08:00")
         == 3600
     )
