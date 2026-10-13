@@ -24,7 +24,7 @@ from utils import training_pool
 from utils.checkpoints import available
 from utils.jobs import alive, launch, resume_training, stop_batch, tensorboard
 from utils.models import discover
-from utils.runs import HK, estimate, history, read_json
+from utils.runs import HK, elapsed_between, estimate, history, read_json
 
 require_lora()
 st.set_page_config(page_title="GPT-2 Medium · E2E", layout="wide")
@@ -389,7 +389,7 @@ else:
             average, count = estimate(record["config"], record["kind"])
             if average is not None:
                 elapsed = (
-                    (datetime.now(HK) - datetime.fromisoformat(record["started"])).total_seconds()
+                    (elapsed_between(record["started"], datetime.now(HK).isoformat()) or 0)
                     if record.get("started")
                     else 0
                 )

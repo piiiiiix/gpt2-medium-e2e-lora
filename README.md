@@ -160,6 +160,7 @@ python -s src/smoke.py training-pool
 python -s src/smoke.py resume
 python -s src/smoke.py stop
 python -s src/smoke.py formal-records
+python -s src/smoke.py timestamps
 python -s src/smoke.py medium-base
 python -s src/smoke.py medium-lora
 python -s src/smoke.py medium-fft
@@ -193,3 +194,5 @@ VSCode 可安装 Ruff 扩展并选择其作为 Python 格式化器；检查规�
 ## 正式记录与需求维护
 
 模型列表、历史测试记录及任务进度默认排除 outputs/smoke 与配置标记 smoke=true 的内容。冒烟文件仍完整保留，内部冒烟测试可显式访问。每次用户提出的修改须先整理并补入需求文档.md，同时更新使用说明与实施记录，再提交推送。
+
+续训耗时记录兼容 Python 3.10 与 PowerShell 的七位小数 ISO 时间戳。无法解析或倒序的历史时间会跳过耗时统计并保留警告，不影响断点恢复。修复升级后，刷新前端并重新点击“断点续训”即可；此前失败的启动没有删除 checkpoint。

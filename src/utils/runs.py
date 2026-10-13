@@ -3,6 +3,7 @@
 import hashlib
 import json
 import os
+import re
 import sys
 import time
 import traceback
@@ -19,6 +20,27 @@ HK = timezone(timedelta(hours=8))
 def now():
     """返回香港时区的 ISO 时间字符串，用于记录任务时间。"""
     return datetime.now(HK).isoformat()
+
+
+def elapsed_between(started, ended):
+    """兼容 PowerShell 七位小数与 UTC Z 时间；损坏或倒序时间返回不可估算。"""
+    try:
+        values = []
+        for value in (started, ended):
+            # Python 3.10 的 ISO 解析器最多支持六位微秒；只截断秒的小数部分。
+            normalized = re.sub(
+                r"(?<=\d{2}:\d{2}:\d{2})\.(\d{6})\d+",
+                r".\1",
+                value.strip(),
+            )
+            if normalized.endswith("Z"):
+                normalized = normalized[:-1] + "+00:00"
+            stamp = datetime.fromisoformat(normalized)
+            values.append(stamp if stamp.tzinfo else stamp.replace(tzinfo=HK))
+        seconds = (values[1] - values[0]).total_seconds()
+        return seconds if seconds >= 0 else None
+    except (ValueError, TypeError, AttributeError):
+        return None
 
 
 def write_json(path, value):
@@ -128,9 +150,11 @@ def running(path, kind, config):
         state = attempt["status"]
         seconds = state.get("elapsed_seconds")
         if seconds is None and state.get("started") and state.get("ended"):
-            seconds = (
-                datetime.fromisoformat(state["ended"]) - datetime.fromisoformat(state["started"])
-            ).total_seconds()
+            seconds = elapsed_between(state["started"], state["ended"])
+            if seconds is None:
+                metadata.setdefault("timing_warnings", []).append(
+                    "历史时间记录无法计算耗时，已保留原记录并跳过该次耗时统计。"
+                )
         previous_seconds += seconds or 0
     write_json(path / "status.json", metadata)
     import importlib.metadata

@@ -439,6 +439,14 @@ def resume_pipeline():
                 pass
         assert read_json(interrupted / "status.json")["status"] == "interrupted"
         assert available(interrupted)[-1].name == "checkpoint-2"
+        # 重现 PowerShell 七位小数历史状态，确保续训启动和累计耗时兼容 Python 3.10。
+        status = read_json(interrupted / "status.json")
+        status.pop("elapsed_seconds", None)
+        status["started"] = "2026-10-12T14:25:54.4977937+08:00"
+        status["ended"] = "2026-10-12T15:25:54.4977937+08:00"
+        from utils.runs import write_json
+
+        write_json(interrupted / "status.json", status)
         # 测试专用：显式允许冒烟记录，实际前端始终只显示正式运行。
         with patch("utils.runs.history", return_value=history(include_smoke=True)):
             app = AppTest.from_file(
@@ -461,6 +469,7 @@ def resume_pipeline():
                 break
             time.sleep(0.5)
         assert status["status"] == "completed", status
+        assert status["total_elapsed_seconds"] >= 3600
         rows = [
             json.loads(line) for line in (interrupted / "training.jsonl").read_text().splitlines()
         ]
@@ -559,6 +568,28 @@ def formal_records_pipeline():
         for name in ("config.json", "status.json", "model.safetensors"):
             (fixture / name).unlink(missing_ok=True)
         fixture.rmdir()
+
+
+def timestamps_pipeline():
+    """验证七位小数、UTC 时区与坏时间记录不会阻断任务生命周期。"""
+    from config import TRAIN_DEFAULTS
+    from utils.runs import elapsed_between, write_json
+
+    assert (
+        elapsed_between("2026-10-12T14:25:54.4977937+08:00", "2026-10-12T15:25:54.4977937+08:00")
+        == 3600
+    )
+    assert elapsed_between("2026-10-12T07:25:54.497793Z", "2026-10-12T15:25:55.497793+08:00") == 1
+    assert elapsed_between("bad", "2026-10-12T15:25:54+08:00") is None
+    assert elapsed_between("2026-10-12T16:00:00+08:00", "2026-10-12T15:00:00+08:00") is None
+    config = {**TRAIN_DEFAULTS, "smoke": True}
+    path = new_run("fft", config)
+    write_json(path / "attempts.json", [dict(status=dict(started="bad", ended="bad"))])
+    with running(path, "fft", config):
+        print("Invalid historical time skipped without blocking task startup")
+    state = read_json(path / "status.json")
+    assert state["status"] == "completed" and state["timing_warnings"]
+    print("PASS: timestamp precision/timezones, invalid history warning and task startup")
 
 
 def medium_pipeline(kind):
@@ -683,6 +714,7 @@ if __name__ == "__main__":
             "resume",
             "stop",
             "formal-records",
+            "timestamps",
             "medium-base",
             "medium-lora",
             "medium-fft",
@@ -701,6 +733,7 @@ if __name__ == "__main__":
         "resume": resume_pipeline,
         "stop": stop_pipeline,
         "formal-records": formal_records_pipeline,
+        "timestamps": timestamps_pipeline,
         "medium-base": lambda: medium_pipeline("base"),
         "medium-lora": lambda: medium_pipeline("lora"),
         "medium-fft": lambda: medium_pipeline("fft"),
