@@ -240,9 +240,21 @@ def frontend_pipeline():
     }
     app = AppTest.from_file(str(Path(__file__).with_name("app.py")), default_timeout=30).run()
     assert not app.exception
-    learning_rate = app.number_input(key="learning_rate")
+    learning_rate = app.number_input(key="learning_rate_lora_论文默认 / Prefix-Tuning FT 默认")
     assert learning_rate.proto.step == 1e-6
+    lora_values = {item.label: item.value for item in app.number_input}
+    assert lora_values["Seed"] == 110 and lora_values["验证 batch size"] == 4
+    assert lora_values["LoRA dropout"] == 0.1
+    assert not next(item for item in app.checkbox if item.label == "梯度检查点").value
     previous = learning_rate.value
+    # 切换训练方式必须加载各自默认值，不能沿用 LoRA 的学习率。
+    app.segmented_control(key="train_kind").set_value("fft").run()
+    fft_values = {item.label: item.value for item in app.number_input}
+    assert fft_values["学习率"] == 5e-5 and fft_values["每设备 batch size"] == 10
+    assert fft_values["Seed"] == 101 and fft_values["最大训练长度"] == 1024
+    assert not next(item for item in app.checkbox if item.label == "梯度检查点").value
+    app.segmented_control(key="train_kind").set_value("lora").run()
+    learning_rate = app.number_input(key="learning_rate_lora_论文默认 / Prefix-Tuning FT 默认")
     # 表单内先验证按钮产生的值；未提交表单时，后端仍保留旧值。
     learning_rate.increment()
     assert abs(learning_rate.value - previous - 1e-6) < 1e-12

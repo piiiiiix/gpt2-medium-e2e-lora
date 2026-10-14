@@ -15,17 +15,17 @@ TRAIN_DEFAULTS = dict(
     learning_rate=2e-4,  # noqa: C408
     epochs=5,
     batch_size=8,
-    eval_batch_size=8,
+    eval_batch_size=4,
     gradient_accumulation=1,
     weight_decay=0.01,
     warmup_steps=500,
     label_smoothing=0.1,
     dropout=0.1,
     alpha=32,
-    seed=42,
+    seed=110,
     precision="fp32",
     max_length=512,
-    gradient_checkpointing=True,
+    gradient_checkpointing=False,
     logging_steps=100,
     max_steps=-1,
     smoke=False,
@@ -35,8 +35,20 @@ TRAIN_DEFAULTS = dict(
     local_files_only=False,
     ranks=dict(q=4, k=0, v=4),
 )  # noqa: C408
-# FFT 使用独立的对照实验默认配置；论文表 11 的默认值针对 LoRA。
-FFT_DEFAULTS = {**TRAIN_DEFAULTS, "learning_rate": 2e-5}
+# FFT 对齐 Li & Liang (2021) E2E FT；未在论文报告的值按作者代码补充。
+# warmup=0 依据普通 E2E 启动路径与当时框架默认值推断，见参数来源.md。
+FFT_DEFAULTS = {
+    **TRAIN_DEFAULTS,
+    "learning_rate": 5e-5,
+    "batch_size": 10,
+    "eval_batch_size": 10,
+    "weight_decay": 0.0,
+    "warmup_steps": 0,
+    "label_smoothing": 0.0,
+    "seed": 101,
+    "max_length": 1024,
+    "gradient_checkpointing": False,
+}
 EVAL_DEFAULTS = dict(
     dataset=DATASET_NAME,
     split="validation",

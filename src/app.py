@@ -100,10 +100,16 @@ if page == "训练":
         or "lora"
     )
     config = deepcopy(TRAIN_DEFAULTS if kind == "lora" else FFT_DEFAULTS)
-    profile = st.selectbox("训练配置", ["论文默认 / 独立 FFT 默认", "8GB 显存适配"])
+    profile = st.selectbox("训练配置", ["论文默认 / Prefix-Tuning FT 默认", "8GB 显存适配"])
     if profile == "8GB 显存适配":
-        config.update(batch_size=1, gradient_accumulation=8, eval_batch_size=1, precision="bf16")
-    st.caption("LoRA 默认值来自 V2 附录 D.3 / 表 11；FFT 为独立比较配置。")
+        config.update(
+            batch_size=1,
+            gradient_accumulation=8 if kind == "lora" else 10,
+            eval_batch_size=1,
+            precision="bf16",
+            gradient_checkpointing=True,
+        )
+    st.caption("LoRA 默认值来自 V2 表 11；FFT 默认值参考 Prefix-Tuning 的 E2E FT 及作者代码。")
     if kind == "lora":
         st.subheader("Q、K、V 的 LoRA rank")
         st.caption("三个设置统一应用到所有 Transformer 层。rank=0：冻结该投影，不挂 LoRA。")
@@ -121,7 +127,7 @@ if page == "训练":
             v = st.number_input("V rank", 0, 1024, value=None, step=1, key="v_rank")
             st.button("全部冻结", key="freeze_qkv", on_click=freeze_qkv)
         config["ranks"] = dict(q=int(q or 0), k=int(k or 0), v=int(v or 0))
-    with st.form("training_config"):
+    with st.form(f"training_config_{kind}_{profile}"):
         a, b, c = st.columns(3)
         # 加减按钮每次调整 1e-6；更小的学习率仍可直接输入。
         config["learning_rate"] = a.number_input(
@@ -130,7 +136,7 @@ if page == "训练":
             value=config["learning_rate"],
             step=1e-6,
             format="%.9f",
-            key="learning_rate",
+            key=f"learning_rate_{kind}_{profile}",
             help="加减步长为 0.000001，可直接输入更小的值。",
         )
         config["epochs"] = b.number_input("Epochs", min_value=0.1, value=float(config["epochs"]))
@@ -154,7 +160,10 @@ if page == "训练":
             "Label smoothing", min_value=0.0, max_value=0.99, value=config["label_smoothing"]
         )
         config["dropout"] = a.number_input(
-            "Dropout", min_value=0.0, max_value=0.99, value=config["dropout"]
+            "LoRA dropout" if kind == "lora" else "GPT-2 dropout",
+            min_value=0.0,
+            max_value=0.99,
+            value=config["dropout"],
         )
         if kind == "lora":
             config["alpha"] = b.number_input("LoRA alpha", min_value=1, value=config["alpha"])

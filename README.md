@@ -72,11 +72,13 @@ python -s -m streamlit run src/app.py
 
 LoRA 论文参数见 [参数来源.md](参数来源.md)。默认 Q=4、K=0、V=4，alpha=32；适配器分支按 alpha/r 缩放。Q、K、V 可以分别使用不同 rank 或关闭，例如 Q=8、K=0、V=4；同一投影在所有层使用同一个 rank，各层分别学习自己的 adapter 权重。当前 Hugging Face GPT-2 Small 和 Medium 都将 QKV 存在合并的 c_attn 中；项目在该合并层上分别添加 Q/K/V 分支，基础模型权重被冻结。
 
-论文有效 batch=8，默认 micro batch=8 / accumulation=1。显存不足时可显式改 micro batch=1、accumulation=8、eval batch=1；精度和最大长度为单独可调的硬件设置，实际配置会保存。不要把冒烟的 warmup=0、max_steps=1 当作完整训练设置。
+论文有效 batch=8，默认 micro batch=8 / accumulation=1；验证 batch=4、seed=110、fp32、最大长度 512、关闭梯度检查点、日志间隔 100。LoRA dropout=0.1 仅用于 adapter 分支，原生 GPT-2 dropout 关闭。默认值来自论文表 11 和官方 E2E 示例命令。显存不足时可显式改 micro batch=1、accumulation=8、eval batch=1；精度和最大长度为单独可调的硬件设置，实际配置会保存。不要把冒烟的 warmup=0、max_steps=1 当作完整训练设置。
 
 本机 RTX 4070 Laptop 8GB 的真实模型验证使用 BF16；首次 FP16 的非有限梯度记录已保留。训练中若 loss 或 grad_norm 非有限则标记失败；保存最终模型前还会检查是否发生权重更新。
 
-FFT 默认学习率为 2e-5，属于本项目比较配置，未声称是论文 FFT 的完整复现配置。
+FFT 默认参考 Prefix-Tuning 的 E2E FT：学习率 5e-5、5 epochs、单卡 batch=10、梯度累积=1、验证 batch=10、seed=101、warmup=0、weight decay=0、label smoothing=0、原生 dropout=0.1、fp32、最大长度 1024、关闭梯度检查点。论文报告值与作者代码补充值的区别见参数来源.md；warmup=0 为启动路径与框架默认值推断。8GB 适配保留有效 batch=10，使用 bf16 和梯度检查点。
+
+2026-10-14 已用真实 GPT-2 Medium 验证新 FFT 默认：仅覆盖训练样本 10、验证样本 2、max_steps=1、logging_steps=1、离线缓存与 smoke 标记；训练 loss=3.291145、验证 loss=3.710723，所有参数可训练且权重确实更新，checkpoint / 最终模型保存成功。运行位于 `outputs/smoke/gpt2-e2e-full-ft/20261014_130742_374057_lr5e-05_e5_b10_ga1_s101_d881fd5f`。这是流程验证，不是完整 E2E 指标复现。前端新 FFT 默认值及 8GB 有效 batch=10 的 AppTest 检查通过。
 
 ## 后端命令
 
