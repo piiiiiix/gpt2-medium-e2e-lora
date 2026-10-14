@@ -169,12 +169,14 @@ def train(config, path, kind):
 
             train_data = train_data.map(encode, remove_columns=train_data.column_names)
             eval_data = eval_data.map(encode, remove_columns=eval_data.column_names)
+            # 官方 LoRA GPT-2 仅在 LoRA 输入使用 dropout；FFT 使用原生 dropout。
+            model_dropout = 0.0 if kind == "lora" else config["dropout"]
             model = AutoModelForCausalLM.from_pretrained(
                 config["model"],
                 local_files_only=config["local_files_only"],
-                resid_pdrop=config["dropout"],
-                embd_pdrop=config["dropout"],
-                attn_pdrop=config["dropout"],
+                resid_pdrop=model_dropout,
+                embd_pdrop=model_dropout,
+                attn_pdrop=model_dropout,
             )
             if config["max_length"] > model.config.n_positions:
                 raise ValueError("max_length exceeds model context window")
