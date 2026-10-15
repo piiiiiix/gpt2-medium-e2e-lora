@@ -141,6 +141,8 @@ GPU 数据为 **整张设备** 的占用率（%）、核心温度（°C）、显
 
 ## 评分口径
 
+E2E 测试与 benchmark 默认最多生成 64 个新 token，对齐官方 LoRA E2E 示例的 `--eval_len 64`。前端与 CLI 共用此默认值，可通过“最大新 token 数”或配置字段 `max_new_tokens` 调整；已有配置和历史结果保留原值。
+
 延续 small：pycocoevalcap BLEU-1…4、ROUGE-L、CIDEr，NLTK NIST-5、METEOR。选择 BLEU 会保留四种 n-gram 分数。NIST 是语料级指标；逐样本栏明确为 null。CIDEr 的逐样本分数依赖本次语料文档频率，不能拿一个样本单独评分后拼接替代整体评分。
 
 当前采用 small 的按数据行、单 target 评分口径，并另存原始完整 references；它不是论文官方多参考评测脚本。分数不能直接当作论文表 3 的同口径成绩。

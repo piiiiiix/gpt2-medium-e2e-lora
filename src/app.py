@@ -255,7 +255,9 @@ elif page == "测试 / benchmark":
         config["split"] = st.selectbox("数据 split", ["validation", "test"])
         config["metrics"] = st.multiselect("评测指标", METRICS, default=METRICS)
         config["samples"] = st.number_input("样本数，0=全部", min_value=0, value=0) or None
-        config["max_new_tokens"] = st.number_input("最大新 token 数", min_value=1, value=60)
+        config["max_new_tokens"] = st.number_input(
+            "最大新 token 数", min_value=1, value=config["max_new_tokens"]
+        )
         config["num_beams"] = st.number_input("Beam size", min_value=1, value=10)
         config["length_penalty"] = st.number_input("Length penalty", value=0.9)
         config["no_repeat_ngram_size"] = st.number_input(
