@@ -147,7 +147,9 @@ E2E 测试与 benchmark 默认最多生成 64 个新 token，对齐官方 LoRA E
 
 当前采用 small 的按数据行、单 target 评分口径，并另存原始完整 references；它不是论文官方多参考评测脚本。分数不能直接当作论文表 3 的同口径成绩。
 
-METEOR 需要 WordNet，可将已有 wordnet.zip 放到 `outputs/resources/nltk_data/corpora/wordnet.zip`。正常网络下也会尝试 NLTK 官方下载；代理安全检查失败时保留错误，不关闭安全检查。当前本机已将 small 的资源复制到 medium 内，运行时不读取 small。
+METEOR 会自动准备 WordNet，无需单独运行下载脚本。评分模块优先复用项目内资源；缺失时通过系统代理从 NLTK 官方固定 HTTPS 地址直接下载到 `outputs/resources/nltk_data/corpora/wordnet.zip`，保留默认 TLS 校验，不调用 `nltk.download()`，不修改 NLTK 安全开关。
+
+下载先写临时文件，通过 ZIP CRC 与必需文件检查后原子替换目标文件，并实际加载语料、查询验证；失败会清理临时文件并保存评分错误。已有 ZIP 也会检查，损坏时需移走后重试。也支持手动放入官方 ZIP 或解压后的 `corpora/wordnet` 目录。资源位于被 Git 忽略的 outputs 中，迁移代码不会自动带上，运行时不读取 small 项目。WordNet 准备仍在 METEOR 评分阶段执行。
 
 ## 逐步冒烟
 

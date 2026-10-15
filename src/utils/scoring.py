@@ -2,7 +2,10 @@
 
 import csv
 import json
+import tempfile
 import traceback
+import urllib.request
+import zipfile
 from pathlib import Path
 
 from config import METRICS, OUTPUT_ROOT
@@ -22,18 +25,55 @@ def read_predictions(path):
 
 
 def wordnet():
-    """准备 METEOR 所需 WordNet，优先读取本项目资源，缺失时尝试官方下载。"""
+    """准备并验证项目 WordNet，直接下载官方 ZIP，兼容系统代理。"""
     import nltk
     from nltk.corpus import wordnet
 
     folder = OUTPUT_ROOT / "resources/nltk_data"
-    folder.mkdir(parents=True, exist_ok=True)
-    nltk.data.path.insert(0, str(folder))
+    corpora = folder / "corpora"
+    corpora.mkdir(parents=True, exist_ok=True)
+    target = corpora / "wordnet.zip"
+    if not target.exists() and not (corpora / "wordnet").is_dir():
+        url = (
+            "https://raw.githubusercontent.com/nltk/nltk_data/gh-pages/packages/corpora/wordnet.zip"
+        )
+        print(f"Downloading WordNet: {url}\nDestination: {target}", flush=True)
+        temporary = None
+        try:
+            with tempfile.NamedTemporaryFile(dir=corpora, suffix=".part", delete=False) as stream:
+                temporary = Path(stream.name)
+                with urllib.request.urlopen(url, timeout=60) as response:
+                    while chunk := response.read(1024 * 1024):
+                        stream.write(chunk)
+            check_wordnet_archive(temporary)
+            temporary.replace(target)
+        finally:
+            if temporary is not None:
+                temporary.unlink(missing_ok=True)
+    elif target.exists():
+        check_wordnet_archive(target)
+    # 加载时仅查项目资源；随后仍保留项目路径供延迟读取与安全校验使用。
+    previous_paths = nltk.data.path[:]
+    nltk.data.path[:] = [str(folder)]
     try:
         wordnet.ensure_loaded()
-    except LookupError:
-        nltk.download("wordnet", download_dir=str(folder), raise_on_error=True)
-        wordnet.ensure_loaded()
+        if not wordnet.synsets("restaurant"):
+            raise RuntimeError("Project WordNet query returned no synsets")
+    finally:
+        nltk.data.path[:] = [str(folder)] + [p for p in previous_paths if p != str(folder)]
+
+
+def check_wordnet_archive(path):
+    """检查 ZIP CRC 和必需文件，避免将不完整下载作为可用语料。"""
+    with zipfile.ZipFile(path) as archive:
+        required = {f"wordnet/{name}" for name in ("lexnames", "index.noun", "data.noun")}
+        if not required.issubset(archive.namelist()):
+            raise ValueError(
+                f"Missing WordNet files in {path}; remove the invalid archive and retry"
+            )
+        bad = archive.testzip()
+        if bad:
+            raise ValueError(f"Corrupt WordNet ZIP member: {bad}; remove the archive and retry")
 
 
 def score(path, selected, output):
