@@ -1,0 +1,982 @@
+[
+  {
+    "run": "outputs\\benchmarks\\20261015_121717_677367_base_491e5ef1_test_nall_t64_beam10_BLEU-NIST-METEOR-ROUGE-L-CIDEr_78d23abe",
+    "config": {
+      "dataset": "GEM/e2e_nlg",
+      "split": "test",
+      "samples": null,
+      "metrics": [
+        "BLEU",
+        "NIST",
+        "METEOR",
+        "ROUGE-L",
+        "CIDEr"
+      ],
+      "max_new_tokens": 64,
+      "num_beams": 10,
+      "length_penalty": 0.9,
+      "no_repeat_ngram_size": 4,
+      "seed": 42,
+      "local_data": null,
+      "local_files_only": false,
+      "model": {
+        "type": "base",
+        "path": "openai-community/gpt2-medium",
+        "name": "GPT-2 Medium (Base)"
+      },
+      "predictions": null,
+      "smoke": false
+    },
+    "result": {
+      "metrics": {
+        "BLEU-1": 0.15803676842637548,
+        "BLEU-2": 0.08629491975165482,
+        "BLEU-3": 0.046035060691574245,
+        "BLEU-4": 0.023635378290679188,
+        "NIST": 1.0916008299034623,
+        "METEOR": 0.1285355637511133,
+        "ROUGE-L": 0.1158768704921423,
+        "CIDEr": 0.043690065835454615
+      },
+      "errors": {},
+      "scope": {
+        "BLEU": "corpus BLEU; sentence BLEU separately retained, not averaged into corpus score",
+        "NIST": "corpus NIST-5 only; per-sample score unavailable in this scoring profile",
+        "METEOR": "mean sample METEOR, NLTK tokenized whitespace with WordNet",
+        "ROUGE-L": "sample average; CIDEr uses this whole corpus document frequencies",
+        "CIDEr": "sample average; CIDEr uses this whole corpus document frequencies"
+      },
+      "samples": 1847,
+      "selected": [
+        "BLEU",
+        "NIST",
+        "METEOR",
+        "ROUGE-L",
+        "CIDEr"
+      ],
+      "profile": "small-compatible single-target"
+    },
+    "kind": "base",
+    "seed": null
+  },
+  {
+    "run": "outputs\\benchmarks\\20261015_121717_698387_fft_50f74ec6_test_nall_t64_beam10_BLEU-NIST-METEOR-ROUGE-L-CIDEr_6237f470",
+    "config": {
+      "dataset": "GEM/e2e_nlg",
+      "split": "test",
+      "samples": null,
+      "metrics": [
+        "BLEU",
+        "NIST",
+        "METEOR",
+        "ROUGE-L",
+        "CIDEr"
+      ],
+      "max_new_tokens": 64,
+      "num_beams": 10,
+      "length_penalty": 0.9,
+      "no_repeat_ngram_size": 4,
+      "seed": 42,
+      "local_data": null,
+      "local_files_only": false,
+      "model": {
+        "type": "fft",
+        "path": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\gpt2-e2e-full-ft\\20261014_132455_262014_lr5e-05_e5.0_b10_ga1_s101_0ee7393a\\final",
+        "name": "outputs\\gpt2-e2e-full-ft\\20261014_132455_262014_lr5e-05_e5.0_b10_ga1_s101_0ee7393a\\final",
+        "training_run": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\gpt2-e2e-full-ft\\20261014_132455_262014_lr5e-05_e5.0_b10_ga1_s101_0ee7393a",
+        "trained": "2026-10-14T16:19:50.589724+08:00",
+        "training_config": {
+          "model": "openai-community/gpt2-medium",
+          "dataset": "GEM/e2e_nlg",
+          "learning_rate": 5e-05,
+          "epochs": 5.0,
+          "batch_size": 10,
+          "eval_batch_size": 10,
+          "gradient_accumulation": 1,
+          "weight_decay": 0.0,
+          "warmup_steps": 0,
+          "label_smoothing": 0.0,
+          "dropout": 0.1,
+          "alpha": 32,
+          "seed": 101,
+          "precision": "fp32",
+          "max_length": 1024,
+          "gradient_checkpointing": false,
+          "logging_steps": 100,
+          "max_steps": -1,
+          "smoke": false,
+          "train_samples": null,
+          "eval_samples": null,
+          "local_data": null,
+          "local_files_only": false,
+          "ranks": {
+            "q": 4,
+            "k": 0,
+            "v": 4
+          }
+        }
+      },
+      "predictions": null,
+      "smoke": false
+    },
+    "result": {
+      "metrics": {
+        "BLEU-1": 0.5615259041957502,
+        "BLEU-2": 0.43006140624506195,
+        "BLEU-3": 0.33168843038127827,
+        "BLEU-4": 0.2560325704158081,
+        "NIST": 4.794498885154993,
+        "METEOR": 0.5409129090633247,
+        "ROUGE-L": 0.44521749289348217,
+        "CIDEr": 1.4441981516845601
+      },
+      "errors": {},
+      "scope": {
+        "BLEU": "corpus BLEU; sentence BLEU separately retained, not averaged into corpus score",
+        "NIST": "corpus NIST-5 only; per-sample score unavailable in this scoring profile",
+        "METEOR": "mean sample METEOR, NLTK tokenized whitespace with WordNet",
+        "ROUGE-L": "sample average; CIDEr uses this whole corpus document frequencies",
+        "CIDEr": "sample average; CIDEr uses this whole corpus document frequencies"
+      },
+      "samples": 1847,
+      "selected": [
+        "BLEU",
+        "NIST",
+        "METEOR",
+        "ROUGE-L",
+        "CIDEr"
+      ],
+      "profile": "small-compatible single-target"
+    },
+    "kind": "fft",
+    "seed": 101
+  },
+  {
+    "run": "outputs\\benchmarks\\20261015_121717_716404_fft_398cb7f5_test_nall_t64_beam10_BLEU-NIST-METEOR-ROUGE-L-CIDEr_d10b7de2",
+    "config": {
+      "dataset": "GEM/e2e_nlg",
+      "split": "test",
+      "samples": null,
+      "metrics": [
+        "BLEU",
+        "NIST",
+        "METEOR",
+        "ROUGE-L",
+        "CIDEr"
+      ],
+      "max_new_tokens": 64,
+      "num_beams": 10,
+      "length_penalty": 0.9,
+      "no_repeat_ngram_size": 4,
+      "seed": 42,
+      "local_data": null,
+      "local_files_only": false,
+      "model": {
+        "type": "fft",
+        "path": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\gpt2-e2e-full-ft\\20261014_195155_334703_lr5e-05_e5.0_b10_ga1_s101_d1944f44\\final",
+        "name": "outputs\\gpt2-e2e-full-ft\\20261014_195155_334703_lr5e-05_e5.0_b10_ga1_s101_d1944f44\\final",
+        "training_run": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\gpt2-e2e-full-ft\\20261014_195155_334703_lr5e-05_e5.0_b10_ga1_s101_d1944f44",
+        "trained": "2026-10-14T20:35:41.730898+08:00",
+        "training_config": {
+          "model": "openai-community/gpt2-medium",
+          "dataset": "GEM/e2e_nlg",
+          "learning_rate": 5e-05,
+          "epochs": 5.0,
+          "batch_size": 10,
+          "eval_batch_size": 10,
+          "gradient_accumulation": 1,
+          "weight_decay": 0.0,
+          "warmup_steps": 0,
+          "label_smoothing": 0.0,
+          "dropout": 0.1,
+          "alpha": 32,
+          "seed": 101,
+          "precision": "fp32",
+          "max_length": 512,
+          "gradient_checkpointing": false,
+          "logging_steps": 100,
+          "max_steps": -1,
+          "smoke": false,
+          "train_samples": null,
+          "eval_samples": null,
+          "local_data": null,
+          "local_files_only": false,
+          "ranks": {
+            "q": 4,
+            "k": 0,
+            "v": 4
+          }
+        }
+      },
+      "predictions": null,
+      "smoke": false
+    },
+    "result": {
+      "metrics": {
+        "BLEU-1": 0.5611621279772038,
+        "BLEU-2": 0.42974375877083204,
+        "BLEU-3": 0.33133218150817584,
+        "BLEU-4": 0.2557341197162414,
+        "NIST": 4.793432542018731,
+        "METEOR": 0.5400758840834629,
+        "ROUGE-L": 0.44466288876084015,
+        "CIDEr": 1.44286348298763
+      },
+      "errors": {},
+      "scope": {
+        "BLEU": "corpus BLEU; sentence BLEU separately retained, not averaged into corpus score",
+        "NIST": "corpus NIST-5 only; per-sample score unavailable in this scoring profile",
+        "METEOR": "mean sample METEOR, NLTK tokenized whitespace with WordNet",
+        "ROUGE-L": "sample average; CIDEr uses this whole corpus document frequencies",
+        "CIDEr": "sample average; CIDEr uses this whole corpus document frequencies"
+      },
+      "samples": 1847,
+      "selected": [
+        "BLEU",
+        "NIST",
+        "METEOR",
+        "ROUGE-L",
+        "CIDEr"
+      ],
+      "profile": "small-compatible single-target"
+    },
+    "kind": "fft",
+    "seed": 101
+  },
+  {
+    "run": "outputs\\benchmarks\\20261015_121717_735421_fft_e967b0c0_test_nall_t64_beam10_BLEU-NIST-METEOR-ROUGE-L-CIDEr_b80ccdc8",
+    "config": {
+      "dataset": "GEM/e2e_nlg",
+      "split": "test",
+      "samples": null,
+      "metrics": [
+        "BLEU",
+        "NIST",
+        "METEOR",
+        "ROUGE-L",
+        "CIDEr"
+      ],
+      "max_new_tokens": 64,
+      "num_beams": 10,
+      "length_penalty": 0.9,
+      "no_repeat_ngram_size": 4,
+      "seed": 42,
+      "local_data": null,
+      "local_files_only": false,
+      "model": {
+        "type": "fft",
+        "path": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\gpt2-e2e-full-ft\\20261014_195155_337706_lr5e-05_e5.0_b10_ga1_s42_4a71f5da\\final",
+        "name": "outputs\\gpt2-e2e-full-ft\\20261014_195155_337706_lr5e-05_e5.0_b10_ga1_s42_4a71f5da\\final",
+        "training_run": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\gpt2-e2e-full-ft\\20261014_195155_337706_lr5e-05_e5.0_b10_ga1_s42_4a71f5da",
+        "trained": "2026-10-14T22:00:50.958816+08:00",
+        "training_config": {
+          "model": "openai-community/gpt2-medium",
+          "dataset": "GEM/e2e_nlg",
+          "learning_rate": 5e-05,
+          "epochs": 5.0,
+          "batch_size": 10,
+          "eval_batch_size": 10,
+          "gradient_accumulation": 1,
+          "weight_decay": 0.0,
+          "warmup_steps": 0,
+          "label_smoothing": 0.0,
+          "dropout": 0.1,
+          "alpha": 32,
+          "seed": 42,
+          "precision": "fp32",
+          "max_length": 1024,
+          "gradient_checkpointing": false,
+          "logging_steps": 100,
+          "max_steps": -1,
+          "smoke": false,
+          "train_samples": null,
+          "eval_samples": null,
+          "local_data": null,
+          "local_files_only": false,
+          "ranks": {
+            "q": 4,
+            "k": 0,
+            "v": 4
+          }
+        }
+      },
+      "predictions": null,
+      "smoke": false
+    },
+    "result": {
+      "metrics": {
+        "BLEU-1": 0.5781733905744688,
+        "BLEU-2": 0.44187434047225693,
+        "BLEU-3": 0.3406732314896635,
+        "BLEU-4": 0.2637226149423356,
+        "NIST": 4.863599912825808,
+        "METEOR": 0.5519600057796311,
+        "ROUGE-L": 0.4448322706376615,
+        "CIDEr": 1.4817728737958098
+      },
+      "errors": {},
+      "scope": {
+        "BLEU": "corpus BLEU; sentence BLEU separately retained, not averaged into corpus score",
+        "NIST": "corpus NIST-5 only; per-sample score unavailable in this scoring profile",
+        "METEOR": "mean sample METEOR, NLTK tokenized whitespace with WordNet",
+        "ROUGE-L": "sample average; CIDEr uses this whole corpus document frequencies",
+        "CIDEr": "sample average; CIDEr uses this whole corpus document frequencies"
+      },
+      "samples": 1847,
+      "selected": [
+        "BLEU",
+        "NIST",
+        "METEOR",
+        "ROUGE-L",
+        "CIDEr"
+      ],
+      "profile": "small-compatible single-target"
+    },
+    "kind": "fft",
+    "seed": 42
+  },
+  {
+    "run": "outputs\\benchmarks\\20261015_121717_753437_fft_bb11f402_test_nall_t64_beam10_BLEU-NIST-METEOR-ROUGE-L-CIDEr_3dca1c7a",
+    "config": {
+      "dataset": "GEM/e2e_nlg",
+      "split": "test",
+      "samples": null,
+      "metrics": [
+        "BLEU",
+        "NIST",
+        "METEOR",
+        "ROUGE-L",
+        "CIDEr"
+      ],
+      "max_new_tokens": 64,
+      "num_beams": 10,
+      "length_penalty": 0.9,
+      "no_repeat_ngram_size": 4,
+      "seed": 42,
+      "local_data": null,
+      "local_files_only": false,
+      "model": {
+        "type": "fft",
+        "path": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\gpt2-e2e-full-ft\\20261014_195155_340708_lr5e-05_e5.0_b10_ga1_s43_7dfd4e3f\\final",
+        "name": "outputs\\gpt2-e2e-full-ft\\20261014_195155_340708_lr5e-05_e5.0_b10_ga1_s43_7dfd4e3f\\final",
+        "training_run": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\gpt2-e2e-full-ft\\20261014_195155_340708_lr5e-05_e5.0_b10_ga1_s43_7dfd4e3f",
+        "trained": "2026-10-14T23:05:09.639936+08:00",
+        "training_config": {
+          "model": "openai-community/gpt2-medium",
+          "dataset": "GEM/e2e_nlg",
+          "learning_rate": 5e-05,
+          "epochs": 5.0,
+          "batch_size": 10,
+          "eval_batch_size": 10,
+          "gradient_accumulation": 1,
+          "weight_decay": 0.0,
+          "warmup_steps": 0,
+          "label_smoothing": 0.0,
+          "dropout": 0.1,
+          "alpha": 32,
+          "seed": 43,
+          "precision": "fp32",
+          "max_length": 1024,
+          "gradient_checkpointing": false,
+          "logging_steps": 100,
+          "max_steps": -1,
+          "smoke": false,
+          "train_samples": null,
+          "eval_samples": null,
+          "local_data": null,
+          "local_files_only": false,
+          "ranks": {
+            "q": 4,
+            "k": 0,
+            "v": 4
+          }
+        }
+      },
+      "predictions": null,
+      "smoke": false
+    },
+    "result": {
+      "metrics": {
+        "BLEU-1": 0.5807899764728354,
+        "BLEU-2": 0.44323656228762104,
+        "BLEU-3": 0.34144462241418966,
+        "BLEU-4": 0.26398211062891974,
+        "NIST": 4.862992220971803,
+        "METEOR": 0.5529127610799035,
+        "ROUGE-L": 0.4412539259350083,
+        "CIDEr": 1.4794729169074288
+      },
+      "errors": {},
+      "scope": {
+        "BLEU": "corpus BLEU; sentence BLEU separately retained, not averaged into corpus score",
+        "NIST": "corpus NIST-5 only; per-sample score unavailable in this scoring profile",
+        "METEOR": "mean sample METEOR, NLTK tokenized whitespace with WordNet",
+        "ROUGE-L": "sample average; CIDEr uses this whole corpus document frequencies",
+        "CIDEr": "sample average; CIDEr uses this whole corpus document frequencies"
+      },
+      "samples": 1847,
+      "selected": [
+        "BLEU",
+        "NIST",
+        "METEOR",
+        "ROUGE-L",
+        "CIDEr"
+      ],
+      "profile": "small-compatible single-target"
+    },
+    "kind": "fft",
+    "seed": 43
+  },
+  {
+    "run": "outputs\\benchmarks\\20261015_121717_771623_fft_6b506dd1_test_nall_t64_beam10_BLEU-NIST-METEOR-ROUGE-L-CIDEr_e8fb49ec",
+    "config": {
+      "dataset": "GEM/e2e_nlg",
+      "split": "test",
+      "samples": null,
+      "metrics": [
+        "BLEU",
+        "NIST",
+        "METEOR",
+        "ROUGE-L",
+        "CIDEr"
+      ],
+      "max_new_tokens": 64,
+      "num_beams": 10,
+      "length_penalty": 0.9,
+      "no_repeat_ngram_size": 4,
+      "seed": 42,
+      "local_data": null,
+      "local_files_only": false,
+      "model": {
+        "type": "fft",
+        "path": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\gpt2-e2e-full-ft\\20261014_195155_343711_lr5e-05_e5.0_b10_ga1_s44_14c95cf4\\final",
+        "name": "outputs\\gpt2-e2e-full-ft\\20261014_195155_343711_lr5e-05_e5.0_b10_ga1_s44_14c95cf4\\final",
+        "training_run": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\gpt2-e2e-full-ft\\20261014_195155_343711_lr5e-05_e5.0_b10_ga1_s44_14c95cf4",
+        "trained": "2026-10-15T00:29:57.762691+08:00",
+        "training_config": {
+          "model": "openai-community/gpt2-medium",
+          "dataset": "GEM/e2e_nlg",
+          "learning_rate": 5e-05,
+          "epochs": 5.0,
+          "batch_size": 10,
+          "eval_batch_size": 10,
+          "gradient_accumulation": 1,
+          "weight_decay": 0.0,
+          "warmup_steps": 0,
+          "label_smoothing": 0.0,
+          "dropout": 0.1,
+          "alpha": 32,
+          "seed": 44,
+          "precision": "fp32",
+          "max_length": 1024,
+          "gradient_checkpointing": false,
+          "logging_steps": 100,
+          "max_steps": -1,
+          "smoke": false,
+          "train_samples": null,
+          "eval_samples": null,
+          "local_data": null,
+          "local_files_only": false,
+          "ranks": {
+            "q": 4,
+            "k": 0,
+            "v": 4
+          }
+        }
+      },
+      "predictions": null,
+      "smoke": false
+    },
+    "result": {
+      "metrics": {
+        "BLEU-1": 0.5744615513658982,
+        "BLEU-2": 0.4378496033517168,
+        "BLEU-3": 0.33685977827812297,
+        "BLEU-4": 0.2598759771003339,
+        "NIST": 4.857599845170256,
+        "METEOR": 0.5499899036490873,
+        "ROUGE-L": 0.44484737474333014,
+        "CIDEr": 1.4611367167881617
+      },
+      "errors": {},
+      "scope": {
+        "BLEU": "corpus BLEU; sentence BLEU separately retained, not averaged into corpus score",
+        "NIST": "corpus NIST-5 only; per-sample score unavailable in this scoring profile",
+        "METEOR": "mean sample METEOR, NLTK tokenized whitespace with WordNet",
+        "ROUGE-L": "sample average; CIDEr uses this whole corpus document frequencies",
+        "CIDEr": "sample average; CIDEr uses this whole corpus document frequencies"
+      },
+      "samples": 1847,
+      "selected": [
+        "BLEU",
+        "NIST",
+        "METEOR",
+        "ROUGE-L",
+        "CIDEr"
+      ],
+      "profile": "small-compatible single-target"
+    },
+    "kind": "fft",
+    "seed": 44
+  },
+  {
+    "run": "outputs\\benchmarks\\20261015_121717_787638_lora_66eaf0d4_test_nall_t64_beam10_BLEU-NIST-METEOR-ROUGE-L-CIDEr_50d54773",
+    "config": {
+      "dataset": "GEM/e2e_nlg",
+      "split": "test",
+      "samples": null,
+      "metrics": [
+        "BLEU",
+        "NIST",
+        "METEOR",
+        "ROUGE-L",
+        "CIDEr"
+      ],
+      "max_new_tokens": 64,
+      "num_beams": 10,
+      "length_penalty": 0.9,
+      "no_repeat_ngram_size": 4,
+      "seed": 42,
+      "local_data": null,
+      "local_files_only": false,
+      "model": {
+        "type": "lora",
+        "path": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\gpt2-e2e-lora\\20261014_132455_250003_lr0.0002_e5.0_b8_ga1_s110_q4k0v4_60c8e60b\\final",
+        "name": "outputs\\gpt2-e2e-lora\\20261014_132455_250003_lr0.0002_e5.0_b8_ga1_s110_q4k0v4_60c8e60b\\final",
+        "training_run": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\gpt2-e2e-lora\\20261014_132455_250003_lr0.0002_e5.0_b8_ga1_s110_q4k0v4_60c8e60b",
+        "trained": "2026-10-14T13:25:05.534489+08:00",
+        "training_config": {
+          "model": "openai-community/gpt2-medium",
+          "dataset": "GEM/e2e_nlg",
+          "learning_rate": 0.0002,
+          "epochs": 5.0,
+          "batch_size": 8,
+          "eval_batch_size": 4,
+          "gradient_accumulation": 1,
+          "weight_decay": 0.01,
+          "warmup_steps": 500,
+          "label_smoothing": 0.1,
+          "dropout": 0.1,
+          "alpha": 32,
+          "seed": 110,
+          "precision": "fp32",
+          "max_length": 512,
+          "gradient_checkpointing": false,
+          "logging_steps": 100,
+          "max_steps": -1,
+          "smoke": false,
+          "train_samples": null,
+          "eval_samples": null,
+          "local_data": null,
+          "local_files_only": false,
+          "ranks": {
+            "q": 4,
+            "k": 0,
+            "v": 4
+          }
+        }
+      },
+      "predictions": null,
+      "smoke": false
+    },
+    "result": {
+      "metrics": {
+        "BLEU-1": 0.5784796686604605,
+        "BLEU-2": 0.4435613072109933,
+        "BLEU-3": 0.3425394721944049,
+        "BLEU-4": 0.26577834807214495,
+        "NIST": 4.912501855270479,
+        "METEOR": 0.5535642168383036,
+        "ROUGE-L": 0.44956448006209104,
+        "CIDEr": 1.511447561997269
+      },
+      "errors": {},
+      "scope": {
+        "BLEU": "corpus BLEU; sentence BLEU separately retained, not averaged into corpus score",
+        "NIST": "corpus NIST-5 only; per-sample score unavailable in this scoring profile",
+        "METEOR": "mean sample METEOR, NLTK tokenized whitespace with WordNet",
+        "ROUGE-L": "sample average; CIDEr uses this whole corpus document frequencies",
+        "CIDEr": "sample average; CIDEr uses this whole corpus document frequencies"
+      },
+      "samples": 1847,
+      "selected": [
+        "BLEU",
+        "NIST",
+        "METEOR",
+        "ROUGE-L",
+        "CIDEr"
+      ],
+      "profile": "small-compatible single-target"
+    },
+    "kind": "lora",
+    "seed": 110
+  },
+  {
+    "run": "outputs\\benchmarks\\20261015_121717_805654_lora_d7d9bc89_test_nall_t64_beam10_BLEU-NIST-METEOR-ROUGE-L-CIDEr_3aa5dc0c",
+    "config": {
+      "dataset": "GEM/e2e_nlg",
+      "split": "test",
+      "samples": null,
+      "metrics": [
+        "BLEU",
+        "NIST",
+        "METEOR",
+        "ROUGE-L",
+        "CIDEr"
+      ],
+      "max_new_tokens": 64,
+      "num_beams": 10,
+      "length_penalty": 0.9,
+      "no_repeat_ngram_size": 4,
+      "seed": 42,
+      "local_data": null,
+      "local_files_only": false,
+      "model": {
+        "type": "lora",
+        "path": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\gpt2-e2e-lora\\20261014_132455_253006_lr0.0002_e5.0_b8_ga1_s42_q4k0v4_b35615c7\\final",
+        "name": "outputs\\gpt2-e2e-lora\\20261014_132455_253006_lr0.0002_e5.0_b8_ga1_s42_q4k0v4_b35615c7\\final",
+        "training_run": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\gpt2-e2e-lora\\20261014_132455_253006_lr0.0002_e5.0_b8_ga1_s42_q4k0v4_b35615c7",
+        "trained": "2026-10-14T14:09:21.352643+08:00",
+        "training_config": {
+          "model": "openai-community/gpt2-medium",
+          "dataset": "GEM/e2e_nlg",
+          "learning_rate": 0.0002,
+          "epochs": 5.0,
+          "batch_size": 8,
+          "eval_batch_size": 4,
+          "gradient_accumulation": 1,
+          "weight_decay": 0.01,
+          "warmup_steps": 500,
+          "label_smoothing": 0.1,
+          "dropout": 0.1,
+          "alpha": 32,
+          "seed": 42,
+          "precision": "fp32",
+          "max_length": 512,
+          "gradient_checkpointing": false,
+          "logging_steps": 100,
+          "max_steps": -1,
+          "smoke": false,
+          "train_samples": null,
+          "eval_samples": null,
+          "local_data": null,
+          "local_files_only": false,
+          "ranks": {
+            "q": 4,
+            "k": 0,
+            "v": 4
+          }
+        }
+      },
+      "predictions": null,
+      "smoke": false
+    },
+    "result": {
+      "metrics": {
+        "BLEU-1": 0.5758978345946862,
+        "BLEU-2": 0.44127032577736797,
+        "BLEU-3": 0.34098718134884665,
+        "BLEU-4": 0.2644573088394953,
+        "NIST": 4.89987273017052,
+        "METEOR": 0.552794307293242,
+        "ROUGE-L": 0.44821649636336913,
+        "CIDEr": 1.5120721016503202
+      },
+      "errors": {},
+      "scope": {
+        "BLEU": "corpus BLEU; sentence BLEU separately retained, not averaged into corpus score",
+        "NIST": "corpus NIST-5 only; per-sample score unavailable in this scoring profile",
+        "METEOR": "mean sample METEOR, NLTK tokenized whitespace with WordNet",
+        "ROUGE-L": "sample average; CIDEr uses this whole corpus document frequencies",
+        "CIDEr": "sample average; CIDEr uses this whole corpus document frequencies"
+      },
+      "samples": 1847,
+      "selected": [
+        "BLEU",
+        "NIST",
+        "METEOR",
+        "ROUGE-L",
+        "CIDEr"
+      ],
+      "profile": "small-compatible single-target"
+    },
+    "kind": "lora",
+    "seed": 42
+  },
+  {
+    "run": "outputs\\benchmarks\\20261015_121717_822669_lora_3f01744d_test_nall_t64_beam10_BLEU-NIST-METEOR-ROUGE-L-CIDEr_043dfa69",
+    "config": {
+      "dataset": "GEM/e2e_nlg",
+      "split": "test",
+      "samples": null,
+      "metrics": [
+        "BLEU",
+        "NIST",
+        "METEOR",
+        "ROUGE-L",
+        "CIDEr"
+      ],
+      "max_new_tokens": 64,
+      "num_beams": 10,
+      "length_penalty": 0.9,
+      "no_repeat_ngram_size": 4,
+      "seed": 42,
+      "local_data": null,
+      "local_files_only": false,
+      "model": {
+        "type": "lora",
+        "path": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\gpt2-e2e-lora\\20261014_132455_256008_lr0.0002_e5.0_b8_ga1_s43_q4k0v4_0d3db090\\final",
+        "name": "outputs\\gpt2-e2e-lora\\20261014_132455_256008_lr0.0002_e5.0_b8_ga1_s43_q4k0v4_0d3db090\\final",
+        "training_run": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\gpt2-e2e-lora\\20261014_132455_256008_lr0.0002_e5.0_b8_ga1_s43_q4k0v4_0d3db090",
+        "trained": "2026-10-14T14:52:49.267293+08:00",
+        "training_config": {
+          "model": "openai-community/gpt2-medium",
+          "dataset": "GEM/e2e_nlg",
+          "learning_rate": 0.0002,
+          "epochs": 5.0,
+          "batch_size": 8,
+          "eval_batch_size": 4,
+          "gradient_accumulation": 1,
+          "weight_decay": 0.01,
+          "warmup_steps": 500,
+          "label_smoothing": 0.1,
+          "dropout": 0.1,
+          "alpha": 32,
+          "seed": 43,
+          "precision": "fp32",
+          "max_length": 512,
+          "gradient_checkpointing": false,
+          "logging_steps": 100,
+          "max_steps": -1,
+          "smoke": false,
+          "train_samples": null,
+          "eval_samples": null,
+          "local_data": null,
+          "local_files_only": false,
+          "ranks": {
+            "q": 4,
+            "k": 0,
+            "v": 4
+          }
+        }
+      },
+      "predictions": null,
+      "smoke": false
+    },
+    "result": {
+      "metrics": {
+        "BLEU-1": 0.5728838752927081,
+        "BLEU-2": 0.43724467871979494,
+        "BLEU-3": 0.33565911520239106,
+        "BLEU-4": 0.25876597392911016,
+        "NIST": 4.854968861403776,
+        "METEOR": 0.5477691390142483,
+        "ROUGE-L": 0.44831647812924563,
+        "CIDEr": 1.4676684570148766
+      },
+      "errors": {},
+      "scope": {
+        "BLEU": "corpus BLEU; sentence BLEU separately retained, not averaged into corpus score",
+        "NIST": "corpus NIST-5 only; per-sample score unavailable in this scoring profile",
+        "METEOR": "mean sample METEOR, NLTK tokenized whitespace with WordNet",
+        "ROUGE-L": "sample average; CIDEr uses this whole corpus document frequencies",
+        "CIDEr": "sample average; CIDEr uses this whole corpus document frequencies"
+      },
+      "samples": 1847,
+      "selected": [
+        "BLEU",
+        "NIST",
+        "METEOR",
+        "ROUGE-L",
+        "CIDEr"
+      ],
+      "profile": "small-compatible single-target"
+    },
+    "kind": "lora",
+    "seed": 43
+  },
+  {
+    "run": "outputs\\benchmarks\\20261015_121717_840686_lora_1a225840_test_nall_t64_beam10_BLEU-NIST-METEOR-ROUGE-L-CIDEr_30c9bebf",
+    "config": {
+      "dataset": "GEM/e2e_nlg",
+      "split": "test",
+      "samples": null,
+      "metrics": [
+        "BLEU",
+        "NIST",
+        "METEOR",
+        "ROUGE-L",
+        "CIDEr"
+      ],
+      "max_new_tokens": 64,
+      "num_beams": 10,
+      "length_penalty": 0.9,
+      "no_repeat_ngram_size": 4,
+      "seed": 42,
+      "local_data": null,
+      "local_files_only": false,
+      "model": {
+        "type": "lora",
+        "path": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\gpt2-e2e-lora\\20261014_132455_259011_lr0.0002_e5.0_b8_ga1_s44_q4k0v4_631867cd\\final",
+        "name": "outputs\\gpt2-e2e-lora\\20261014_132455_259011_lr0.0002_e5.0_b8_ga1_s44_q4k0v4_631867cd\\final",
+        "training_run": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\gpt2-e2e-lora\\20261014_132455_259011_lr0.0002_e5.0_b8_ga1_s44_q4k0v4_631867cd",
+        "trained": "2026-10-14T15:36:19.303529+08:00",
+        "training_config": {
+          "model": "openai-community/gpt2-medium",
+          "dataset": "GEM/e2e_nlg",
+          "learning_rate": 0.0002,
+          "epochs": 5.0,
+          "batch_size": 8,
+          "eval_batch_size": 4,
+          "gradient_accumulation": 1,
+          "weight_decay": 0.01,
+          "warmup_steps": 500,
+          "label_smoothing": 0.1,
+          "dropout": 0.1,
+          "alpha": 32,
+          "seed": 44,
+          "precision": "fp32",
+          "max_length": 512,
+          "gradient_checkpointing": false,
+          "logging_steps": 100,
+          "max_steps": -1,
+          "smoke": false,
+          "train_samples": null,
+          "eval_samples": null,
+          "local_data": null,
+          "local_files_only": false,
+          "ranks": {
+            "q": 4,
+            "k": 0,
+            "v": 4
+          }
+        }
+      },
+      "predictions": null,
+      "smoke": false
+    },
+    "result": {
+      "metrics": {
+        "BLEU-1": 0.5784494815408864,
+        "BLEU-2": 0.4431955151985196,
+        "BLEU-3": 0.34217914597594845,
+        "BLEU-4": 0.2657282287041242,
+        "NIST": 4.91861692325835,
+        "METEOR": 0.5523678626944232,
+        "ROUGE-L": 0.4507602782750306,
+        "CIDEr": 1.5330474121339268
+      },
+      "errors": {},
+      "scope": {
+        "BLEU": "corpus BLEU; sentence BLEU separately retained, not averaged into corpus score",
+        "NIST": "corpus NIST-5 only; per-sample score unavailable in this scoring profile",
+        "METEOR": "mean sample METEOR, NLTK tokenized whitespace with WordNet",
+        "ROUGE-L": "sample average; CIDEr uses this whole corpus document frequencies",
+        "CIDEr": "sample average; CIDEr uses this whole corpus document frequencies"
+      },
+      "samples": 1847,
+      "selected": [
+        "BLEU",
+        "NIST",
+        "METEOR",
+        "ROUGE-L",
+        "CIDEr"
+      ],
+      "profile": "small-compatible single-target"
+    },
+    "kind": "lora",
+    "seed": 44
+  },
+  {
+    "run": "outputs\\benchmarks\\20261015_121717_858703_lora_3aeb8747_test_nall_t64_beam10_BLEU-NIST-METEOR-ROUGE-L-CIDEr_88e99c94",
+    "config": {
+      "dataset": "GEM/e2e_nlg",
+      "split": "test",
+      "samples": null,
+      "metrics": [
+        "BLEU",
+        "NIST",
+        "METEOR",
+        "ROUGE-L",
+        "CIDEr"
+      ],
+      "max_new_tokens": 64,
+      "num_beams": 10,
+      "length_penalty": 0.9,
+      "no_repeat_ngram_size": 4,
+      "seed": 42,
+      "local_data": null,
+      "local_files_only": false,
+      "model": {
+        "type": "lora",
+        "path": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\gpt2-e2e-lora\\20261014_195155_330699_lr0.0002_e5.0_b8_ga1_s110_q4k0v4_eb6d5cbd\\final",
+        "name": "outputs\\gpt2-e2e-lora\\20261014_195155_330699_lr0.0002_e5.0_b8_ga1_s110_q4k0v4_eb6d5cbd\\final",
+        "training_run": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\gpt2-e2e-lora\\20261014_195155_330699_lr0.0002_e5.0_b8_ga1_s110_q4k0v4_eb6d5cbd",
+        "trained": "2026-10-14T19:52:06.074283+08:00",
+        "training_config": {
+          "model": "openai-community/gpt2-medium",
+          "dataset": "GEM/e2e_nlg",
+          "learning_rate": 0.0002,
+          "epochs": 5.0,
+          "batch_size": 8,
+          "eval_batch_size": 4,
+          "gradient_accumulation": 1,
+          "weight_decay": 0.01,
+          "warmup_steps": 500,
+          "label_smoothing": 0.1,
+          "dropout": 0.1,
+          "alpha": 32,
+          "seed": 110,
+          "precision": "fp32",
+          "max_length": 1024,
+          "gradient_checkpointing": false,
+          "logging_steps": 100,
+          "max_steps": -1,
+          "smoke": false,
+          "train_samples": null,
+          "eval_samples": null,
+          "local_data": null,
+          "local_files_only": false,
+          "ranks": {
+            "q": 4,
+            "k": 0,
+            "v": 4
+          }
+        }
+      },
+      "predictions": null,
+      "smoke": false
+    },
+    "result": {
+      "metrics": {
+        "BLEU-1": 0.5784796686604605,
+        "BLEU-2": 0.4435613072109933,
+        "BLEU-3": 0.3425394721944049,
+        "BLEU-4": 0.26577834807214495,
+        "NIST": 4.912501855270479,
+        "METEOR": 0.5535642168383036,
+        "ROUGE-L": 0.44956448006209104,
+        "CIDEr": 1.511447561997269
+      },
+      "errors": {},
+      "scope": {
+        "BLEU": "corpus BLEU; sentence BLEU separately retained, not averaged into corpus score",
+        "NIST": "corpus NIST-5 only; per-sample score unavailable in this scoring profile",
+        "METEOR": "mean sample METEOR, NLTK tokenized whitespace with WordNet",
+        "ROUGE-L": "sample average; CIDEr uses this whole corpus document frequencies",
+        "CIDEr": "sample average; CIDEr uses this whole corpus document frequencies"
+      },
+      "samples": 1847,
+      "selected": [
+        "BLEU",
+        "NIST",
+        "METEOR",
+        "ROUGE-L",
+        "CIDEr"
+      ],
+      "profile": "small-compatible single-target"
+    },
+    "kind": "lora",
+    "seed": 110
+  }
+]

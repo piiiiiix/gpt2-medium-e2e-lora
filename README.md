@@ -203,3 +203,6 @@ VSCode 可安装 Ruff 扩展并选择其作为 Python 格式化器；检查规�
 模型列表及任务列表默认排除 outputs/smoke 与配置标记 smoke=true 的内容。冒烟文件仍完整保留，内部冒烟测试可显式访问。每次用户提出的修改须先整理并补入需求文档.md，同时更新使用说明与实施记录，再提交推送。
 
 续训耗时记录兼容 Python 3.10 与 PowerShell 的不同小数位数 ISO 时间戳，包括五位与七位；统一补齐或截断至六位微秒精度。无法解析或倒序的历史时间会跳过耗时统计并保留警告，不影响断点恢复。修复升级后，刷新前端并重新点击“断点续训”即可；此前失败的启动没有删除 checkpoint。
+# Benchmark 对比图与数据
+
+8 项指标的五组横评图位于 `outputs/pics`，包含 PNG、SVG、汇总 CSV、数据来源及绘图脚本；运行 `python -s outputs/pics/plot_comparison.py` 可重新生成。Git 纳入整个 `outputs/pics` 与 `outputs/benchmarks` 下所有 CSV，其余实验输出仍忽略。
