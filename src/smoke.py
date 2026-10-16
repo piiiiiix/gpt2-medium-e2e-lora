@@ -269,6 +269,19 @@ def task_list_pipeline():
     assert filter_tasks(records, "训练", "FFT", "失败") == [records[2]]
     assert filter_tasks(records, "benchmark", "LoRA", "队列中") == [records[3]]
     assert not filter_tasks(records, "训练", "base")
+    from utils.task_list import created_time, task_time, time_label
+
+    legacy = dict(path="20261015_121717_677367_base", started="2026-10-16T05:11:36.630803+08:00")
+    assert task_time(legacy)[0].strftime("%Y-%m-%d %H:%M:%S") == "2026-10-15 12:17:17"
+    assert "创建（目录）" in time_label(legacy)
+    fallback = dict(path="legacy", started="2026-10-12T06:25:54.4977937Z")
+    assert "开始：2026-10-12 14:25:54" in time_label(fallback)
+    assert created_time(fallback) > float("-inf")
+    assert (
+        task_time(dict(path="legacy", created="bad", first_started=fallback["started"]))[1]
+        == "首次开始"
+    )
+    assert "结束" in time_label(dict(path="legacy", ended=fallback["started"]))
     with patch("utils.task_list.alive", return_value=False):
         assert task_status(dict(status="running", pid=-1)) == "失败"
     with patch("utils.runs.history", return_value=records):

@@ -131,6 +131,7 @@ def running(path, kind, config):
     require_lora()
     path = inside_project(path)
     write_json(path / "config.json", config)
+    previous = read_json(path / "status.json", {})
     metadata = dict(
         kind=kind,
         status="running",
@@ -140,6 +141,8 @@ def running(path, kind, config):
         hardware=GPUMonitor.sample(),
         python=sys.executable,
     )
+    if previous.get("created"):
+        metadata["created"] = previous["created"]
     attempts = read_json(path / "attempts.json", [])
     metadata["first_started"] = next(
         (attempt["status"]["started"] for attempt in attempts if attempt["status"].get("started")),

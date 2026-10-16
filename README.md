@@ -46,7 +46,7 @@ python -s -m streamlit run src/app.py
 
 - **训练**：LoRA / FFT，超参数、精度和少量样本设置；只有 Q rank、K rank、V rank 三个模型级设置，各自独立调整，统一应用到所有 Transformer 层，无需逐层配置。rank=0 没有 adapter 分支；全部冻结时可测试 Base，但不能启动无参数训练。
 - **测试 / benchmark**：仅扫描 medium 内有效模型和 checkpoint；支持多个模型与一个、多个或全部指标，任务按顺序执行，避免抢占 GPU。
-- **任务列表**：统一训练与测试 / benchmark 记录，按创建时间倒序；使用任务类型、模型类型（base / FFT / LoRA）、状态三组切换按钮组合筛选，支持重置。tests 与 benchmarks 均归入 benchmark；中断和进程异常退出归入失败，详情保留原始状态。
+- **任务列表**：统一训练与测试 / benchmark 记录，按创建时间倒序（旧记录兼容目录时间，缺失时回退首次开始 / 开始 / 结束时间，显示来源及香港时间）；使用任务类型、模型类型（base / FFT / LoRA）、状态三组切换按钮组合筛选，支持重置。tests 与 benchmarks 均归入 benchmark；中断和进程异常退出归入失败，详情保留原始状态。
 - 每条任务独立折叠，展开后加载配置、结果、下载、重新评分、进度、日志、GPU 曲线和断点续训。默认收起，可同时展开多条，每 3 秒刷新状态。
 - 对应训练任务详情提供“打开 TensorBoard”，点击后准备服务，再点击“进入 TensorBoard”跳转。无日志时显示原因，失败训练的已有日志仍可查看。评测配置页不再启动训练 TensorBoard。
 

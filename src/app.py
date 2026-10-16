@@ -25,7 +25,7 @@ from utils.checkpoints import available
 from utils.jobs import alive, launch, resume_training, stop_batch, tensorboard
 from utils.models import discover
 from utils.runs import HK, elapsed_between, estimate, history, read_json
-from utils.task_list import filter_tasks, task_status
+from utils.task_list import filter_tasks, task_status, time_label
 
 require_lora()
 st.set_page_config(page_title="GPT-2 Medium · E2E", layout="wide")
@@ -446,7 +446,7 @@ else:
             )
             label = (
                 f"{path.name} · {'训练' if training else 'benchmark'} · {model_type} · "
-                f"{task_status(record)} · {record.get('created', '时间未知')}"
+                f"{task_status(record)} · {time_label(record)}"
             )
             panel = st.expander(label, key="task_" + str(path), on_change="rerun")
             if panel.open:
