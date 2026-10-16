@@ -7,8 +7,8 @@ from config import MODEL_NAME, PROJECT_ROOT, inside_project
 from utils.runs import read_json
 
 
-def discover(include_smoke=False):
-    """扫描正式权重与 adapter，默认排除冒烟；内部测试可显式包含冒烟。"""
+def discover(include_smoke=False, include_checkpoints=False):
+    """扫描权重与 adapter，默认排除冒烟及训练中间 checkpoint。"""
     models = [dict(type="base", path=MODEL_NAME, name="GPT-2 Medium (Base)")]
     for directory, folders, files in os.walk(PROJECT_ROOT, followlinks=False):
         folders[:] = [
@@ -16,6 +16,7 @@ def discover(include_smoke=False):
             for f in folders
             if f not in (".git", "nltk_data", "notebooks", "__pycache__")
             and (include_smoke or f != "smoke")
+            and (include_checkpoints or (f != "checkpoints" and not f.startswith("checkpoint-")))
             and (Path(directory) / f).resolve().is_relative_to(PROJECT_ROOT)
         ]
         path = Path(directory)

@@ -224,6 +224,76 @@ def evaluation_pipeline():
     )
 
 
+def task_list_pipeline():
+    """用固定历史验证跨目录排序、组合筛选、独立展开及详情操作。"""
+    from unittest.mock import patch
+
+    from streamlit.testing.v1 import AppTest
+
+    from config import OUTPUT_ROOT
+    from utils.task_list import filter_tasks, task_status
+
+    fixture = OUTPUT_ROOT / "smoke/task-list-fixture"
+    fixture.mkdir(parents=True, exist_ok=True)
+    records = [
+        dict(
+            path=str(fixture / "z-old"),
+            kind="lora",
+            status="completed",
+            created="2026-10-14T12:00:00+08:00",
+            config={},
+        ),
+        dict(
+            path=str(fixture / "a-new"),
+            kind="benchmarks",
+            status="completed",
+            created="2026-10-15T05:00:00Z",
+            config={"model": {"type": "base"}},
+        ),
+        dict(
+            path=str(fixture / "fft"),
+            kind="fft",
+            status="interrupted",
+            created="2026-10-15T14:00:00+08:00",
+            config={},
+        ),
+        dict(
+            path=str(fixture / "queue"),
+            kind="tests",
+            status="queued",
+            created="invalid",
+            config={"model": {"type": "lora"}},
+        ),
+    ]
+    assert [r["kind"] for r in filter_tasks(records)] == ["fft", "benchmarks", "lora", "tests"]
+    assert filter_tasks(records, "训练", "FFT", "失败") == [records[2]]
+    assert filter_tasks(records, "benchmark", "LoRA", "队列中") == [records[3]]
+    assert not filter_tasks(records, "训练", "base")
+    with patch("utils.task_list.alive", return_value=False):
+        assert task_status(dict(status="running", pid=-1)) == "失败"
+    with patch("utils.runs.history", return_value=records):
+        app = AppTest.from_file(str(Path(__file__).with_name("app.py")), default_timeout=30).run()
+        app.radio(key="page").set_value("任务列表").run()
+        assert not app.exception
+        assert len(app.expander) == 4
+        assert "fft" in app.expander[0].label
+        for record in records[:2]:
+            app.session_state["task_" + record["path"]] = True
+        app.run()
+        assert not app.exception
+        assert any("暂无 TensorBoard" in item.value for item in app.caption)
+        app.segmented_control(key="task_kind").set_value("benchmark").run()
+        app.segmented_control(key="task_model").set_value("LoRA").run()
+        app.segmented_control(key="task_status").set_value("队列中").run()
+        assert not app.exception and len(app.expander) == 1
+        app.button(key="reset_tasks").click().run()
+        assert not app.exception and len(app.expander) >= 4
+        app.radio(key="page").set_value("测试 / benchmark").run()
+        assert not app.exception
+        assert not any("TensorBoard" in button.label for button in app.button)
+    print("PASS: task sorting, filters, reset, independent details, TensorBoard placement")
+
+
 def frontend_pipeline():
     """用 AppTest 验证前端控件与页面，并检查独立后台任务和 TensorBoard 接口。"""
     from copy import deepcopy
@@ -268,7 +338,7 @@ def frontend_pipeline():
     app.button(key="freeze_qkv").click().run()
     assert not app.exception
     assert all(app.number_input(key=key).value == 0 for key in ("q_rank", "k_rank", "v_rank"))
-    for page in ["测试 / benchmark", "历史测试记录", "任务进度"]:
+    for page in ["测试 / benchmark", "任务列表"]:
         app.radio(key="page").set_value(page).run()
         assert not app.exception
     config = deepcopy(EVAL_DEFAULTS)
@@ -322,7 +392,7 @@ def frontend_pipeline():
         if pid not in existing_pids and alive(pid):
             subprocess.run(["taskkill", "/PID", str(pid), "/T"], capture_output=True)
     print(
-        "PASS: four frontend pages, all-frozen control, "
+        "PASS: three frontend pages, all-frozen control, "
         "detached sequential jobs, TensorBoard HTTP scalars"
     )
 
@@ -464,13 +534,9 @@ def resume_pipeline():
             app = AppTest.from_file(
                 str(Path(__file__).with_name("app.py")), default_timeout=30
             ).run()
-            app.radio(key="page").set_value("任务进度").run()
-            index = next(
-                i
-                for i, item in enumerate(history(include_smoke=True))
-                if item["path"] == str(interrupted)
-            )
-            app.selectbox(key="progress_run").set_value(index).run()
+            app.radio(key="page").set_value("任务列表").run()
+            app.session_state["task_" + str(interrupted)] = True
+            app.run()
             app.button(key="resume_training_" + interrupted.name).click().run()
             assert not app.exception and not app.error
         deadline = time.monotonic() + 120
@@ -525,7 +591,7 @@ def stop_pipeline():
         time.sleep(0.1)
     assert (first / "progress.json").exists()
     app = AppTest.from_file(str(Path(__file__).with_name("app.py")), default_timeout=30).run()
-    app.radio(key="page").set_value("任务进度").run()
+    app.radio(key="page").set_value("任务列表").run()
     app.button(key="stop_batch").click().run()
     assert not app.exception and not app.error
     deadline = time.monotonic() + 120
@@ -572,7 +638,7 @@ def formal_records_pipeline():
         for path in _parse_event_files_spec(spec):
             assert "smoke" not in Path(path).relative_to(OUTPUT_ROOT).parts
         app = AppTest.from_file(str(Path(__file__).with_name("app.py")), default_timeout=30).run()
-        for page in ("测试 / benchmark", "历史测试记录", "任务进度"):
+        for page in ("测试 / benchmark", "任务列表"):
             app.radio(key="page").set_value(page).run()
             assert not app.exception
         print("PASS: formal model/history filtering, legacy smoke flag, UI pages, TensorBoard spec")
@@ -729,6 +795,7 @@ if __name__ == "__main__":
             "fft",
             "evaluation",
             "frontend",
+            "task-list",
             "training-pool",
             "resume",
             "stop",
@@ -748,6 +815,7 @@ if __name__ == "__main__":
         "fft": lambda: training_pipeline("fft"),
         "evaluation": evaluation_pipeline,
         "frontend": frontend_pipeline,
+        "task-list": task_list_pipeline,
         "training-pool": training_pool_pipeline,
         "resume": resume_pipeline,
         "stop": stop_pipeline,
