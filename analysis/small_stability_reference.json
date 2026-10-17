@@ -1,0 +1,239 @@
+{
+  "summary_source": "outputs\\benchmarks\\fft_benchmark_summary_20261006_1852-1944.csv",
+  "summary_sha256": "84d0fce1209aca0e34ea458991a4cb0903e738484e650ba939b05c655061879b",
+  "summary": [
+    {
+      "metric": "CIDEr",
+      "n_runs": "6",
+      "mean": "0.06055804181590212",
+      "sample_SD": "0.03331618468153807",
+      "CV": "0.5501529389411246"
+    },
+    {
+      "metric": "ROUGE-L",
+      "n_runs": "6",
+      "mean": "0.35619842546290026",
+      "sample_SD": "0.004769504678271697",
+      "CV": "0.013390021789325579"
+    },
+    {
+      "metric": "BLEU-1",
+      "n_runs": "6",
+      "mean": "0.3150783007546303",
+      "sample_SD": "0.006623250208150494",
+      "CV": "0.021020965875109255"
+    },
+    {
+      "metric": "BLEU-2",
+      "n_runs": "6",
+      "mean": "0.2439923486888709",
+      "sample_SD": "0.004851869414781164",
+      "CV": "0.019885334277297648"
+    },
+    {
+      "metric": "BLEU-3",
+      "n_runs": "6",
+      "mean": "0.18879444319669458",
+      "sample_SD": "0.0037179391952493783",
+      "CV": "0.01969305416142922"
+    },
+    {
+      "metric": "BLEU-4",
+      "n_runs": "6",
+      "mean": "0.1482029476982006",
+      "sample_SD": "0.0032889020009476216",
+      "CV": "0.022191879797459343"
+    },
+    {
+      "metric": "NIST",
+      "n_runs": "6",
+      "mean": "2.4835092673689823",
+      "sample_SD": "0.052963393792081766",
+      "CV": "0.02132603026208593"
+    },
+    {
+      "metric": "METEOR",
+      "n_runs": "6",
+      "mean": "0.5069541994083459",
+      "sample_SD": "0.00740899068013275",
+      "CV": "0.014614714088135786"
+    }
+  ],
+  "runs": [
+    {
+      "source": "outputs\\benchmarks\\20261006_185222_866245_fft_20261005_172511_426854_seed42\\metrics.json",
+      "sha256": "2a150a1d83f1bb9ac0ba6d4609abbf42c2e2480b67f5a76367b21bdd92c6f5c2",
+      "seed": 42,
+      "result": {
+        "name": "20261005_172511_426854_seed42",
+        "config": {
+          "name": "20261005_172511_426854_seed42",
+          "type": "full",
+          "path": "D:\\Users\\pix\\Desktop\\Paper\\gpt2-small-e2e-lora\\outputs\\gpt2-e2e-full-ft\\final\\20261005_172511_426854_seed42"
+        },
+        "split": "validation",
+        "num_samples": 1484,
+        "device": "cuda",
+        "max_new_tokens": 60,
+        "do_sample": false,
+        "elapsed_seconds": 629.6928464000011,
+        "metrics": {
+          "BLEU-1": 0.30727689286493143,
+          "BLEU-2": 0.2385846022401285,
+          "BLEU-3": 0.1853672817354201,
+          "BLEU-4": 0.14593029052472764,
+          "NIST": 2.4240538727981735,
+          "METEOR": 0.4991589154564491,
+          "ROUGE-L": 0.350849750226251,
+          "CIDEr": 0.02083970637060324
+        }
+      }
+    },
+    {
+      "source": "outputs\\benchmarks\\20261006_190254_878378_fft_20261005_174151_183374_seed43\\metrics.json",
+      "sha256": "10abc2dbded816874fe25375817623d3f96d9b5f4112a97df572ab2792084a94",
+      "seed": 43,
+      "result": {
+        "name": "20261005_174151_183374_seed43",
+        "config": {
+          "name": "20261005_174151_183374_seed43",
+          "type": "full",
+          "path": "D:\\Users\\pix\\Desktop\\Paper\\gpt2-small-e2e-lora\\outputs\\gpt2-e2e-full-ft\\final\\20261005_174151_183374_seed43"
+        },
+        "split": "validation",
+        "num_samples": 1484,
+        "device": "cuda",
+        "max_new_tokens": 60,
+        "do_sample": false,
+        "elapsed_seconds": 607.6997288000002,
+        "metrics": {
+          "BLEU-1": 0.3183629068716049,
+          "BLEU-2": 0.24781513786484452,
+          "BLEU-3": 0.19287282864819474,
+          "BLEU-4": 0.1522690406537389,
+          "NIST": 2.5210853312368746,
+          "METEOR": 0.5080006745193671,
+          "ROUGE-L": 0.3617608213207025,
+          "CIDEr": 0.06845148670690966
+        }
+      }
+    },
+    {
+      "source": "outputs\\benchmarks\\20261006_191304_777626_fft_20261005_175831_106591_seed44\\metrics.json",
+      "sha256": "6e64b1680d5ad9e4b26e4561aa3e4f2f260a3f8c0822acf6799a7e000c714f25",
+      "seed": 44,
+      "result": {
+        "name": "20261005_175831_106591_seed44",
+        "config": {
+          "name": "20261005_175831_106591_seed44",
+          "type": "full",
+          "path": "D:\\Users\\pix\\Desktop\\Paper\\gpt2-small-e2e-lora\\outputs\\gpt2-e2e-full-ft\\final\\20261005_175831_106591_seed44"
+        },
+        "split": "validation",
+        "num_samples": 1484,
+        "device": "cuda",
+        "max_new_tokens": 60,
+        "do_sample": false,
+        "elapsed_seconds": 626.7539495000001,
+        "metrics": {
+          "BLEU-1": 0.32272371510565667,
+          "BLEU-2": 0.24913551367909892,
+          "BLEU-3": 0.1921853389334751,
+          "BLEU-4": 0.1507193757143316,
+          "NIST": 2.5440967291060708,
+          "METEOR": 0.5178510847404004,
+          "ROUGE-L": 0.3608944411392683,
+          "CIDEr": 0.10180172289278888
+        }
+      }
+    },
+    {
+      "source": "outputs\\benchmarks\\20261006_192333_523239_fft_20261006_175515_097768_seed42\\metrics.json",
+      "sha256": "db2237a94d8a9bd1ec23fc1cc42668595cf6760fef8817ca91f244471ec75cc8",
+      "seed": 42,
+      "result": {
+        "name": "20261006_175515_097768_seed42",
+        "config": {
+          "name": "20261006_175515_097768_seed42",
+          "type": "full",
+          "path": "D:\\Users\\pix\\Desktop\\Paper\\gpt2-small-e2e-lora\\outputs\\gpt2-e2e-full-ft\\final\\20261006_175515_097768_seed42"
+        },
+        "split": "validation",
+        "num_samples": 1484,
+        "device": "cuda",
+        "max_new_tokens": 60,
+        "do_sample": false,
+        "elapsed_seconds": 631.9402512000015,
+        "metrics": {
+          "BLEU-1": 0.3066466902751252,
+          "BLEU-2": 0.23822315066391556,
+          "BLEU-3": 0.18502881563433718,
+          "BLEU-4": 0.14558513528949898,
+          "NIST": 2.4197105896403386,
+          "METEOR": 0.49904356906299935,
+          "ROUGE-L": 0.3509256860909666,
+          "CIDEr": 0.019332036810881574
+        }
+      }
+    },
+    {
+      "source": "outputs\\benchmarks\\20261006_193407_313130_fft_20261006_181245_332825_seed43\\metrics.json",
+      "sha256": "9afd726ff191355554fc0d8e3c10d71df05a2ae1bf960664266bf3b06651b97a",
+      "seed": 43,
+      "result": {
+        "name": "20261006_181245_332825_seed43",
+        "config": {
+          "name": "20261006_181245_332825_seed43",
+          "type": "full",
+          "path": "D:\\Users\\pix\\Desktop\\Paper\\gpt2-small-e2e-lora\\outputs\\gpt2-e2e-full-ft\\final\\20261006_181245_332825_seed43"
+        },
+        "split": "validation",
+        "num_samples": 1484,
+        "device": "cuda",
+        "max_new_tokens": 60,
+        "do_sample": false,
+        "elapsed_seconds": 626.5474138999998,
+        "metrics": {
+          "BLEU-1": 0.319158313784029,
+          "BLEU-2": 0.24751297472052608,
+          "BLEU-3": 0.19139666668458502,
+          "BLEU-4": 0.15033764579039696,
+          "NIST": 2.518668931312926,
+          "METEOR": 0.5053565710270483,
+          "ROUGE-L": 0.3578414451459378,
+          "CIDEr": 0.0777871681757388
+        }
+      }
+    },
+    {
+      "source": "outputs\\benchmarks\\20261006_194436_044815_fft_20261006_183042_322491_seed44\\metrics.json",
+      "sha256": "17b8120d0a490d753832600fbc27a19f7462e11f66eb19dbbde799aa2d23b5c7",
+      "seed": 44,
+      "result": {
+        "name": "20261006_183042_322491_seed44",
+        "config": {
+          "name": "20261006_183042_322491_seed44",
+          "type": "full",
+          "path": "D:\\Users\\pix\\Desktop\\Paper\\gpt2-small-e2e-lora\\outputs\\gpt2-e2e-full-ft\\final\\20261006_183042_322491_seed44"
+        },
+        "split": "validation",
+        "num_samples": 1484,
+        "device": "cuda",
+        "max_new_tokens": 60,
+        "do_sample": false,
+        "elapsed_seconds": 630.3369573999989,
+        "metrics": {
+          "BLEU-1": 0.31630128562643445,
+          "BLEU-2": 0.24268271296471183,
+          "BLEU-3": 0.18591572754415542,
+          "BLEU-4": 0.14437619821650963,
+          "NIST": 2.4734401501195107,
+          "METEOR": 0.5123143816438107,
+          "ROUGE-L": 0.35491840885427556,
+          "CIDEr": 0.07513612993849055
+        }
+      }
+    }
+  ],
+  "interpretation": "Historical description only: validation/1484/60 differs from Medium test/1847/64."
+}

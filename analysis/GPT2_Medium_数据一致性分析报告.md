@@ -80,6 +80,35 @@ LoRA 加入的两条 seed=110 记录，1,847 条预测逐条完全相同；因�
 
 **报告引用规则：主要结果引用三次均值，五次均值作为补充描述；涉及长度影响时，只引用第 7 节的同 seed 对照。**
 
+### 4.1 不同训练 seed 的标准差与逐运行分布
+
+以下图表按用户要求使用 **Base、LoRA 3、LoRA 5、FT 3、FT 5** 五组。每根柱子表示均值；顶部误差线表示 **均值 ±1 个样本标准差（ddof=1）**，并叠加每次完整测试运行的散点。散点不是 1,847 条测试输入各自的分数；误差线也不是最小—最大范围、标准误或置信区间。所有图表均保留原始分数尺度，BLEU、METEOR、ROUGE-L 未乘 100。
+
+Base 只有一次运行，标准差记为 N/A，不把无法估计写成零。三次组是 seed 42/43/44，方法内部训练配置一致；五次组只有四个不同 seed，其中 LoRA seed=110、FT seed=101 各含两种长度。五次组的 SD 描述五份记录的混合波动，不能当成五个独立 seed 的波动，也不能把 LoRA 相同预测的两条记录视作两份独立证据。LoRA 3 与 LoRA 5、FT 3 与 FT 5 有重叠，不能视作独立实验组。
+
+![八项 benchmark 的均值、标准差和逐运行结果](figures/variability_overview.png)
+
+表中单元格为“均值 ± 样本标准差 / CV”。CV=100×SD/均值，用于比较不同量纲的相对波动；单次 Base 不计算 CV。完整精度结果与每一个散点的运行 ID 分别保存在 `variability_summary.csv`、`variability_runs.csv`。
+
+|指标|Base（单次 / SD 不可估计）|LoRA 3|LoRA 5（混合）|FT 3|FT 5（混合）|
+|---|---|---|---|---|---|
+|BLEU-1|0.15804 / N/A|0.57574 ± 0.00279 / 0.48%|0.57684 ± 0.00248 / 0.43%|0.57781 ± 0.00318 / 0.55%|0.57122 ± 0.00929 / 1.63%|
+|BLEU-2|0.08629 / N/A|0.44057 ± 0.00304 / 0.69%|0.44177 ± 0.00270 / 0.61%|0.44099 ± 0.00280 / 0.64%|0.43655 ± 0.00639 / 1.46%|
+|BLEU-3|0.04604 / N/A|0.33961 ± 0.00347 / 1.02%|0.34078 ± 0.00293 / 0.86%|0.33966 ± 0.00245 / 0.72%|0.33640 ± 0.00479 / 1.42%|
+|BLEU-4|0.02364 / N/A|0.26298 ± 0.00371 / 1.41%|0.26410 ± 0.00304 / 1.15%|0.26253 ± 0.00230 / 0.88%|0.25987 ± 0.00399 / 1.53%|
+|NIST|1.09160 / N/A|4.89115 ± 0.03271 / 0.67%|4.89969 ± 0.02592 / 0.53%|4.86140 ± 0.00330 / 0.07%|4.83442 ± 0.03701 / 0.77%|
+|METEOR|0.12854 / N/A|0.55098 ± 0.00279 / 0.51%|0.55201 ± 0.00243 / 0.44%|0.55162 ± 0.00149 / 0.27%|0.54717 ± 0.00619 / 1.13%|
+|ROUGE-L|0.11588 / N/A|0.44910 ± 0.00144 / 0.32%|0.44928 ± 0.00105 / 0.23%|0.44364 ± 0.00207 / 0.47%|0.44416 ± 0.00164 / 0.37%|
+|CIDEr|0.04369 / N/A|1.50426 ± 0.03338 / 2.22%|1.50714 ± 0.02393 / 1.59%|1.47413 ± 0.01131 / 0.77%|1.46189 ± 0.01857 / 1.27%|
+
+CIDEr 的三 seed 结果：LoRA **1.50426 ± 0.03338，CV=2.22%**；FT **1.47413 ± 0.01131，CV=0.77%**。五记录补充组的 CV 分别为 **1.59% / 1.27%**。当前 Medium 的这些记录没有显示此前 Small 中那种大幅 CIDEr 相对波动，但三 seed 仅有三次训练，没有各 seed 的独立重跑，不能据此证明问题已经消失。评分口径一致性与跨 seed 稳定性也是不同问题；分数稳定并不能消除本报告确认的数据集与参考集合差异。
+
+![CIDEr 均值与逐运行波动](figures/variability_CIDEr.png)
+
+**与 Small 旧记录的边界**：已核对 Small 的 `outputs/benchmarks/fft_benchmark_summary_20261006_1852-1944.csv`：六次 FT（seed 42/43/44 各两次）的 CIDEr 均值为 0.060558、样本 SD 为 0.033316、CV 为 55.02%。该批保存的评测配置使用 **validation 1,484 条、max_new_tokens=60**；Medium 当前使用 **test 1,847 条、max_new_tokens=64**，且每个主分析 seed 仅一次训练。两批结果没有统一测试集、解码配置与重复运行设计，不能把 CV 的降低直接归因于 Medium 模型规模。Small 原始摘要与配置证据已另存为 [small_stability_reference.json](small_stability_reference.json)，只作历史描述对照。
+
+八项独立大图（均有同名 SVG）：[BLEU-1](figures/variability_BLEU-1.png)、[BLEU-2](figures/variability_BLEU-2.png)、[BLEU-3](figures/variability_BLEU-3.png)、[BLEU-4](figures/variability_BLEU-4.png)、[NIST](figures/variability_NIST.png)、[METEOR](figures/variability_METEOR.png)、[ROUGE-L](figures/variability_ROUGE-L.png)、[CIDEr](figures/variability_CIDEr.png)。复跑命令：`python analysis/seed_variability.py`；运行 `python analysis/build_report.py` 会一起更新图表及本报告。脚本先核对审计记录中的原始文件 SHA-256，避免用旧审计数据绘制新实验结果。
+
 ## 5. 差异原因一：评分时只使用了第一条参考——已做受控验证
 
 当前 [`src/utils/scoring.py`](../src/utils/scoring.py) 的 `score()` 明确构造 `gts = {i: [row["target"]] ...}`。BLEU、NIST、METEOR、ROUGE-L、CIDEr 都没有使用保存的全部 `references`。数据加载器把 `target` 设为第一条参考，记录也逐条满足 `target == references[0]`。
@@ -251,6 +280,9 @@ BLEU-4 在 seed=43 上出现 LoRA 低于 FFT，说明三次平均的微小正差
 |附件|内容|
 |---|---|
 |[run_metrics.csv](run_metrics.csv)|全部 11 次原始指标及运行目录；分数保持原始尺度|
+|[variability_summary.csv](variability_summary.csv)|8 项指标×5 组的均值、样本 SD、CV、范围和样本数|
+|[variability_runs.csv](variability_runs.csv)|每一个绘图散点的运行 ID、seed、长度及分数|
+|[seed_variability.py](seed_variability.py)|核对原始数据哈希后生成 8 张误差线单图与 1 张总览|
 |[rescoring.csv](rescoring.csv)|每次运行、每种参考条件的受控重评分；分数保持原始尺度|
 |[audit_results.json](audit_results.json)|配置、原始分数、重评分、输入文件哈希、预测文本哈希|
 |[data_audit.json](data_audit.json)|样本数量、MR 数量、参考分布核验|
@@ -264,6 +296,6 @@ BLEU-4 在 seed=43 上出现 LoRA 低于 FFT，说明三次平均的微小正差
 
 本次评分环境的 pycocoevalcap=1.2，与原 benchmark 保存版本一致；NIST 重新计算吻合。原始记录还保存 torch=2.14.0+cu130、transformers=5.17.0、datasets=2.21.0、peft=0.21.0、nltk=3.10.3。上述版本来自当次 `environment.json`，不等于本地分析环境版本。本地分析使用 Python 3.14.6、NLTK 3.10.0；与当次 NLTK 版本不同，但 NIST 原分复算吻合，未将本地 METEOR 当作原始或官方 METEOR 重算结果。
 
-审计临时依赖和下载快照位于 `outputs/smoke/report_audit`，不混入正式 benchmark。运行审计需要 numpy、nltk、matplotlib、future、pycocoevalcap=1.2，以及长度统计使用的 tokenizers；依赖与外部源码保持独立。后续复跑时可运行 `python medium/prepare_sources.py` 获取 manifest 内文件（校验哈希），再运行 `analyze_consistency.py`、`length_audit.py`、`build_report.py`。
+审计临时依赖和下载快照位于 `outputs/smoke/report_audit`，不混入正式 benchmark。运行审计需要 numpy、nltk、matplotlib、future、pycocoevalcap=1.2，以及长度统计使用的 tokenizers；依赖与外部源码保持独立。后续复跑时可运行 `python analysis/prepare_sources.py` 获取 manifest 内文件（校验哈希），再运行 `analyze_consistency.py`、`length_audit.py`、`build_report.py`。
 
 公开源码/数据快照读取于 2026-10-17；manifest 固定其内容哈希，但它们不构成论文作者当年运行环境的完整封存。本报告中**已证实的协议差异**与**未归因的剩余差距**已分别标注，后者不应写成已经查明的唯一训练根因。

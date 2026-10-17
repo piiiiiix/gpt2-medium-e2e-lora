@@ -210,4 +210,6 @@ VSCode 可安装 Ruff 扩展并选择其作为 Python 格式化器；检查规�
 
 ## 与原文的数据一致性分析
 
-报告：[GPT-2 Medium 数据一致性分析](medium/GPT2_Medium_数据一致性分析报告.md)。包含 seed 42/43/44 三次均值、全部五次记录均值、512/1024 同 seed 对照、原文表 3 对比、固定预测的参考集合/评分实现消融，以及数据来源哈希。GEM 清洗数据和单参考评分与原文不同，当前分数不能直接当作原文复现结果；原始 benchmark 保持不变。
+报告：[GPT-2 Medium 数据一致性分析](analysis/GPT2_Medium_数据一致性分析报告.md)。包含 seed 42/43/44 三次均值、全部五次记录均值、512/1024 同 seed 对照、原文表 3 对比、固定预测的参考集合/评分实现消融，以及数据来源哈希。GEM 清洗数据和单参考评分与原文不同，当前分数不能直接当作原文复现结果；原始 benchmark 保持不变。
+
+运行 `python analysis/seed_variability.py` 可生成八项指标的五组纵向柱状图（Base、LoRA 3、LoRA 5、FT 3、FT 5），柱高为均值，误差线为 ±1 样本标准差，散点对应各次完整测试运行。图位于 `analysis/figures/variability_*.png`（另有 SVG 与总览）；`analysis/variability_summary.csv` 保留原始尺度的均值、SD、CV，`analysis/variability_runs.csv` 可追溯每个散点。Base 单次 SD 不可估计；五记录组仅四个不同 seed，包含同 seed 长度对照。运行 `python analysis/build_report.py` 会同步更新完整报告。Small 旧六次 FT 与当前 Medium 的测试分割及生成设置不同，CV 仅作描述对照。

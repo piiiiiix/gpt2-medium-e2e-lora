@@ -10,5 +10,23 @@
   "python": "3.14.6 | packaged by Anaconda, Inc. | (main, Jul  9 2026, 14:29:05) [MSC v.1942 64 bit (AMD64)]",
   "nltk": "3.10.0",
   "new_training_or_generation": false,
-  "complete_official_java_pipeline_executed": false
+  "complete_official_java_pipeline_executed": false,
+  "seed_variability_update": {
+    "summary_rows": 40,
+    "plotted_points": 136,
+    "new_figure_pairs": 9,
+    "independent_numpy_statistics_match": true,
+    "original_run_values_match": true,
+    "small_six_run_summary_recomputed": true,
+    "markdown_links_valid": true,
+    "png_integrity": true,
+    "visual_review": [
+      "variability_CIDEr",
+      "variability_overview"
+    ],
+    "base_sd_is_missing": true,
+    "raw_benchmark_modified": false,
+    "new_training_or_generation": false,
+    "python": "3.14.6 | packaged by Anaconda, Inc. | (main, Jul  9 2026, 14:29:05) [MSC v.1942 64 bit (AMD64)]"
+  }
 }
