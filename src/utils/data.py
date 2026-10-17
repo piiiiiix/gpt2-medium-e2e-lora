@@ -1,6 +1,7 @@
 """E2E 数据模块：加载数据、选择样本、构造提示词并生成仅目标文本参与损失的标签。"""
 
 import json
+import re
 
 from datasets import Dataset, DatasetDict, load_dataset
 
@@ -27,17 +28,44 @@ def subset(dataset, count):
     return dataset
 
 
-def prompt(sample):
-    """按 small 项目的约定，将 meaning representation 转为 MR/Text 提示词。"""
-    return f"MR: {sample['meaning_representation']}\nText:"
+def context(sample):
+    """保留原始 context；GEM MR 仅转换字段名，不冒充原始数据集。"""
+    if "context" in sample:
+        return sample["context"]
+    mr = sample["meaning_representation"]
+    fields = re.findall(r"([^,\[\]]+)\[([^\]]*)\]", mr)
+    if not fields or re.sub(r"[^,\[\]]+\[[^\]]*\]", "", mr).strip(" ,"):
+        raise ValueError("Expected E2E slot[value] MR or an explicit context field")
+    names = {
+        "eatType": "Type",
+        "priceRange": "price",
+        "customer rating": "customer rating",
+        "customerRating": "customer rating",
+        "familyFriendly": "family friendly",
+    }
+    return " | ".join(f"{names.get(k.strip(), k.strip())} : {v}" for k, v in fields)
 
 
-def tokenize(sample, tokenizer, max_length):
+def prompt(sample, protocol="legacy", tokenizer=None):
+    """按模型训练协议构造提示词；legacy 保留旧 MR/Text 格式。"""
+    if protocol == "legacy":
+        return f"MR: {sample['meaning_representation']}\nText:"
+    if tokenizer is None:
+        raise ValueError("Source protocols require a tokenizer")
+    if protocol == "lora_e2e":
+        return context(sample) + tokenizer.bos_token
+    if protocol == "prefix_ft":
+        return f" {context(sample)} {tokenizer.bos_token}"
+    raise ValueError(f"Unknown protocol: {protocol}")
+
+
+def tokenize(sample, tokenizer, max_length, protocol="legacy"):
     """拼接提示词与目标文本，用 -100 屏蔽提示词损失，并检查上下文长度。"""
-    prefix = tokenizer(prompt(sample), add_special_tokens=False)["input_ids"]
-    target = tokenizer(" " + sample["target"], add_special_tokens=False)["input_ids"] + [
-        tokenizer.eos_token_id
-    ]
+    prefix = tokenizer(prompt(sample, protocol, tokenizer), add_special_tokens=False)["input_ids"]
+    text = " " + sample["target"]
+    if protocol == "prefix_ft":
+        text += " "
+    target = tokenizer(text, add_special_tokens=False)["input_ids"] + [tokenizer.eos_token_id]
     if len(prefix) >= max_length:
         raise ValueError(
             "Prompt consumes max_length; increase max_length "

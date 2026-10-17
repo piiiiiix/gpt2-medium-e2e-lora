@@ -76,7 +76,7 @@ LoRA 论文参数见 [参数来源.md](参数来源.md)。默认 Q=4、K=0、V=4
 
 本机 RTX 4070 Laptop 8GB 的真实模型验证使用 BF16；首次 FP16 的非有限梯度记录已保留。训练中若 loss 或 grad_norm 非有限则标记失败；保存最终模型前还会检查是否发生权重更新。
 
-FFT 默认参考 Prefix-Tuning 的 E2E FT：学习率 5e-5、5 epochs、单卡 batch=10、梯度累积=1、验证 batch=10、seed=101、warmup=0、weight decay=0、label smoothing=0、原生 dropout=0.1、fp32、最大长度 1024、关闭梯度检查点。论文报告值与作者代码补充值的区别见参数来源.md；warmup=0 为启动路径与框架默认值推断。8GB 适配保留有效 batch=10，使用 bf16 和梯度检查点。
+FFT 默认参考 Prefix-Tuning 的 E2E FT：学习率 5e-5、5 epochs、单卡 batch=10、梯度累积=1、验证 batch=10、seed=101、warmup=0、weight decay=0、label smoothing=0、原生 dropout=0.1、fp32、最大长度 1024、关闭梯度检查点。论文报告值与作者代码补充值的区别见参数来源.md；warmup=0 已由作者仓库 training_args.py 与启动路径确认。8GB 适配保留有效 batch=10，使用 bf16 和梯度检查点。
 
 2026-10-14 已用真实 GPT-2 Medium 验证新 FFT 默认：仅覆盖训练样本 10、验证样本 2、max_steps=1、logging_steps=1、离线缓存与 smoke 标记；训练 loss=3.291145、验证 loss=3.710723，所有参数可训练且权重确实更新，checkpoint / 最终模型保存成功。运行位于 `outputs/smoke/gpt2-e2e-full-ft/20261014_130742_374057_lr5e-05_e5_b10_ga1_s101_d881fd5f`。这是流程验证，不是完整 E2E 指标复现。前端新 FFT 默认值及 8GB 有效 batch=10 的 AppTest 检查通过。
 
@@ -213,3 +213,21 @@ VSCode 可安装 Ruff 扩展并选择其作为 Python 格式化器；检查规�
 报告：[GPT-2 Medium 数据一致性分析](analysis/GPT2_Medium_数据一致性分析报告.md)。包含 seed 42/43/44 三次均值、全部五次记录均值、512/1024 同 seed 对照、原文表 3 对比、固定预测的参考集合/评分实现消融，以及数据来源哈希。GEM 清洗数据和单参考评分与原文不同，当前分数不能直接当作原文复现结果；原始 benchmark 保持不变。
 
 运行 `python analysis/seed_variability.py` 可生成八项指标的五组纵向柱状图（Base、LoRA 3、LoRA 5、FT 3、FT 5），柱高为均值，误差线为 ±1 样本标准差，散点对应各次完整测试运行。图位于 `analysis/figures/variability_*.png`（另有 SVG 与总览）；`analysis/variability_summary.csv` 保留原始尺度的均值、SD、CV，`analysis/variability_runs.csv` 可追溯每个散点。Base 单次 SD 不可估计；五记录组仅四个不同 seed，包含同 seed 长度对照。运行 `python analysis/build_report.py` 会同步更新完整报告。Small 旧六次 FT 与当前 Medium 的测试分割及生成设置不同，CV 仅作描述对照。
+
+
+## 第 8 节设置修正（2026-10-17）
+
+新训练默认分别采用 `lora_e2e` / `prefix_ft` 输入协议，显式保存 Adam betas、epsilon、梯度裁剪和作者版 AdamW。LoRA epsilon=1e-6、裁剪关闭；FFT epsilon=1e-8、裁剪=1.0。原有学习率、epoch、batch、warmup、Q/V rank 和 dropout 默认值保持各自论文/作者来源。完整对应表及实现边界见 [参数来源.md](参数来源.md#2026-10-17按分析报告第-8-节落实训练与解码设置)。
+
+训练页可设置协议、优化器、Adam 参数和梯度裁剪；8GB 档仍只是显存适配。测试页“生成协议”默认 auto：新 LoRA 使用论文表值（beam=10、length penalty=0.9、上限64、EOS628）；新 FFT 使用 Prefix-Tuning FT 档（beam=5、length penalty=1.0、上限100）。勾选“覆盖协议的生成参数”后才覆盖数值；CLI 用 null 表示跟随协议默认值。实际参数写入 `generation_config.json`。
+
+新模型和 checkpoint 旁保存 `training_protocol.json`，旧模型没有标记时自动沿用 MR/Text 格式。历史排队任务和断点续训缺少新字段时使用旧默认值；新建训练配置使用新默认值。已有权重不会因修改代码而变成新协议训练的权重。
+
+默认数据仍是 GEM，评分仍为原有单参考流程。本次解决第 8 节的配置与协议问题，不代表已复现论文分数，也未覆盖历史数据分析或启动完整正式训练。
+
+```powershell
+python -s src/verify_protocols.py
+# CLI 可在 JSON 中设置 protocol、optimizer、adam_epsilon、max_grad_norm 等
+python -s src/train_lora.py --config <项目内配置.json>
+python -s src/train_fft.py --config <项目内配置.json>
+```

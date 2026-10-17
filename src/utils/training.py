@@ -18,6 +18,7 @@ from transformers import (
 from transformers.integrations import TensorBoardCallback
 
 from utils.data import load_data, subset, tokenize
+from utils.protocols import save_protocol
 from utils.qkv_lora import attach, restore, save_adapter
 from utils.runs import running, write_json
 
@@ -68,17 +69,58 @@ class Progress(TrainerCallback):
         )
 
 
-class AdapterTrainer(Trainer):
+class SourceTrainer(Trainer):
+    """显式选择作者版 AdamW，历史配置继续使用 torch AdamW。"""
+
+    def __init__(self, *args, run_config=None, **kwargs):
+        self.run_config = run_config or {}
+        super().__init__(*args, **kwargs)
+
+    def create_optimizer(self):
+        if self.run_config.get("optimizer") != "source_adamw":
+            return super().create_optimizer()
+        if self.optimizer is None:
+            from utils.source_optimizer import SourceAdamW
+
+            # LoRA 只训练 A/B；FFT 按作者 Trainer 排除 bias 与 LayerNorm。
+            decay_names = self.get_decay_parameter_names(self.model)
+            groups = [
+                dict(
+                    params=[
+                        p
+                        for n, p in self.model.named_parameters()
+                        if p.requires_grad and (n in decay_names) == decay
+                    ],
+                    weight_decay=self.args.weight_decay if decay else 0.0,
+                )
+                for decay in (True, False)
+            ]
+            self.optimizer = SourceAdamW(
+                groups,
+                lr=self.args.learning_rate,
+                betas=(self.args.adam_beta1, self.args.adam_beta2),
+                eps=self.args.adam_epsilon,
+                weight_decay=self.args.weight_decay,
+            )
+        return self.optimizer
+
+    def _save(self, output_dir=None, state_dict=None):
+        super()._save(output_dir, state_dict)
+        save_protocol(output_dir or self.args.output_dir, self.run_config)
+
+
+class AdapterTrainer(SourceTrainer):
     """LoRA 专用 Trainer：只保存 adapter，按验证结果重载最佳 adapter checkpoint。"""
 
     def __init__(self, *args, run_config=None, **kwargs):
         """保留 adapter 配置，初始化通用 Trainer。"""
         self.run_config = run_config
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, run_config=run_config, **kwargs)
 
     def _save(self, output_dir=None, state_dict=None):
         """保存当前 adapter 与 tokenizer，避免将修改后的合并层当作普通整模型保存。"""
         save_adapter(self.model, output_dir or self.args.output_dir, self.run_config)
+        save_protocol(output_dir or self.args.output_dir, self.run_config)
         if self.processing_class:
             self.processing_class.save_pretrained(output_dir or self.args.output_dir)
 
@@ -111,6 +153,20 @@ def validate(config, kind):
         raise ValueError("Select fp32 on CPU")
     if not 0 <= config["label_smoothing"] < 1:
         raise ValueError("label_smoothing must be in [0,1)")
+    if config.get("protocol", "legacy") not in (
+        "legacy",
+        "lora_e2e" if kind == "lora" else "prefix_ft",
+    ):
+        raise ValueError("Training protocol must match lora/fft, or use legacy")
+    if config.get("optimizer", "adamw_torch") not in ("source_adamw", "adamw_torch"):
+        raise ValueError("Unknown optimizer")
+    for key, default in (("adam_epsilon", 1e-8), ("max_grad_norm", 1.0)):
+        value = config.get(key, default)
+        if not math.isfinite(value) or value < 0 or (key == "adam_epsilon" and value == 0):
+            raise ValueError(f"Invalid {key}")
+    for key in ("adam_beta1", "adam_beta2"):
+        if not 0 <= config.get(key, 0.9) < 1:
+            raise ValueError(f"Invalid {key}")
     if kind == "lora":
         if not isinstance(config["ranks"], dict):
             raise ValueError(
@@ -140,7 +196,10 @@ def train(config, path, kind):
         tokenizer = AutoTokenizer.from_pretrained(
             config["model"], local_files_only=config["local_files_only"]
         )
-        tokenizer.pad_token = tokenizer.eos_token
+        if config.get("protocol") == "prefix_ft":
+            tokenizer.add_special_tokens({"pad_token": "[PAD]"})
+        else:
+            tokenizer.pad_token = tokenizer.eos_token
         raw = load_data(config)
         train_data = subset(raw["train"], config["train_samples"])
         eval_data = subset(raw["validation"], config["eval_samples"])
@@ -153,7 +212,7 @@ def train(config, path, kind):
                 validation_count=len(eval_data),
                 train_fingerprint=train_data._fingerprint,
                 validation_fingerprint=eval_data._fingerprint,
-                prompt="MR: {meaning_representation}\nText:",
+                protocol=config.get("protocol", "legacy"),
                 loss="target only",
                 examples=[train_data[i] for i in range(min(3, len(train_data)))],
             ),
@@ -165,7 +224,9 @@ def train(config, path, kind):
 
             def encode(row):
                 """将单条 E2E 数据编码为训练输入与仅覆盖目标文本的标签。"""
-                return tokenize(row, tokenizer, config["max_length"])
+                return tokenize(
+                    row, tokenizer, config["max_length"], config.get("protocol", "legacy")
+                )
 
             train_data = train_data.map(encode, remove_columns=train_data.column_names)
             eval_data = eval_data.map(encode, remove_columns=eval_data.column_names)
@@ -180,6 +241,8 @@ def train(config, path, kind):
             )
             if config["max_length"] > model.config.n_positions:
                 raise ValueError("max_length exceeds model context window")
+            if len(tokenizer) != model.config.vocab_size:
+                model.resize_token_embeddings(len(tokenizer), mean_resizing=False)
             if kind == "lora":
                 attach(model, config["ranks"], config["alpha"], config["dropout"])
                 if config["gradient_checkpointing"]:
@@ -205,6 +268,10 @@ def train(config, path, kind):
                 num_train_epochs=config["epochs"],
                 max_steps=config["max_steps"],
                 optim="adamw_torch",
+                adam_beta1=config.get("adam_beta1", 0.9),
+                adam_beta2=config.get("adam_beta2", 0.999),
+                adam_epsilon=config.get("adam_epsilon", 1e-8),
+                max_grad_norm=config.get("max_grad_norm", 1.0),
                 lr_scheduler_type="linear",
                 weight_decay=config["weight_decay"],
                 warmup_steps=config["warmup_steps"],
@@ -225,8 +292,8 @@ def train(config, path, kind):
                 data_seed=config["seed"],
                 disable_tqdm=True,
             )
-            trainer_class = AdapterTrainer if kind == "lora" else Trainer
-            extras = {"run_config": config} if kind == "lora" else {}
+            trainer_class = AdapterTrainer if kind == "lora" else SourceTrainer
+            extras = {"run_config": config}
             trainer = trainer_class(
                 model=model,
                 args=args,

@@ -76,5 +76,6 @@ def load_model(spec, local_files_only=False, device=None):
     else:
         tokenizer = AutoTokenizer.from_pretrained(path, **options)
         model = AutoModelForCausalLM.from_pretrained(path, **options)
-    tokenizer.pad_token = tokenizer.eos_token
+    if tokenizer.pad_token_id is None:
+        tokenizer.pad_token = tokenizer.eos_token
     return model.to(device or ("cuda" if torch.cuda.is_available() else "cpu")), tokenizer

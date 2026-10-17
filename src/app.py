@@ -282,6 +282,38 @@ if page == "训练":
             max_value=0.99,
             value=config["dropout"],
         )
+        config["max_grad_norm"] = b.number_input(
+            "梯度裁剪（0=关闭）",
+            min_value=0.0,
+            value=config["max_grad_norm"],
+            key=f"max_grad_norm_{kind}_{profile}",
+        )
+        config["adam_epsilon"] = c.number_input(
+            "Adam epsilon",
+            min_value=1e-12,
+            value=config["adam_epsilon"],
+            format="%.10f",
+            key=f"adam_epsilon_{kind}_{profile}",
+        )
+        with st.expander("输入协议与优化器"):
+            protocols = ["lora_e2e" if kind == "lora" else "prefix_ft", "legacy"]
+            config["protocol"] = st.selectbox(
+                "训练输入协议",
+                protocols,
+                index=protocols.index(config["protocol"]),
+                key=f"protocol_{kind}_{profile}",
+            )
+            config["optimizer"] = st.selectbox(
+                "AdamW 实现", ["source_adamw", "adamw_torch"], key=f"optimizer_{kind}_{profile}"
+            )
+            for beta in ("adam_beta1", "adam_beta2"):
+                config[beta] = st.number_input(
+                    beta,
+                    min_value=0.0,
+                    max_value=0.99999,
+                    value=config[beta],
+                    key=f"{beta}_{kind}_{profile}",
+                )
         if kind == "lora":
             config["alpha"] = b.number_input("LoRA alpha", min_value=1, value=config["alpha"])
         config["precision"] = c.selectbox(
@@ -367,19 +399,34 @@ elif page == "测试 / benchmark":
         format_func=lambda i: f"{options[i]['type']} · {options[i]['name']}",
     )
     config = deepcopy(EVAL_DEFAULTS)
+    from utils.protocols import GENERATION
+
+    config["generation_profile"] = st.selectbox(
+        "生成协议",
+        ["auto", *GENERATION],
+        help="auto 跟随模型训练协议；无协议标记的历史模型使用 legacy。",
+    )
+    manual_generation = st.checkbox("覆盖协议的生成参数", value=False)
+    preset = GENERATION.get(config["generation_profile"], GENERATION["lora_paper"])
+    st.caption("LoRA 论文档：beam=10、长度惩罚=0.9；Prefix FT：beam=5、长度惩罚=1.0。")
     with st.form("evaluation_config"):
         kind = st.selectbox("任务", ["benchmarks", "tests"])
         config["split"] = st.selectbox("数据 split", ["validation", "test"])
         config["metrics"] = st.multiselect("评测指标", METRICS, default=METRICS)
         config["samples"] = st.number_input("样本数，0=全部", min_value=0, value=0) or None
-        config["max_new_tokens"] = st.number_input(
-            "最大新 token 数", min_value=1, value=config["max_new_tokens"]
-        )
-        config["num_beams"] = st.number_input("Beam size", min_value=1, value=10)
-        config["length_penalty"] = st.number_input("Length penalty", value=0.9)
-        config["no_repeat_ngram_size"] = st.number_input(
-            "No repeat ngram size", min_value=0, value=4
-        )
+        if manual_generation:
+            for key, label, minimum in [
+                ("max_new_tokens", "最大新 token 数", 1),
+                ("num_beams", "Beam size", 1),
+                ("length_penalty", "Length penalty", 0.0),
+                ("no_repeat_ngram_size", "No repeat ngram size", 0),
+            ]:
+                config[key] = st.number_input(
+                    label,
+                    min_value=minimum,
+                    value=preset[key],
+                    key=f"eval_{key}_{config['generation_profile']}",
+                )
         config["smoke"] = st.checkbox("将本次评测标记为冒烟测试", value=False)
         submitted = st.form_submit_button("启动评测", type="primary")
     if selected:

@@ -19,6 +19,12 @@ TRAIN_DEFAULTS = dict(
     gradient_accumulation=1,
     weight_decay=0.01,
     warmup_steps=500,
+    protocol="lora_e2e",
+    optimizer="source_adamw",
+    adam_beta1=0.9,
+    adam_beta2=0.999,
+    adam_epsilon=1e-6,
+    max_grad_norm=0.0,
     label_smoothing=0.1,
     dropout=0.1,
     alpha=32,
@@ -36,7 +42,7 @@ TRAIN_DEFAULTS = dict(
     ranks=dict(q=4, k=0, v=4),
 )  # noqa: C408
 # FFT 对齐 Li & Liang (2021) E2E FT；未在论文报告的值按作者代码补充。
-# warmup=0 依据普通 E2E 启动路径与当时框架默认值推断，见参数来源.md。
+# warmup=0 已核对作者仓库 training_args.py 与普通 E2E 启动路径。
 FFT_DEFAULTS = {
     **TRAIN_DEFAULTS,
     "learning_rate": 5e-5,
@@ -48,16 +54,20 @@ FFT_DEFAULTS = {
     "seed": 101,
     "max_length": 1024,
     "gradient_checkpointing": False,
+    "protocol": "prefix_ft",
+    "adam_epsilon": 1e-8,
+    "max_grad_norm": 1.0,
 }
 EVAL_DEFAULTS = dict(
     dataset=DATASET_NAME,
     split="validation",
     samples=None,  # noqa: C408
     metrics=METRICS.copy(),
-    max_new_tokens=64,
-    num_beams=10,
-    length_penalty=0.9,
-    no_repeat_ngram_size=4,
+    generation_profile="auto",
+    max_new_tokens=None,
+    num_beams=None,
+    length_penalty=None,
+    no_repeat_ngram_size=None,
     seed=42,
     local_data=None,
     local_files_only=False,

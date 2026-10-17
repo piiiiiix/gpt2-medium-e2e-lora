@@ -22,6 +22,21 @@ def arguments(defaults, kind):
         if unknown:
             raise ValueError(f"Unknown config keys: {unknown}")
         config.update(overrides)
+        if args.run_dir or overrides.get("resume_from_checkpoint"):
+            # 排队快照/续训属于已有实验；不能把新增默认值灌入历史配置。
+            legacy = dict(
+                protocol="legacy",
+                optimizer="adamw_torch",
+                adam_beta1=0.9,
+                adam_beta2=0.999,
+                adam_epsilon=1e-8,
+                max_grad_norm=1.0,
+            )
+            if kind in ("lora", "fft"):
+                for key, value in legacy.items():
+                    config[key] = overrides.get(key, value)
+            elif "generation_profile" not in overrides:
+                config["generation_profile"] = "legacy"
     path = inside_project(args.run_dir) if args.run_dir else new_run(kind, config)
     if args.run_dir and read_json(path / "status.json", {}).get("status") != "queued":
         raise ValueError("Only queued run directories may be started; never overwrite a prior run")
