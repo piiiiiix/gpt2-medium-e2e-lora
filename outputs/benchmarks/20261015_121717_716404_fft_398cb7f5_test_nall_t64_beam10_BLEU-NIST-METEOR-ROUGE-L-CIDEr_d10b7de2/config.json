@@ -1,0 +1,58 @@
+{
+  "dataset": "GEM/e2e_nlg",
+  "split": "test",
+  "samples": null,
+  "metrics": [
+    "BLEU",
+    "NIST",
+    "METEOR",
+    "ROUGE-L",
+    "CIDEr"
+  ],
+  "max_new_tokens": 64,
+  "num_beams": 10,
+  "length_penalty": 0.9,
+  "no_repeat_ngram_size": 4,
+  "seed": 42,
+  "local_data": null,
+  "local_files_only": false,
+  "model": {
+    "type": "fft",
+    "path": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\gpt2-e2e-full-ft\\20261014_195155_334703_lr5e-05_e5.0_b10_ga1_s101_d1944f44\\final",
+    "name": "outputs\\gpt2-e2e-full-ft\\20261014_195155_334703_lr5e-05_e5.0_b10_ga1_s101_d1944f44\\final",
+    "training_run": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\gpt2-e2e-full-ft\\20261014_195155_334703_lr5e-05_e5.0_b10_ga1_s101_d1944f44",
+    "trained": "2026-10-14T20:35:41.730898+08:00",
+    "training_config": {
+      "model": "openai-community/gpt2-medium",
+      "dataset": "GEM/e2e_nlg",
+      "learning_rate": 5e-05,
+      "epochs": 5.0,
+      "batch_size": 10,
+      "eval_batch_size": 10,
+      "gradient_accumulation": 1,
+      "weight_decay": 0.0,
+      "warmup_steps": 0,
+      "label_smoothing": 0.0,
+      "dropout": 0.1,
+      "alpha": 32,
+      "seed": 101,
+      "precision": "fp32",
+      "max_length": 512,
+      "gradient_checkpointing": false,
+      "logging_steps": 100,
+      "max_steps": -1,
+      "smoke": false,
+      "train_samples": null,
+      "eval_samples": null,
+      "local_data": null,
+      "local_files_only": false,
+      "ranks": {
+        "q": 4,
+        "k": 0,
+        "v": 4
+      }
+    }
+  },
+  "predictions": null,
+  "smoke": false
+}

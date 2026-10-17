@@ -3,11 +3,10 @@
 /outputs/**
 !/outputs/.gitkeep
 !/outputs/benchmarks/
-!/outputs/benchmarks/**/
-!/outputs/benchmarks/**/*.csv
 !/outputs/pics/
 !/outputs/pics/**
 __pycache__/
 *.py[cod]
 .env
 .streamlit/secrets.toml
+!/outputs/benchmarks/**

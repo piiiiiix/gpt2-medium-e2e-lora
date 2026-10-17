@@ -1,0 +1,29 @@
+{
+  "metrics": {
+    "BLEU-1": 0.5758978345946862,
+    "BLEU-2": 0.44127032577736797,
+    "BLEU-3": 0.34098718134884665,
+    "BLEU-4": 0.2644573088394953,
+    "NIST": 4.89987273017052,
+    "METEOR": 0.552794307293242,
+    "ROUGE-L": 0.44821649636336913,
+    "CIDEr": 1.5120721016503202
+  },
+  "errors": {},
+  "scope": {
+    "BLEU": "corpus BLEU; sentence BLEU separately retained, not averaged into corpus score",
+    "NIST": "corpus NIST-5 only; per-sample score unavailable in this scoring profile",
+    "METEOR": "mean sample METEOR, NLTK tokenized whitespace with WordNet",
+    "ROUGE-L": "sample average; CIDEr uses this whole corpus document frequencies",
+    "CIDEr": "sample average; CIDEr uses this whole corpus document frequencies"
+  },
+  "samples": 1847,
+  "selected": [
+    "BLEU",
+    "NIST",
+    "METEOR",
+    "ROUGE-L",
+    "CIDEr"
+  ],
+  "profile": "small-compatible single-target"
+}
