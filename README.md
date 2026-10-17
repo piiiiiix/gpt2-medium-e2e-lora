@@ -206,3 +206,8 @@ VSCode 可安装 Ruff 扩展并选择其作为 Python 格式化器；检查规�
 # Benchmark 对比图与数据
 
 8 项指标的五组横评图位于 `outputs/pics`，包含 PNG、SVG、汇总 CSV、数据来源及绘图脚本；运行 `python -s outputs/pics/plot_comparison.py` 可重新生成。Git 纳入整个 `outputs/pics` 与 `outputs/benchmarks` 下所有 CSV，其余实验输出仍忽略。
+
+
+## 与原文的数据一致性分析
+
+报告：[GPT-2 Medium 数据一致性分析](medium/GPT2_Medium_数据一致性分析报告.md)。包含 seed 42/43/44 三次均值、全部五次记录均值、512/1024 同 seed 对照、原文表 3 对比、固定预测的参考集合/评分实现消融，以及数据来源哈希。GEM 清洗数据和单参考评分与原文不同，当前分数不能直接当作原文复现结果；原始 benchmark 保持不变。

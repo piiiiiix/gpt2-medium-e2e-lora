@@ -1,0 +1,56 @@
+[
+  {
+    "file": "pymteval.py",
+    "url": "https://raw.githubusercontent.com/tuetschek/e2e-metrics/master/metrics/pymteval.py",
+    "sha256": "89fa624ddf605d519365a7f273e802406ff6f24345aef5ce59bd54229fef218c",
+    "bytes": 12881
+  },
+  {
+    "file": "lora_test.txt",
+    "url": "https://raw.githubusercontent.com/microsoft/LoRA/main/examples/NLG/data/e2e/test.txt",
+    "sha256": "81b1bcd40c4f12845ec4eb61a77bf43765d112483cd9b2f91ef10bfc1b3d8f13",
+    "bytes": 1351149
+  },
+  {
+    "file": "lora_train.txt",
+    "url": "https://raw.githubusercontent.com/microsoft/LoRA/main/examples/NLG/data/e2e/train.txt",
+    "sha256": "eae319082237310913d9f37f6a891d48fb3f821f29d86870d2cb4f92ddd72c5a",
+    "bytes": 9624463
+  },
+  {
+    "file": "format_converting_e2e.py",
+    "url": "https://raw.githubusercontent.com/microsoft/LoRA/main/examples/NLG/src/format_converting_e2e.py",
+    "sha256": "b7f86266735cebb1075663bf84b284a091f8c06576d58c9ae3506f6e6b8a5dd8",
+    "bytes": 713
+  },
+  {
+    "file": "gpt2_ft.py",
+    "url": "https://raw.githubusercontent.com/microsoft/LoRA/main/examples/NLG/src/gpt2_ft.py",
+    "sha256": "9c54e681acb3275fea35b93f1ee11dbf6832653354a8c0c86070fc6fd75bee86",
+    "bytes": 12549
+  },
+  {
+    "file": "gem_loader.py",
+    "url": "https://huggingface.co/datasets/GEM/e2e_nlg/raw/main/e2e_nlg.py",
+    "sha256": "d440739500ce44a91a1e963bf87e89e03e8be8b11a3c5885021029439ff3fea5",
+    "bytes": 4954
+  },
+  {
+    "file": "gem_test.json",
+    "url": "https://raw.githubusercontent.com/jordiclive/GEM_datasets/main/e2e/test.json",
+    "sha256": "e52a3cfc76fced9546c8362eb7de4c65dc64c2b935b496916c7ddfa1170b9aaa",
+    "bytes": 1081450
+  },
+  {
+    "file": "gem_train.csv",
+    "url": "https://raw.githubusercontent.com/tuetschek/e2e-cleaning/master/cleaned-data/train-fixed.no-ol.csv",
+    "sha256": "12a4f59ec85ddd2586244aaf166f65d1b8cd468b6227e6620108baf118d5b325",
+    "bytes": 11100744
+  },
+  {
+    "file": "gem_validation.json",
+    "url": "https://raw.githubusercontent.com/jordiclive/GEM_datasets/main/e2e/validation.json",
+    "sha256": "92206cb272e2cd2a146b0e9255d04f596c8864a328303b09f819c4bba926981d",
+    "bytes": 880752
+  }
+]

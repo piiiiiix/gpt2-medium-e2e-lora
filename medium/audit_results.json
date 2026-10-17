@@ -1,0 +1,1469 @@
+[
+  {
+    "label": "Base",
+    "run": "20261015_121717_677367_base_491e5ef1_test_nall_t64_beam10_BLEU-NIST-METEOR-ROUGE-L-CIDEr_78d23abe",
+    "kind": "base",
+    "seed": null,
+    "max_length": null,
+    "training_config": {},
+    "generation_config": {
+      "dataset": "GEM/e2e_nlg",
+      "split": "test",
+      "samples": null,
+      "metrics": [
+        "BLEU",
+        "NIST",
+        "METEOR",
+        "ROUGE-L",
+        "CIDEr"
+      ],
+      "max_new_tokens": 64,
+      "num_beams": 10,
+      "length_penalty": 0.9,
+      "no_repeat_ngram_size": 4,
+      "seed": 42,
+      "local_data": null,
+      "local_files_only": false,
+      "predictions": null,
+      "smoke": false
+    },
+    "dataset": {
+      "dataset": "GEM/e2e_nlg",
+      "local_data": null,
+      "split": "test",
+      "count": 1847,
+      "fingerprint": "63266d6563bd1739"
+    },
+    "environment": {
+      "torch": "2.14.0+cu130",
+      "transformers": "5.17.0",
+      "datasets": "2.21.0",
+      "peft": "0.21.0",
+      "streamlit": "1.65.0",
+      "tensorboard": "2.21.0",
+      "nltk": "3.10.3",
+      "pycocoevalcap": "1.2"
+    },
+    "metrics": {
+      "BLEU-1": 0.15803676842637548,
+      "BLEU-2": 0.08629491975165482,
+      "BLEU-3": 0.046035060691574245,
+      "BLEU-4": 0.023635378290679188,
+      "NIST": 1.0916008299034623,
+      "METEOR": 0.1285355637511133,
+      "ROUGE-L": 0.1158768704921423,
+      "CIDEr": 0.043690065835454615
+    },
+    "rescoring": {
+      "single": {
+        "COCO_BLEU4": 0.023635378290679188,
+        "ROUGE-L": 0.1158768704921423,
+        "CIDEr": 0.043690065835454615,
+        "NLTK_NIST": 1.0916008299034623,
+        "MTEval_BLEU": 0.03638890398889978,
+        "MTEval_NIST": 1.503862606340329
+      },
+      "multi": {
+        "COCO_BLEU4": 0.030877349673388472,
+        "ROUGE-L": 0.12910401685234754,
+        "CIDEr": 0.041491753547064913,
+        "NLTK_NIST": 1.2128777036226523,
+        "MTEval_BLEU": 0.042062211700084305,
+        "MTEval_NIST": 1.6523232091638196
+      }
+    },
+    "hashes": {
+      "config.json": "01579765fe7c1e53f71397f4678e26043e5eb196e87942dbf3dbd89beb1ad723",
+      "metrics.json": "460b280f0e2d70caf9513dd02049da0cab3621385d09209f270e5eab4d340a67",
+      "predictions.jsonl": "f4a89ec0c048941ad65c7c58cfe7076c9dd932fbf0048206a7c5c5d4e02b54df"
+    },
+    "training_path": null,
+    "examples": [
+      {
+        "id": "e2e_nlg-test-0",
+        "index": 0,
+        "meaning_representation": "eatType[pub], food[Fast food], customer rating[high], area[riverside], familyFriendly[no], near[Café Rouge]",
+        "prompt": "MR: eatType[pub], food[Fast food], customer rating[high], area[riverside], familyFriendly[no], near[Café Rouge]\nText:",
+        "target": "The Mills is not kid friendly as it is a riverside pub near Café Rouge.  Its mid priced fast food is highly rated.",
+        "references": [
+          "The Mills is not kid friendly as it is a riverside pub near Café Rouge.  Its mid priced fast food is highly rated."
+        ],
+        "prediction": "<span style=\"font-size: 12px; font-family: Arial, Helvetica, sans-serif; font-style: normal; font-variant: normal; letter-spacing: normal; -webkit-text-stroke-width: 1px; -moz-text",
+        "elapsed_seconds": 1.95677550000255
+      },
+      {
+        "id": "e2e_nlg-test-1",
+        "index": 1,
+        "meaning_representation": "eatType[pub], food[Japanese], priceRange[moderate], customer rating[5 out of 5], area[city centre], near[Raja Indian Cuisine]",
+        "prompt": "MR: eatType[pub], food[Japanese], priceRange[moderate], customer rating[5 out of 5], area[city centre], near[Raja Indian Cuisine]\nText:",
+        "target": "The Wrestlerss is rated 5 out of 5, serving Japanese food in a pub. It is higher than average priced, and located near the city centre near Raja Indian Cuisine.",
+        "references": [
+          "The Wrestlerss is rated 5 out of 5, serving Japanese food in a pub. It is higher than average priced, and located near the city centre near Raja Indian Cuisine."
+        ],
+        "prediction": "http://www.reddit.com/r/japanesefood/comments/1u8jvq/japan_s_best_japanese_restaurants_in_japan/\nText: https://www.facebook.com/pages/Raja-Indian-Cuisine",
+        "elapsed_seconds": 1.3811964999767952
+      }
+    ],
+    "prediction_text_sha256": "99e5f9236929e17cc46ac9fdc0f49f2da045da2c11f25da08132c632e97e4bfa"
+  },
+  {
+    "label": "FFT-s101-L1024",
+    "run": "20261015_121717_698387_fft_50f74ec6_test_nall_t64_beam10_BLEU-NIST-METEOR-ROUGE-L-CIDEr_6237f470",
+    "kind": "fft",
+    "seed": 101,
+    "max_length": 1024,
+    "training_config": {
+      "model": "openai-community/gpt2-medium",
+      "dataset": "GEM/e2e_nlg",
+      "learning_rate": 5e-05,
+      "epochs": 5.0,
+      "batch_size": 10,
+      "eval_batch_size": 10,
+      "gradient_accumulation": 1,
+      "weight_decay": 0.0,
+      "warmup_steps": 0,
+      "label_smoothing": 0.0,
+      "dropout": 0.1,
+      "alpha": 32,
+      "seed": 101,
+      "precision": "fp32",
+      "max_length": 1024,
+      "gradient_checkpointing": false,
+      "logging_steps": 100,
+      "max_steps": -1,
+      "smoke": false,
+      "train_samples": null,
+      "eval_samples": null,
+      "local_data": null,
+      "local_files_only": false,
+      "ranks": {
+        "q": 4,
+        "k": 0,
+        "v": 4
+      }
+    },
+    "generation_config": {
+      "dataset": "GEM/e2e_nlg",
+      "split": "test",
+      "samples": null,
+      "metrics": [
+        "BLEU",
+        "NIST",
+        "METEOR",
+        "ROUGE-L",
+        "CIDEr"
+      ],
+      "max_new_tokens": 64,
+      "num_beams": 10,
+      "length_penalty": 0.9,
+      "no_repeat_ngram_size": 4,
+      "seed": 42,
+      "local_data": null,
+      "local_files_only": false,
+      "predictions": null,
+      "smoke": false
+    },
+    "dataset": {
+      "dataset": "GEM/e2e_nlg",
+      "local_data": null,
+      "split": "test",
+      "count": 1847,
+      "fingerprint": "63266d6563bd1739"
+    },
+    "environment": {
+      "torch": "2.14.0+cu130",
+      "transformers": "5.17.0",
+      "datasets": "2.21.0",
+      "peft": "0.21.0",
+      "streamlit": "1.65.0",
+      "tensorboard": "2.21.0",
+      "nltk": "3.10.3",
+      "pycocoevalcap": "1.2"
+    },
+    "metrics": {
+      "BLEU-1": 0.5615259041957502,
+      "BLEU-2": 0.43006140624506195,
+      "BLEU-3": 0.33168843038127827,
+      "BLEU-4": 0.2560325704158081,
+      "NIST": 4.794498885154993,
+      "METEOR": 0.5409129090633247,
+      "ROUGE-L": 0.44521749289348217,
+      "CIDEr": 1.4441981516845601
+    },
+    "rescoring": {
+      "single": {
+        "COCO_BLEU4": 0.2560325704158081,
+        "ROUGE-L": 0.44521749289348217,
+        "CIDEr": 1.4441981516845601,
+        "NLTK_NIST": 4.794498885154994,
+        "MTEval_BLEU": 0.31535844380055034,
+        "MTEval_NIST": 5.301509303923271
+      },
+      "multi": {
+        "COCO_BLEU4": 0.36460193364089805,
+        "ROUGE-L": 0.5157641022265844,
+        "CIDEr": 1.5199125133630365,
+        "NLTK_NIST": 5.394629954353914,
+        "MTEval_BLEU": 0.42029589797823275,
+        "MTEval_NIST": 6.149613509271672
+      }
+    },
+    "hashes": {
+      "config.json": "15755efdaa8a18ac20fac3b43974b94dc660dccc12ba097c7e7bdc77ec2dcffc",
+      "metrics.json": "fa6b134c252c5c8ca7465267a0c9bf54ccdf5c268e3842533bb22181d31f7ba8",
+      "predictions.jsonl": "a4b338e3d800a17b5d12c44ac560b511d61fbe3d044347ff83607bffbfea1880"
+    },
+    "training_path": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\gpt2-e2e-full-ft\\20261014_132455_262014_lr5e-05_e5.0_b10_ga1_s101_0ee7393a",
+    "examples": [
+      {
+        "id": "e2e_nlg-test-0",
+        "index": 0,
+        "meaning_representation": "eatType[pub], food[Fast food], customer rating[high], area[riverside], familyFriendly[no], near[Café Rouge]",
+        "prompt": "MR: eatType[pub], food[Fast food], customer rating[high], area[riverside], familyFriendly[no], near[Café Rouge]\nText:",
+        "target": "The Mills is not kid friendly as it is a riverside pub near Café Rouge.  Its mid priced fast food is highly rated.",
+        "references": [
+          "The Mills is not kid friendly as it is a riverside pub near Café Rouge.  Its mid priced fast food is highly rated."
+        ],
+        "prediction": "Located in the riverside area near Café Rouge, the highly rated Fast food pub, The Pub, is not child friendly.",
+        "elapsed_seconds": 0.9233014999772422
+      },
+      {
+        "id": "e2e_nlg-test-1",
+        "index": 1,
+        "meaning_representation": "eatType[pub], food[Japanese], priceRange[moderate], customer rating[5 out of 5], area[city centre], near[Raja Indian Cuisine]",
+        "prompt": "MR: eatType[pub], food[Japanese], priceRange[moderate], customer rating[5 out of 5], area[city centre], near[Raja Indian Cuisine]\nText:",
+        "target": "The Wrestlerss is rated 5 out of 5, serving Japanese food in a pub. It is higher than average priced, and located near the city centre near Raja Indian Cuisine.",
+        "references": [
+          "The Wrestlerss is rated 5 out of 5, serving Japanese food in a pub. It is higher than average priced, and located near the city centre near Raja Indian Cuisine."
+        ],
+        "prediction": "Located in the city centre near Raja Indian Cuisine is a pub called The Japanese Pub. It has a customer rating of 5 out of 5 and a moderate price range.",
+        "elapsed_seconds": 0.8132667999889236
+      }
+    ],
+    "prediction_text_sha256": "aa75a886badd2883118fbf559ff126332437fc6713c87ee890f3ec701194ef95"
+  },
+  {
+    "label": "FFT-s101-L512",
+    "run": "20261015_121717_716404_fft_398cb7f5_test_nall_t64_beam10_BLEU-NIST-METEOR-ROUGE-L-CIDEr_d10b7de2",
+    "kind": "fft",
+    "seed": 101,
+    "max_length": 512,
+    "training_config": {
+      "model": "openai-community/gpt2-medium",
+      "dataset": "GEM/e2e_nlg",
+      "learning_rate": 5e-05,
+      "epochs": 5.0,
+      "batch_size": 10,
+      "eval_batch_size": 10,
+      "gradient_accumulation": 1,
+      "weight_decay": 0.0,
+      "warmup_steps": 0,
+      "label_smoothing": 0.0,
+      "dropout": 0.1,
+      "alpha": 32,
+      "seed": 101,
+      "precision": "fp32",
+      "max_length": 512,
+      "gradient_checkpointing": false,
+      "logging_steps": 100,
+      "max_steps": -1,
+      "smoke": false,
+      "train_samples": null,
+      "eval_samples": null,
+      "local_data": null,
+      "local_files_only": false,
+      "ranks": {
+        "q": 4,
+        "k": 0,
+        "v": 4
+      }
+    },
+    "generation_config": {
+      "dataset": "GEM/e2e_nlg",
+      "split": "test",
+      "samples": null,
+      "metrics": [
+        "BLEU",
+        "NIST",
+        "METEOR",
+        "ROUGE-L",
+        "CIDEr"
+      ],
+      "max_new_tokens": 64,
+      "num_beams": 10,
+      "length_penalty": 0.9,
+      "no_repeat_ngram_size": 4,
+      "seed": 42,
+      "local_data": null,
+      "local_files_only": false,
+      "predictions": null,
+      "smoke": false
+    },
+    "dataset": {
+      "dataset": "GEM/e2e_nlg",
+      "local_data": null,
+      "split": "test",
+      "count": 1847,
+      "fingerprint": "63266d6563bd1739"
+    },
+    "environment": {
+      "torch": "2.14.0+cu130",
+      "transformers": "5.17.0",
+      "datasets": "2.21.0",
+      "peft": "0.21.0",
+      "streamlit": "1.65.0",
+      "tensorboard": "2.21.0",
+      "nltk": "3.10.3",
+      "pycocoevalcap": "1.2"
+    },
+    "metrics": {
+      "BLEU-1": 0.5611621279772038,
+      "BLEU-2": 0.42974375877083204,
+      "BLEU-3": 0.33133218150817584,
+      "BLEU-4": 0.2557341197162414,
+      "NIST": 4.793432542018731,
+      "METEOR": 0.5400758840834629,
+      "ROUGE-L": 0.44466288876084015,
+      "CIDEr": 1.44286348298763
+    },
+    "rescoring": {
+      "single": {
+        "COCO_BLEU4": 0.2557341197162414,
+        "ROUGE-L": 0.44466288876084015,
+        "CIDEr": 1.44286348298763,
+        "NLTK_NIST": 4.793432542018731,
+        "MTEval_BLEU": 0.3149186304920523,
+        "MTEval_NIST": 5.295971021501078
+      },
+      "multi": {
+        "COCO_BLEU4": 0.36441166283313764,
+        "ROUGE-L": 0.5151924222694875,
+        "CIDEr": 1.5189043581014505,
+        "NLTK_NIST": 5.391503953221952,
+        "MTEval_BLEU": 0.4195253913248523,
+        "MTEval_NIST": 6.136722452843347
+      }
+    },
+    "hashes": {
+      "config.json": "b968d68bf49698ee9de4c164596368d67672a12dce0089075199f9bc4c97cba6",
+      "metrics.json": "8b86d3e73adf9883931bb95e928e50ed44f50bf7240686da888f94dc20713192",
+      "predictions.jsonl": "9fec2a65b80ae996dc739feb24f869c6d50520ac241815220f83f296e6441a29"
+    },
+    "training_path": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\gpt2-e2e-full-ft\\20261014_195155_334703_lr5e-05_e5.0_b10_ga1_s101_d1944f44",
+    "examples": [
+      {
+        "id": "e2e_nlg-test-0",
+        "index": 0,
+        "meaning_representation": "eatType[pub], food[Fast food], customer rating[high], area[riverside], familyFriendly[no], near[Café Rouge]",
+        "prompt": "MR: eatType[pub], food[Fast food], customer rating[high], area[riverside], familyFriendly[no], near[Café Rouge]\nText:",
+        "target": "The Mills is not kid friendly as it is a riverside pub near Café Rouge.  Its mid priced fast food is highly rated.",
+        "references": [
+          "The Mills is not kid friendly as it is a riverside pub near Café Rouge.  Its mid priced fast food is highly rated."
+        ],
+        "prediction": "Located in the riverside area near Café Rouge, the highly rated Fast food pub, The Pub, is not child friendly.",
+        "elapsed_seconds": 0.9748592999821994
+      },
+      {
+        "id": "e2e_nlg-test-1",
+        "index": 1,
+        "meaning_representation": "eatType[pub], food[Japanese], priceRange[moderate], customer rating[5 out of 5], area[city centre], near[Raja Indian Cuisine]",
+        "prompt": "MR: eatType[pub], food[Japanese], priceRange[moderate], customer rating[5 out of 5], area[city centre], near[Raja Indian Cuisine]\nText:",
+        "target": "The Wrestlerss is rated 5 out of 5, serving Japanese food in a pub. It is higher than average priced, and located near the city centre near Raja Indian Cuisine.",
+        "references": [
+          "The Wrestlerss is rated 5 out of 5, serving Japanese food in a pub. It is higher than average priced, and located near the city centre near Raja Indian Cuisine."
+        ],
+        "prediction": "Located in the city centre near Raja Indian Cuisine is a pub called The Japanese Pub. It has a customer rating of 5 out of 5 and a moderate price range.",
+        "elapsed_seconds": 0.7955642000015359
+      }
+    ],
+    "prediction_text_sha256": "a06fc6d8fb24cb6b2e3e37ec3d70f6b04eae82ae674666f0461d1ce0fe098a41"
+  },
+  {
+    "label": "FFT-s42-L1024",
+    "run": "20261015_121717_735421_fft_e967b0c0_test_nall_t64_beam10_BLEU-NIST-METEOR-ROUGE-L-CIDEr_b80ccdc8",
+    "kind": "fft",
+    "seed": 42,
+    "max_length": 1024,
+    "training_config": {
+      "model": "openai-community/gpt2-medium",
+      "dataset": "GEM/e2e_nlg",
+      "learning_rate": 5e-05,
+      "epochs": 5.0,
+      "batch_size": 10,
+      "eval_batch_size": 10,
+      "gradient_accumulation": 1,
+      "weight_decay": 0.0,
+      "warmup_steps": 0,
+      "label_smoothing": 0.0,
+      "dropout": 0.1,
+      "alpha": 32,
+      "seed": 42,
+      "precision": "fp32",
+      "max_length": 1024,
+      "gradient_checkpointing": false,
+      "logging_steps": 100,
+      "max_steps": -1,
+      "smoke": false,
+      "train_samples": null,
+      "eval_samples": null,
+      "local_data": null,
+      "local_files_only": false,
+      "ranks": {
+        "q": 4,
+        "k": 0,
+        "v": 4
+      }
+    },
+    "generation_config": {
+      "dataset": "GEM/e2e_nlg",
+      "split": "test",
+      "samples": null,
+      "metrics": [
+        "BLEU",
+        "NIST",
+        "METEOR",
+        "ROUGE-L",
+        "CIDEr"
+      ],
+      "max_new_tokens": 64,
+      "num_beams": 10,
+      "length_penalty": 0.9,
+      "no_repeat_ngram_size": 4,
+      "seed": 42,
+      "local_data": null,
+      "local_files_only": false,
+      "predictions": null,
+      "smoke": false
+    },
+    "dataset": {
+      "dataset": "GEM/e2e_nlg",
+      "local_data": null,
+      "split": "test",
+      "count": 1847,
+      "fingerprint": "63266d6563bd1739"
+    },
+    "environment": {
+      "torch": "2.14.0+cu130",
+      "transformers": "5.17.0",
+      "datasets": "2.21.0",
+      "peft": "0.21.0",
+      "streamlit": "1.65.0",
+      "tensorboard": "2.21.0",
+      "nltk": "3.10.3",
+      "pycocoevalcap": "1.2"
+    },
+    "metrics": {
+      "BLEU-1": 0.5781733905744688,
+      "BLEU-2": 0.44187434047225693,
+      "BLEU-3": 0.3406732314896635,
+      "BLEU-4": 0.2637226149423356,
+      "NIST": 4.863599912825808,
+      "METEOR": 0.5519600057796311,
+      "ROUGE-L": 0.4448322706376615,
+      "CIDEr": 1.4817728737958098
+    },
+    "rescoring": {
+      "single": {
+        "COCO_BLEU4": 0.2637226149423356,
+        "ROUGE-L": 0.4448322706376615,
+        "CIDEr": 1.4817728737958098,
+        "NLTK_NIST": 4.863599912825808,
+        "MTEval_BLEU": 0.3254644298354019,
+        "MTEval_NIST": 5.4249043180783785
+      },
+      "multi": {
+        "COCO_BLEU4": 0.37766747213686785,
+        "ROUGE-L": 0.5149206713621218,
+        "CIDEr": 1.564740527053596,
+        "NLTK_NIST": 5.5244612660019285,
+        "MTEval_BLEU": 0.4349781309436854,
+        "MTEval_NIST": 6.375606292390998
+      }
+    },
+    "hashes": {
+      "config.json": "5881b65b7bb84d6efafed83f6ea688fe1272bf31014b8e5e86ebadfba1e88be7",
+      "metrics.json": "4c9e5a556748605479c459c8f17b600cae009c0eb8f2e3b73c962abbe7d3a3c0",
+      "predictions.jsonl": "173c780e4618eab3852277b465f24bfe11a4865d0f3a655e4793ca81497807a8"
+    },
+    "training_path": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\gpt2-e2e-full-ft\\20261014_195155_337706_lr5e-05_e5.0_b10_ga1_s42_4a71f5da",
+    "examples": [
+      {
+        "id": "e2e_nlg-test-0",
+        "index": 0,
+        "meaning_representation": "eatType[pub], food[Fast food], customer rating[high], area[riverside], familyFriendly[no], near[Café Rouge]",
+        "prompt": "MR: eatType[pub], food[Fast food], customer rating[high], area[riverside], familyFriendly[no], near[Café Rouge]\nText:",
+        "target": "The Mills is not kid friendly as it is a riverside pub near Café Rouge.  Its mid priced fast food is highly rated.",
+        "references": [
+          "The Mills is not kid friendly as it is a riverside pub near Café Rouge.  Its mid priced fast food is highly rated."
+        ],
+        "prediction": "There is a fast food pub near Café Rouge in the riverside area. It is called the Fast food pub and has a high customer rating. It is not family-friendly.",
+        "elapsed_seconds": 1.3350705000048038
+      },
+      {
+        "id": "e2e_nlg-test-1",
+        "index": 1,
+        "meaning_representation": "eatType[pub], food[Japanese], priceRange[moderate], customer rating[5 out of 5], area[city centre], near[Raja Indian Cuisine]",
+        "prompt": "MR: eatType[pub], food[Japanese], priceRange[moderate], customer rating[5 out of 5], area[city centre], near[Raja Indian Cuisine]\nText:",
+        "target": "The Wrestlerss is rated 5 out of 5, serving Japanese food in a pub. It is higher than average priced, and located near the city centre near Raja Indian Cuisine.",
+        "references": [
+          "The Wrestlerss is rated 5 out of 5, serving Japanese food in a pub. It is higher than average priced, and located near the city centre near Raja Indian Cuisine."
+        ],
+        "prediction": "Located in the city centre, near Raja Indian Cuisine, is a pub called The Japanese Pub. It has a customer rating of 5 out of 5 and a moderate price range.",
+        "elapsed_seconds": 0.826820599992061
+      }
+    ],
+    "prediction_text_sha256": "00d53e6cfb9d97c2d0d05ac0b905c24f52c81a235469b0ff0b1ec5bc359601ee"
+  },
+  {
+    "label": "FFT-s43-L1024",
+    "run": "20261015_121717_753437_fft_bb11f402_test_nall_t64_beam10_BLEU-NIST-METEOR-ROUGE-L-CIDEr_3dca1c7a",
+    "kind": "fft",
+    "seed": 43,
+    "max_length": 1024,
+    "training_config": {
+      "model": "openai-community/gpt2-medium",
+      "dataset": "GEM/e2e_nlg",
+      "learning_rate": 5e-05,
+      "epochs": 5.0,
+      "batch_size": 10,
+      "eval_batch_size": 10,
+      "gradient_accumulation": 1,
+      "weight_decay": 0.0,
+      "warmup_steps": 0,
+      "label_smoothing": 0.0,
+      "dropout": 0.1,
+      "alpha": 32,
+      "seed": 43,
+      "precision": "fp32",
+      "max_length": 1024,
+      "gradient_checkpointing": false,
+      "logging_steps": 100,
+      "max_steps": -1,
+      "smoke": false,
+      "train_samples": null,
+      "eval_samples": null,
+      "local_data": null,
+      "local_files_only": false,
+      "ranks": {
+        "q": 4,
+        "k": 0,
+        "v": 4
+      }
+    },
+    "generation_config": {
+      "dataset": "GEM/e2e_nlg",
+      "split": "test",
+      "samples": null,
+      "metrics": [
+        "BLEU",
+        "NIST",
+        "METEOR",
+        "ROUGE-L",
+        "CIDEr"
+      ],
+      "max_new_tokens": 64,
+      "num_beams": 10,
+      "length_penalty": 0.9,
+      "no_repeat_ngram_size": 4,
+      "seed": 42,
+      "local_data": null,
+      "local_files_only": false,
+      "predictions": null,
+      "smoke": false
+    },
+    "dataset": {
+      "dataset": "GEM/e2e_nlg",
+      "local_data": null,
+      "split": "test",
+      "count": 1847,
+      "fingerprint": "63266d6563bd1739"
+    },
+    "environment": {
+      "torch": "2.14.0+cu130",
+      "transformers": "5.17.0",
+      "datasets": "2.21.0",
+      "peft": "0.21.0",
+      "streamlit": "1.65.0",
+      "tensorboard": "2.21.0",
+      "nltk": "3.10.3",
+      "pycocoevalcap": "1.2"
+    },
+    "metrics": {
+      "BLEU-1": 0.5807899764728354,
+      "BLEU-2": 0.44323656228762104,
+      "BLEU-3": 0.34144462241418966,
+      "BLEU-4": 0.26398211062891974,
+      "NIST": 4.862992220971803,
+      "METEOR": 0.5529127610799035,
+      "ROUGE-L": 0.4412539259350083,
+      "CIDEr": 1.4794729169074288
+    },
+    "rescoring": {
+      "single": {
+        "COCO_BLEU4": 0.26398211062891974,
+        "ROUGE-L": 0.4412539259350083,
+        "CIDEr": 1.4794729169074288,
+        "NLTK_NIST": 4.862992220971803,
+        "MTEval_BLEU": 0.32406942831741786,
+        "MTEval_NIST": 5.427731936057472
+      },
+      "multi": {
+        "COCO_BLEU4": 0.37366701878874187,
+        "ROUGE-L": 0.5107116743137358,
+        "CIDEr": 1.559404197477849,
+        "NLTK_NIST": 5.505154006790757,
+        "MTEval_BLEU": 0.4301184583167459,
+        "MTEval_NIST": 6.356849419592593
+      }
+    },
+    "hashes": {
+      "config.json": "3315f8299723004621af1092a9c9964e5c4de4739aeb9ec3333422a08c390c17",
+      "metrics.json": "9ec8cecc0a120ea8e7c5c9b58591738c48bfd0ff515ee2dbd9aa197b63946727",
+      "predictions.jsonl": "6d4df27e554811d3ef117b4624586914f35ba33d032144cd34fffe7adcafdea4"
+    },
+    "training_path": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\gpt2-e2e-full-ft\\20261014_195155_340708_lr5e-05_e5.0_b10_ga1_s43_7dfd4e3f",
+    "examples": [
+      {
+        "id": "e2e_nlg-test-0",
+        "index": 0,
+        "meaning_representation": "eatType[pub], food[Fast food], customer rating[high], area[riverside], familyFriendly[no], near[Café Rouge]",
+        "prompt": "MR: eatType[pub], food[Fast food], customer rating[high], area[riverside], familyFriendly[no], near[Café Rouge]\nText:",
+        "target": "The Mills is not kid friendly as it is a riverside pub near Café Rouge.  Its mid priced fast food is highly rated.",
+        "references": [
+          "The Mills is not kid friendly as it is a riverside pub near Café Rouge.  Its mid priced fast food is highly rated."
+        ],
+        "prediction": "In the riverside area, near Café Rouge, there is a pub called The Fast Food. It has a high customer rating and is not kid friendly.",
+        "elapsed_seconds": 1.3248329000198282
+      },
+      {
+        "id": "e2e_nlg-test-1",
+        "index": 1,
+        "meaning_representation": "eatType[pub], food[Japanese], priceRange[moderate], customer rating[5 out of 5], area[city centre], near[Raja Indian Cuisine]",
+        "prompt": "MR: eatType[pub], food[Japanese], priceRange[moderate], customer rating[5 out of 5], area[city centre], near[Raja Indian Cuisine]\nText:",
+        "target": "The Wrestlerss is rated 5 out of 5, serving Japanese food in a pub. It is higher than average priced, and located near the city centre near Raja Indian Cuisine.",
+        "references": [
+          "The Wrestlerss is rated 5 out of 5, serving Japanese food in a pub. It is higher than average priced, and located near the city centre near Raja Indian Cuisine."
+        ],
+        "prediction": "In the city centre, near Raja Indian Cuisine, there is a pub called The Japanese Pub. It has a customer rating of 5 out of 5 and a moderate price range.",
+        "elapsed_seconds": 0.8519774000160396
+      }
+    ],
+    "prediction_text_sha256": "64b4157139774bae8b4ae373659e39f0828caced97c7a369a2250a82158b262d"
+  },
+  {
+    "label": "FFT-s44-L1024",
+    "run": "20261015_121717_771623_fft_6b506dd1_test_nall_t64_beam10_BLEU-NIST-METEOR-ROUGE-L-CIDEr_e8fb49ec",
+    "kind": "fft",
+    "seed": 44,
+    "max_length": 1024,
+    "training_config": {
+      "model": "openai-community/gpt2-medium",
+      "dataset": "GEM/e2e_nlg",
+      "learning_rate": 5e-05,
+      "epochs": 5.0,
+      "batch_size": 10,
+      "eval_batch_size": 10,
+      "gradient_accumulation": 1,
+      "weight_decay": 0.0,
+      "warmup_steps": 0,
+      "label_smoothing": 0.0,
+      "dropout": 0.1,
+      "alpha": 32,
+      "seed": 44,
+      "precision": "fp32",
+      "max_length": 1024,
+      "gradient_checkpointing": false,
+      "logging_steps": 100,
+      "max_steps": -1,
+      "smoke": false,
+      "train_samples": null,
+      "eval_samples": null,
+      "local_data": null,
+      "local_files_only": false,
+      "ranks": {
+        "q": 4,
+        "k": 0,
+        "v": 4
+      }
+    },
+    "generation_config": {
+      "dataset": "GEM/e2e_nlg",
+      "split": "test",
+      "samples": null,
+      "metrics": [
+        "BLEU",
+        "NIST",
+        "METEOR",
+        "ROUGE-L",
+        "CIDEr"
+      ],
+      "max_new_tokens": 64,
+      "num_beams": 10,
+      "length_penalty": 0.9,
+      "no_repeat_ngram_size": 4,
+      "seed": 42,
+      "local_data": null,
+      "local_files_only": false,
+      "predictions": null,
+      "smoke": false
+    },
+    "dataset": {
+      "dataset": "GEM/e2e_nlg",
+      "local_data": null,
+      "split": "test",
+      "count": 1847,
+      "fingerprint": "63266d6563bd1739"
+    },
+    "environment": {
+      "torch": "2.14.0+cu130",
+      "transformers": "5.17.0",
+      "datasets": "2.21.0",
+      "peft": "0.21.0",
+      "streamlit": "1.65.0",
+      "tensorboard": "2.21.0",
+      "nltk": "3.10.3",
+      "pycocoevalcap": "1.2"
+    },
+    "metrics": {
+      "BLEU-1": 0.5744615513658982,
+      "BLEU-2": 0.4378496033517168,
+      "BLEU-3": 0.33685977827812297,
+      "BLEU-4": 0.2598759771003339,
+      "NIST": 4.857599845170256,
+      "METEOR": 0.5499899036490873,
+      "ROUGE-L": 0.44484737474333014,
+      "CIDEr": 1.4611367167881617
+    },
+    "rescoring": {
+      "single": {
+        "COCO_BLEU4": 0.2598759771003339,
+        "ROUGE-L": 0.44484737474333014,
+        "CIDEr": 1.4611367167881617,
+        "NLTK_NIST": 4.857599845170256,
+        "MTEval_BLEU": 0.32242997498874365,
+        "MTEval_NIST": 5.423216246871846
+      },
+      "multi": {
+        "COCO_BLEU4": 0.37065230083805517,
+        "ROUGE-L": 0.5133641522491706,
+        "CIDEr": 1.5373856112408417,
+        "NLTK_NIST": 5.498462298242384,
+        "MTEval_BLEU": 0.42948327029700323,
+        "MTEval_NIST": 6.329306203855434
+      }
+    },
+    "hashes": {
+      "config.json": "39a422d6377f2360eab3586c14fbbd76880c859c60113c64bdfece6d8dc5a7b4",
+      "metrics.json": "6fd01cbeb899701da14c47792418238893bade33d94d773c6edd302896521408",
+      "predictions.jsonl": "7f192de7e6ca63f208f8a589143b528af2f782fa3f504e3b716c51c9be0e8f92"
+    },
+    "training_path": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\gpt2-e2e-full-ft\\20261014_195155_343711_lr5e-05_e5.0_b10_ga1_s44_14c95cf4",
+    "examples": [
+      {
+        "id": "e2e_nlg-test-0",
+        "index": 0,
+        "meaning_representation": "eatType[pub], food[Fast food], customer rating[high], area[riverside], familyFriendly[no], near[Café Rouge]",
+        "prompt": "MR: eatType[pub], food[Fast food], customer rating[high], area[riverside], familyFriendly[no], near[Café Rouge]\nText:",
+        "target": "The Mills is not kid friendly as it is a riverside pub near Café Rouge.  Its mid priced fast food is highly rated.",
+        "references": [
+          "The Mills is not kid friendly as it is a riverside pub near Café Rouge.  Its mid priced fast food is highly rated."
+        ],
+        "prediction": "There is a Fast food pub near Café Rouge in riverside. It is called the pub, is not kid friendly and has a high customer rating.",
+        "elapsed_seconds": 1.1443894999974873
+      },
+      {
+        "id": "e2e_nlg-test-1",
+        "index": 1,
+        "meaning_representation": "eatType[pub], food[Japanese], priceRange[moderate], customer rating[5 out of 5], area[city centre], near[Raja Indian Cuisine]",
+        "prompt": "MR: eatType[pub], food[Japanese], priceRange[moderate], customer rating[5 out of 5], area[city centre], near[Raja Indian Cuisine]\nText:",
+        "target": "The Wrestlerss is rated 5 out of 5, serving Japanese food in a pub. It is higher than average priced, and located near the city centre near Raja Indian Cuisine.",
+        "references": [
+          "The Wrestlerss is rated 5 out of 5, serving Japanese food in a pub. It is higher than average priced, and located near the city centre near Raja Indian Cuisine."
+        ],
+        "prediction": "Located in the city centre near Raja Indian Cuisine is a pub called the Japanese Pub. It has a customer rating of 5 out of 5 and a moderate price range.",
+        "elapsed_seconds": 0.875987699982943
+      }
+    ],
+    "prediction_text_sha256": "c1dce56c98f166f0a2fff607428cfed63315df3d4b9eb38455c601aa5a47201a"
+  },
+  {
+    "label": "LORA-s110-L512",
+    "run": "20261015_121717_787638_lora_66eaf0d4_test_nall_t64_beam10_BLEU-NIST-METEOR-ROUGE-L-CIDEr_50d54773",
+    "kind": "lora",
+    "seed": 110,
+    "max_length": 512,
+    "training_config": {
+      "model": "openai-community/gpt2-medium",
+      "dataset": "GEM/e2e_nlg",
+      "learning_rate": 0.0002,
+      "epochs": 5.0,
+      "batch_size": 8,
+      "eval_batch_size": 4,
+      "gradient_accumulation": 1,
+      "weight_decay": 0.01,
+      "warmup_steps": 500,
+      "label_smoothing": 0.1,
+      "dropout": 0.1,
+      "alpha": 32,
+      "seed": 110,
+      "precision": "fp32",
+      "max_length": 512,
+      "gradient_checkpointing": false,
+      "logging_steps": 100,
+      "max_steps": -1,
+      "smoke": false,
+      "train_samples": null,
+      "eval_samples": null,
+      "local_data": null,
+      "local_files_only": false,
+      "ranks": {
+        "q": 4,
+        "k": 0,
+        "v": 4
+      }
+    },
+    "generation_config": {
+      "dataset": "GEM/e2e_nlg",
+      "split": "test",
+      "samples": null,
+      "metrics": [
+        "BLEU",
+        "NIST",
+        "METEOR",
+        "ROUGE-L",
+        "CIDEr"
+      ],
+      "max_new_tokens": 64,
+      "num_beams": 10,
+      "length_penalty": 0.9,
+      "no_repeat_ngram_size": 4,
+      "seed": 42,
+      "local_data": null,
+      "local_files_only": false,
+      "predictions": null,
+      "smoke": false
+    },
+    "dataset": {
+      "dataset": "GEM/e2e_nlg",
+      "local_data": null,
+      "split": "test",
+      "count": 1847,
+      "fingerprint": "63266d6563bd1739"
+    },
+    "environment": {
+      "torch": "2.14.0+cu130",
+      "transformers": "5.17.0",
+      "datasets": "2.21.0",
+      "peft": "0.21.0",
+      "streamlit": "1.65.0",
+      "tensorboard": "2.21.0",
+      "nltk": "3.10.3",
+      "pycocoevalcap": "1.2"
+    },
+    "metrics": {
+      "BLEU-1": 0.5784796686604605,
+      "BLEU-2": 0.4435613072109933,
+      "BLEU-3": 0.3425394721944049,
+      "BLEU-4": 0.26577834807214495,
+      "NIST": 4.912501855270479,
+      "METEOR": 0.5535642168383036,
+      "ROUGE-L": 0.44956448006209104,
+      "CIDEr": 1.511447561997269
+    },
+    "rescoring": {
+      "single": {
+        "COCO_BLEU4": 0.26577834807214495,
+        "ROUGE-L": 0.44956448006209104,
+        "CIDEr": 1.511447561997269,
+        "NLTK_NIST": 4.912501855270479,
+        "MTEval_BLEU": 0.32747013432981753,
+        "MTEval_NIST": 5.453083290271192
+      },
+      "multi": {
+        "COCO_BLEU4": 0.37636842205713006,
+        "ROUGE-L": 0.5175551136515342,
+        "CIDEr": 1.572578285774484,
+        "NLTK_NIST": 5.527315701547842,
+        "MTEval_BLEU": 0.43472206800422947,
+        "MTEval_NIST": 6.350816607912033
+      }
+    },
+    "hashes": {
+      "config.json": "aa9c954f7966e1ef3300ef7efc0b024ca8afd032510fa631cef6628903ab9c89",
+      "metrics.json": "2239dc5fa0788833dad0dcb35c4cd0b1691334d0e5de379780929100a15e7e49",
+      "predictions.jsonl": "19cbe3f40e429cac47f6b1fb928bb99672ce079d12d4ea59d26552566ce4f491"
+    },
+    "training_path": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\gpt2-e2e-lora\\20261014_132455_250003_lr0.0002_e5.0_b8_ga1_s110_q4k0v4_60c8e60b",
+    "examples": [
+      {
+        "id": "e2e_nlg-test-0",
+        "index": 0,
+        "meaning_representation": "eatType[pub], food[Fast food], customer rating[high], area[riverside], familyFriendly[no], near[Café Rouge]",
+        "prompt": "MR: eatType[pub], food[Fast food], customer rating[high], area[riverside], familyFriendly[no], near[Café Rouge]\nText:",
+        "target": "The Mills is not kid friendly as it is a riverside pub near Café Rouge.  Its mid priced fast food is highly rated.",
+        "references": [
+          "The Mills is not kid friendly as it is a riverside pub near Café Rouge.  Its mid priced fast food is highly rated."
+        ],
+        "prediction": "In the riverside area, near Café Rouge, there is a fast food pub with a high customer rating. It is not family-friendly.",
+        "elapsed_seconds": 1.6207714000192937
+      },
+      {
+        "id": "e2e_nlg-test-1",
+        "index": 1,
+        "meaning_representation": "eatType[pub], food[Japanese], priceRange[moderate], customer rating[5 out of 5], area[city centre], near[Raja Indian Cuisine]",
+        "prompt": "MR: eatType[pub], food[Japanese], priceRange[moderate], customer rating[5 out of 5], area[city centre], near[Raja Indian Cuisine]\nText:",
+        "target": "The Wrestlerss is rated 5 out of 5, serving Japanese food in a pub. It is higher than average priced, and located near the city centre near Raja Indian Cuisine.",
+        "references": [
+          "The Wrestlerss is rated 5 out of 5, serving Japanese food in a pub. It is higher than average priced, and located near the city centre near Raja Indian Cuisine."
+        ],
+        "prediction": "In the city centre, near Raja Indian Cuisine, there is a pub that serves Japanese food with a moderate price range and a customer rating of 5 out of 5. It is called the Akira Indian Cuisine.",
+        "elapsed_seconds": 1.5074295999947935
+      }
+    ],
+    "prediction_text_sha256": "15d1f6f5aee59959551962da2d61eec5424fbd2936921ea715d36f08a6646584"
+  },
+  {
+    "label": "LORA-s42-L512",
+    "run": "20261015_121717_805654_lora_d7d9bc89_test_nall_t64_beam10_BLEU-NIST-METEOR-ROUGE-L-CIDEr_3aa5dc0c",
+    "kind": "lora",
+    "seed": 42,
+    "max_length": 512,
+    "training_config": {
+      "model": "openai-community/gpt2-medium",
+      "dataset": "GEM/e2e_nlg",
+      "learning_rate": 0.0002,
+      "epochs": 5.0,
+      "batch_size": 8,
+      "eval_batch_size": 4,
+      "gradient_accumulation": 1,
+      "weight_decay": 0.01,
+      "warmup_steps": 500,
+      "label_smoothing": 0.1,
+      "dropout": 0.1,
+      "alpha": 32,
+      "seed": 42,
+      "precision": "fp32",
+      "max_length": 512,
+      "gradient_checkpointing": false,
+      "logging_steps": 100,
+      "max_steps": -1,
+      "smoke": false,
+      "train_samples": null,
+      "eval_samples": null,
+      "local_data": null,
+      "local_files_only": false,
+      "ranks": {
+        "q": 4,
+        "k": 0,
+        "v": 4
+      }
+    },
+    "generation_config": {
+      "dataset": "GEM/e2e_nlg",
+      "split": "test",
+      "samples": null,
+      "metrics": [
+        "BLEU",
+        "NIST",
+        "METEOR",
+        "ROUGE-L",
+        "CIDEr"
+      ],
+      "max_new_tokens": 64,
+      "num_beams": 10,
+      "length_penalty": 0.9,
+      "no_repeat_ngram_size": 4,
+      "seed": 42,
+      "local_data": null,
+      "local_files_only": false,
+      "predictions": null,
+      "smoke": false
+    },
+    "dataset": {
+      "dataset": "GEM/e2e_nlg",
+      "local_data": null,
+      "split": "test",
+      "count": 1847,
+      "fingerprint": "63266d6563bd1739"
+    },
+    "environment": {
+      "torch": "2.14.0+cu130",
+      "transformers": "5.17.0",
+      "datasets": "2.21.0",
+      "peft": "0.21.0",
+      "streamlit": "1.65.0",
+      "tensorboard": "2.21.0",
+      "nltk": "3.10.3",
+      "pycocoevalcap": "1.2"
+    },
+    "metrics": {
+      "BLEU-1": 0.5758978345946862,
+      "BLEU-2": 0.44127032577736797,
+      "BLEU-3": 0.34098718134884665,
+      "BLEU-4": 0.2644573088394953,
+      "NIST": 4.89987273017052,
+      "METEOR": 0.552794307293242,
+      "ROUGE-L": 0.44821649636336913,
+      "CIDEr": 1.5120721016503202
+    },
+    "rescoring": {
+      "single": {
+        "COCO_BLEU4": 0.2644573088394953,
+        "ROUGE-L": 0.44821649636336913,
+        "CIDEr": 1.5120721016503202,
+        "NLTK_NIST": 4.89987273017052,
+        "MTEval_BLEU": 0.32550556289642807,
+        "MTEval_NIST": 5.443619609857782
+      },
+      "multi": {
+        "COCO_BLEU4": 0.3759662644529589,
+        "ROUGE-L": 0.5179661467771831,
+        "CIDEr": 1.582031580271832,
+        "NLTK_NIST": 5.525965830744499,
+        "MTEval_BLEU": 0.4327298140869377,
+        "MTEval_NIST": 6.337511696898254
+      }
+    },
+    "hashes": {
+      "config.json": "fa7657385de3b19cb8b115cd6f80f7e95fac4f1880830612fab1cfcffc599785",
+      "metrics.json": "8b89e3c67e855309d07aa131d43ccf3c6880ff1b1eb011331399fca6edf0955c",
+      "predictions.jsonl": "0c6a60be31c61679c6b4d4302f52ba8424430f6667c34474a2d8855b155d3c32"
+    },
+    "training_path": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\gpt2-e2e-lora\\20261014_132455_253006_lr0.0002_e5.0_b8_ga1_s42_q4k0v4_b35615c7",
+    "examples": [
+      {
+        "id": "e2e_nlg-test-0",
+        "index": 0,
+        "meaning_representation": "eatType[pub], food[Fast food], customer rating[high], area[riverside], familyFriendly[no], near[Café Rouge]",
+        "prompt": "MR: eatType[pub], food[Fast food], customer rating[high], area[riverside], familyFriendly[no], near[Café Rouge]\nText:",
+        "target": "The Mills is not kid friendly as it is a riverside pub near Café Rouge.  Its mid priced fast food is highly rated.",
+        "references": [
+          "The Mills is not kid friendly as it is a riverside pub near Café Rouge.  Its mid priced fast food is highly rated."
+        ],
+        "prediction": "There is a fast food pub in the riverside area near Café Rouge. It is not child friendly and has a high customer rating.",
+        "elapsed_seconds": 1.368725899985293
+      },
+      {
+        "id": "e2e_nlg-test-1",
+        "index": 1,
+        "meaning_representation": "eatType[pub], food[Japanese], priceRange[moderate], customer rating[5 out of 5], area[city centre], near[Raja Indian Cuisine]",
+        "prompt": "MR: eatType[pub], food[Japanese], priceRange[moderate], customer rating[5 out of 5], area[city centre], near[Raja Indian Cuisine]\nText:",
+        "target": "The Wrestlerss is rated 5 out of 5, serving Japanese food in a pub. It is higher than average priced, and located near the city centre near Raja Indian Cuisine.",
+        "references": [
+          "The Wrestlerss is rated 5 out of 5, serving Japanese food in a pub. It is higher than average priced, and located near the city centre near Raja Indian Cuisine."
+        ],
+        "prediction": "In the city centre, near Raja Indian Cuisine, there is a pub that serves Japanese food with a moderate price range and a customer rating of 5 out of 5. It is called the moderate price range.",
+        "elapsed_seconds": 1.4904730999842286
+      }
+    ],
+    "prediction_text_sha256": "f188062d9c68a85437e7e128d7d18e6bf1555f3522c641341f393ba19cff2b5e"
+  },
+  {
+    "label": "LORA-s43-L512",
+    "run": "20261015_121717_822669_lora_3f01744d_test_nall_t64_beam10_BLEU-NIST-METEOR-ROUGE-L-CIDEr_043dfa69",
+    "kind": "lora",
+    "seed": 43,
+    "max_length": 512,
+    "training_config": {
+      "model": "openai-community/gpt2-medium",
+      "dataset": "GEM/e2e_nlg",
+      "learning_rate": 0.0002,
+      "epochs": 5.0,
+      "batch_size": 8,
+      "eval_batch_size": 4,
+      "gradient_accumulation": 1,
+      "weight_decay": 0.01,
+      "warmup_steps": 500,
+      "label_smoothing": 0.1,
+      "dropout": 0.1,
+      "alpha": 32,
+      "seed": 43,
+      "precision": "fp32",
+      "max_length": 512,
+      "gradient_checkpointing": false,
+      "logging_steps": 100,
+      "max_steps": -1,
+      "smoke": false,
+      "train_samples": null,
+      "eval_samples": null,
+      "local_data": null,
+      "local_files_only": false,
+      "ranks": {
+        "q": 4,
+        "k": 0,
+        "v": 4
+      }
+    },
+    "generation_config": {
+      "dataset": "GEM/e2e_nlg",
+      "split": "test",
+      "samples": null,
+      "metrics": [
+        "BLEU",
+        "NIST",
+        "METEOR",
+        "ROUGE-L",
+        "CIDEr"
+      ],
+      "max_new_tokens": 64,
+      "num_beams": 10,
+      "length_penalty": 0.9,
+      "no_repeat_ngram_size": 4,
+      "seed": 42,
+      "local_data": null,
+      "local_files_only": false,
+      "predictions": null,
+      "smoke": false
+    },
+    "dataset": {
+      "dataset": "GEM/e2e_nlg",
+      "local_data": null,
+      "split": "test",
+      "count": 1847,
+      "fingerprint": "63266d6563bd1739"
+    },
+    "environment": {
+      "torch": "2.14.0+cu130",
+      "transformers": "5.17.0",
+      "datasets": "2.21.0",
+      "peft": "0.21.0",
+      "streamlit": "1.65.0",
+      "tensorboard": "2.21.0",
+      "nltk": "3.10.3",
+      "pycocoevalcap": "1.2"
+    },
+    "metrics": {
+      "BLEU-1": 0.5728838752927081,
+      "BLEU-2": 0.43724467871979494,
+      "BLEU-3": 0.33565911520239106,
+      "BLEU-4": 0.25876597392911016,
+      "NIST": 4.854968861403776,
+      "METEOR": 0.5477691390142483,
+      "ROUGE-L": 0.44831647812924563,
+      "CIDEr": 1.4676684570148766
+    },
+    "rescoring": {
+      "single": {
+        "COCO_BLEU4": 0.25876597392911016,
+        "ROUGE-L": 0.44831647812924563,
+        "CIDEr": 1.4676684570148766,
+        "NLTK_NIST": 4.854968861403776,
+        "MTEval_BLEU": 0.32100295631736697,
+        "MTEval_NIST": 5.392896569527909
+      },
+      "multi": {
+        "COCO_BLEU4": 0.37222180658168447,
+        "ROUGE-L": 0.5196643731810219,
+        "CIDEr": 1.5501199873725051,
+        "NLTK_NIST": 5.485349686350147,
+        "MTEval_BLEU": 0.43058484959490956,
+        "MTEval_NIST": 6.302161794848932
+      }
+    },
+    "hashes": {
+      "config.json": "24959f152fd2002923d63fb48456ad2a51eb20c3961244b105c783863aad3cbe",
+      "metrics.json": "a94bd218144c9b84a4bfa4822da72a11b8fadf6075966bac68f56e8476286e63",
+      "predictions.jsonl": "618f3f1fd3bfb351a29f6a68a1a6bc463931c67e2d757d341c89bd0c7cd6922c"
+    },
+    "training_path": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\gpt2-e2e-lora\\20261014_132455_256008_lr0.0002_e5.0_b8_ga1_s43_q4k0v4_0d3db090",
+    "examples": [
+      {
+        "id": "e2e_nlg-test-0",
+        "index": 0,
+        "meaning_representation": "eatType[pub], food[Fast food], customer rating[high], area[riverside], familyFriendly[no], near[Café Rouge]",
+        "prompt": "MR: eatType[pub], food[Fast food], customer rating[high], area[riverside], familyFriendly[no], near[Café Rouge]\nText:",
+        "target": "The Mills is not kid friendly as it is a riverside pub near Café Rouge.  Its mid priced fast food is highly rated.",
+        "references": [
+          "The Mills is not kid friendly as it is a riverside pub near Café Rouge.  Its mid priced fast food is highly rated."
+        ],
+        "prediction": "There is a fast food pub in the riverside area near Café Rouge. It is not family-friendly and has a high customer rating.",
+        "elapsed_seconds": 1.5032585999870207
+      },
+      {
+        "id": "e2e_nlg-test-1",
+        "index": 1,
+        "meaning_representation": "eatType[pub], food[Japanese], priceRange[moderate], customer rating[5 out of 5], area[city centre], near[Raja Indian Cuisine]",
+        "prompt": "MR: eatType[pub], food[Japanese], priceRange[moderate], customer rating[5 out of 5], area[city centre], near[Raja Indian Cuisine]\nText:",
+        "target": "The Wrestlerss is rated 5 out of 5, serving Japanese food in a pub. It is higher than average priced, and located near the city centre near Raja Indian Cuisine.",
+        "references": [
+          "The Wrestlerss is rated 5 out of 5, serving Japanese food in a pub. It is higher than average priced, and located near the city centre near Raja Indian Cuisine."
+        ],
+        "prediction": "In the city centre, near Raja Indian Cuisine, there is a moderately priced Japanese pub with a customer rating of 5 out of 5.",
+        "elapsed_seconds": 1.179078200017102
+      }
+    ],
+    "prediction_text_sha256": "7e1c90f47a3a140210f529780b61747d8ca90373bca9e3cdaa20678016b21e24"
+  },
+  {
+    "label": "LORA-s44-L512",
+    "run": "20261015_121717_840686_lora_1a225840_test_nall_t64_beam10_BLEU-NIST-METEOR-ROUGE-L-CIDEr_30c9bebf",
+    "kind": "lora",
+    "seed": 44,
+    "max_length": 512,
+    "training_config": {
+      "model": "openai-community/gpt2-medium",
+      "dataset": "GEM/e2e_nlg",
+      "learning_rate": 0.0002,
+      "epochs": 5.0,
+      "batch_size": 8,
+      "eval_batch_size": 4,
+      "gradient_accumulation": 1,
+      "weight_decay": 0.01,
+      "warmup_steps": 500,
+      "label_smoothing": 0.1,
+      "dropout": 0.1,
+      "alpha": 32,
+      "seed": 44,
+      "precision": "fp32",
+      "max_length": 512,
+      "gradient_checkpointing": false,
+      "logging_steps": 100,
+      "max_steps": -1,
+      "smoke": false,
+      "train_samples": null,
+      "eval_samples": null,
+      "local_data": null,
+      "local_files_only": false,
+      "ranks": {
+        "q": 4,
+        "k": 0,
+        "v": 4
+      }
+    },
+    "generation_config": {
+      "dataset": "GEM/e2e_nlg",
+      "split": "test",
+      "samples": null,
+      "metrics": [
+        "BLEU",
+        "NIST",
+        "METEOR",
+        "ROUGE-L",
+        "CIDEr"
+      ],
+      "max_new_tokens": 64,
+      "num_beams": 10,
+      "length_penalty": 0.9,
+      "no_repeat_ngram_size": 4,
+      "seed": 42,
+      "local_data": null,
+      "local_files_only": false,
+      "predictions": null,
+      "smoke": false
+    },
+    "dataset": {
+      "dataset": "GEM/e2e_nlg",
+      "local_data": null,
+      "split": "test",
+      "count": 1847,
+      "fingerprint": "63266d6563bd1739"
+    },
+    "environment": {
+      "torch": "2.14.0+cu130",
+      "transformers": "5.17.0",
+      "datasets": "2.21.0",
+      "peft": "0.21.0",
+      "streamlit": "1.65.0",
+      "tensorboard": "2.21.0",
+      "nltk": "3.10.3",
+      "pycocoevalcap": "1.2"
+    },
+    "metrics": {
+      "BLEU-1": 0.5784494815408864,
+      "BLEU-2": 0.4431955151985196,
+      "BLEU-3": 0.34217914597594845,
+      "BLEU-4": 0.2657282287041242,
+      "NIST": 4.91861692325835,
+      "METEOR": 0.5523678626944232,
+      "ROUGE-L": 0.4507602782750306,
+      "CIDEr": 1.5330474121339268
+    },
+    "rescoring": {
+      "single": {
+        "COCO_BLEU4": 0.2657282287041242,
+        "ROUGE-L": 0.4507602782750306,
+        "CIDEr": 1.5330474121339268,
+        "NLTK_NIST": 4.918616923258349,
+        "MTEval_BLEU": 0.32633761848721543,
+        "MTEval_NIST": 5.450809144553405
+      },
+      "multi": {
+        "COCO_BLEU4": 0.3786360529988315,
+        "ROUGE-L": 0.5217460100713699,
+        "CIDEr": 1.5972375796648508,
+        "NLTK_NIST": 5.551727468486546,
+        "MTEval_BLEU": 0.43512417289929434,
+        "MTEval_NIST": 6.35095935701316
+      }
+    },
+    "hashes": {
+      "config.json": "02aaca73e02d9ded400256346fdcfbd54cf436a731f45b3eedbd6ddf1517e353",
+      "metrics.json": "41edbe3b623a8134f38dbfa7f87976e05ed05fa3356f0ac8ad9ab8103115cf16",
+      "predictions.jsonl": "66755cb3c8cfa728a22478ca5ac4db6324a7c5113e0acad82cf8830230c749c4"
+    },
+    "training_path": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\gpt2-e2e-lora\\20261014_132455_259011_lr0.0002_e5.0_b8_ga1_s44_q4k0v4_631867cd",
+    "examples": [
+      {
+        "id": "e2e_nlg-test-0",
+        "index": 0,
+        "meaning_representation": "eatType[pub], food[Fast food], customer rating[high], area[riverside], familyFriendly[no], near[Café Rouge]",
+        "prompt": "MR: eatType[pub], food[Fast food], customer rating[high], area[riverside], familyFriendly[no], near[Café Rouge]\nText:",
+        "target": "The Mills is not kid friendly as it is a riverside pub near Café Rouge.  Its mid priced fast food is highly rated.",
+        "references": [
+          "The Mills is not kid friendly as it is a riverside pub near Café Rouge.  Its mid priced fast food is highly rated."
+        ],
+        "prediction": "There is a fast food pub in the riverside area near Café Rouge. It is not family-friendly and has a high customer rating.",
+        "elapsed_seconds": 1.4949812999984715
+      },
+      {
+        "id": "e2e_nlg-test-1",
+        "index": 1,
+        "meaning_representation": "eatType[pub], food[Japanese], priceRange[moderate], customer rating[5 out of 5], area[city centre], near[Raja Indian Cuisine]",
+        "prompt": "MR: eatType[pub], food[Japanese], priceRange[moderate], customer rating[5 out of 5], area[city centre], near[Raja Indian Cuisine]\nText:",
+        "target": "The Wrestlerss is rated 5 out of 5, serving Japanese food in a pub. It is higher than average priced, and located near the city centre near Raja Indian Cuisine.",
+        "references": [
+          "The Wrestlerss is rated 5 out of 5, serving Japanese food in a pub. It is higher than average priced, and located near the city centre near Raja Indian Cuisine."
+        ],
+        "prediction": "In the city centre, near Raja Indian Cuisine, there is a pub that serves Japanese food with a moderate price range and a customer rating of 5 out of 5. It is called the pub with the name Raja IndianCuisine.",
+        "elapsed_seconds": 1.5096365000063088
+      }
+    ],
+    "prediction_text_sha256": "86eb99ac08e65979a62ed6b8f3a197e6384c8b25cfd0024ae400c1896359809f"
+  },
+  {
+    "label": "LORA-s110-L1024",
+    "run": "20261015_121717_858703_lora_3aeb8747_test_nall_t64_beam10_BLEU-NIST-METEOR-ROUGE-L-CIDEr_88e99c94",
+    "kind": "lora",
+    "seed": 110,
+    "max_length": 1024,
+    "training_config": {
+      "model": "openai-community/gpt2-medium",
+      "dataset": "GEM/e2e_nlg",
+      "learning_rate": 0.0002,
+      "epochs": 5.0,
+      "batch_size": 8,
+      "eval_batch_size": 4,
+      "gradient_accumulation": 1,
+      "weight_decay": 0.01,
+      "warmup_steps": 500,
+      "label_smoothing": 0.1,
+      "dropout": 0.1,
+      "alpha": 32,
+      "seed": 110,
+      "precision": "fp32",
+      "max_length": 1024,
+      "gradient_checkpointing": false,
+      "logging_steps": 100,
+      "max_steps": -1,
+      "smoke": false,
+      "train_samples": null,
+      "eval_samples": null,
+      "local_data": null,
+      "local_files_only": false,
+      "ranks": {
+        "q": 4,
+        "k": 0,
+        "v": 4
+      }
+    },
+    "generation_config": {
+      "dataset": "GEM/e2e_nlg",
+      "split": "test",
+      "samples": null,
+      "metrics": [
+        "BLEU",
+        "NIST",
+        "METEOR",
+        "ROUGE-L",
+        "CIDEr"
+      ],
+      "max_new_tokens": 64,
+      "num_beams": 10,
+      "length_penalty": 0.9,
+      "no_repeat_ngram_size": 4,
+      "seed": 42,
+      "local_data": null,
+      "local_files_only": false,
+      "predictions": null,
+      "smoke": false
+    },
+    "dataset": {
+      "dataset": "GEM/e2e_nlg",
+      "local_data": null,
+      "split": "test",
+      "count": 1847,
+      "fingerprint": "63266d6563bd1739"
+    },
+    "environment": {
+      "torch": "2.14.0+cu130",
+      "transformers": "5.17.0",
+      "datasets": "2.21.0",
+      "peft": "0.21.0",
+      "streamlit": "1.65.0",
+      "tensorboard": "2.21.0",
+      "nltk": "3.10.3",
+      "pycocoevalcap": "1.2"
+    },
+    "metrics": {
+      "BLEU-1": 0.5784796686604605,
+      "BLEU-2": 0.4435613072109933,
+      "BLEU-3": 0.3425394721944049,
+      "BLEU-4": 0.26577834807214495,
+      "NIST": 4.912501855270479,
+      "METEOR": 0.5535642168383036,
+      "ROUGE-L": 0.44956448006209104,
+      "CIDEr": 1.511447561997269
+    },
+    "rescoring": {
+      "single": {
+        "COCO_BLEU4": 0.26577834807214495,
+        "ROUGE-L": 0.44956448006209104,
+        "CIDEr": 1.511447561997269,
+        "NLTK_NIST": 4.912501855270479,
+        "MTEval_BLEU": 0.32747013432981753,
+        "MTEval_NIST": 5.453083290271192
+      },
+      "multi": {
+        "COCO_BLEU4": 0.37636842205713006,
+        "ROUGE-L": 0.5175551136515342,
+        "CIDEr": 1.572578285774484,
+        "NLTK_NIST": 5.527315701547842,
+        "MTEval_BLEU": 0.43472206800422947,
+        "MTEval_NIST": 6.350816607912033
+      }
+    },
+    "hashes": {
+      "config.json": "922da64157ac3b169525e65038c453e5bd468d571c77a0bb6966652422b311f1",
+      "metrics.json": "2239dc5fa0788833dad0dcb35c4cd0b1691334d0e5de379780929100a15e7e49",
+      "predictions.jsonl": "6d4f96614ba12c11479c90964e7bdd4f39eb350d7af0710c08525dd652471968"
+    },
+    "training_path": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\gpt2-e2e-lora\\20261014_195155_330699_lr0.0002_e5.0_b8_ga1_s110_q4k0v4_eb6d5cbd",
+    "examples": [
+      {
+        "id": "e2e_nlg-test-0",
+        "index": 0,
+        "meaning_representation": "eatType[pub], food[Fast food], customer rating[high], area[riverside], familyFriendly[no], near[Café Rouge]",
+        "prompt": "MR: eatType[pub], food[Fast food], customer rating[high], area[riverside], familyFriendly[no], near[Café Rouge]\nText:",
+        "target": "The Mills is not kid friendly as it is a riverside pub near Café Rouge.  Its mid priced fast food is highly rated.",
+        "references": [
+          "The Mills is not kid friendly as it is a riverside pub near Café Rouge.  Its mid priced fast food is highly rated."
+        ],
+        "prediction": "In the riverside area, near Café Rouge, there is a fast food pub with a high customer rating. It is not family-friendly.",
+        "elapsed_seconds": 1.648296900006244
+      },
+      {
+        "id": "e2e_nlg-test-1",
+        "index": 1,
+        "meaning_representation": "eatType[pub], food[Japanese], priceRange[moderate], customer rating[5 out of 5], area[city centre], near[Raja Indian Cuisine]",
+        "prompt": "MR: eatType[pub], food[Japanese], priceRange[moderate], customer rating[5 out of 5], area[city centre], near[Raja Indian Cuisine]\nText:",
+        "target": "The Wrestlerss is rated 5 out of 5, serving Japanese food in a pub. It is higher than average priced, and located near the city centre near Raja Indian Cuisine.",
+        "references": [
+          "The Wrestlerss is rated 5 out of 5, serving Japanese food in a pub. It is higher than average priced, and located near the city centre near Raja Indian Cuisine."
+        ],
+        "prediction": "In the city centre, near Raja Indian Cuisine, there is a pub that serves Japanese food with a moderate price range and a customer rating of 5 out of 5. It is called the Akira Indian Cuisine.",
+        "elapsed_seconds": 1.4923375999787822
+      }
+    ],
+    "prediction_text_sha256": "15d1f6f5aee59959551962da2d61eec5424fbd2936921ea715d36f08a6646584"
+  }
+]

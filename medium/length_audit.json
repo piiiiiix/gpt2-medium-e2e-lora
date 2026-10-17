@@ -1,0 +1,31 @@
+{
+  "tokenizer_sha256": "8414cab924d8b9b33013f0d221c5862f365ee9be39c5c2bfae8a5a9e970478a6",
+  "tokenizer_snapshot": "6dcaa7a952f72f9298047fd5137cd6e4f05f41da",
+  "recipe": "len(encode(MR: {meaning_representation}\\nText:)) + len(encode(space + target)) + 1 EOS",
+  "train": {
+    "samples": 33525,
+    "max_tokens": 124,
+    "over_512": 0,
+    "over_1024": 0
+  },
+  "validation": {
+    "samples": 1484,
+    "max_tokens": 135,
+    "over_512": 0,
+    "over_1024": 0
+  },
+  "length_pairs": {
+    "lora": {
+      "seed": 110,
+      "equal_predictions": 1847,
+      "different_predictions": 0,
+      "total": 1847
+    },
+    "fft": {
+      "seed": 101,
+      "equal_predictions": 1598,
+      "different_predictions": 249,
+      "total": 1847
+    }
+  }
+}

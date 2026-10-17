@@ -1,0 +1,14 @@
+{
+  "runs": 11,
+  "original_score_recomputations": 44,
+  "original_scores_tolerance": 1e-10,
+  "original_input_hashes_verified": true,
+  "three_and_five_means_match_existing_csv": true,
+  "markdown_links_and_table_columns_valid": true,
+  "original_markdown_history_preserved": true,
+  "png_integrity_and_visual_review": "3 figures inspected",
+  "python": "3.14.6 | packaged by Anaconda, Inc. | (main, Jul  9 2026, 14:29:05) [MSC v.1942 64 bit (AMD64)]",
+  "nltk": "3.10.0",
+  "new_training_or_generation": false,
+  "complete_official_java_pipeline_executed": false
+}
