@@ -75,6 +75,8 @@ class SourceTrainer(Trainer):
     def __init__(self, *args, run_config=None, **kwargs):
         self.run_config = run_config or {}
         super().__init__(*args, **kwargs)
+        if self.run_config.get("source_training") and self.run_config.get("protocol") == "lora_e2e":
+            self.model_accepts_loss_kwargs = False
 
     def create_optimizer(self):
         if self.run_config.get("optimizer") != "source_adamw":
@@ -103,6 +105,35 @@ class SourceTrainer(Trainer):
                 weight_decay=self.args.weight_decay,
             )
         return self.optimizer
+
+    def compute_loss(self, model, inputs, return_outputs=False, num_items_in_batch=None):
+        if self.run_config.get("source_training") and self.run_config.get("protocol") == "lora_e2e":
+            from utils.source_training import source_loss
+
+            outputs = model(**{k: v for k, v in inputs.items() if k != "labels"})
+            smoothing = self.run_config["label_smoothing"] if model.training else 0.0
+            loss = source_loss(outputs.logits, inputs["labels"], smoothing)
+            return (loss, outputs) if return_outputs else loss
+        return super().compute_loss(model, inputs, return_outputs, num_items_in_batch)
+
+    def _get_train_sampler(self, train_dataset=None):
+        if self.run_config.get("source_training") and self.run_config.get("protocol") == "lora_e2e":
+            from utils.source_training import SourceSampler
+
+            return SourceSampler(
+                train_dataset if train_dataset is not None else self.train_dataset,
+                num_replicas=1,
+                rank=0,
+                seed=self.args.seed,
+            )
+        return super()._get_train_sampler(train_dataset)
+
+    def _get_eval_sampler(self, eval_dataset):
+        if self.run_config.get("source_training") and self.run_config.get("protocol") == "lora_e2e":
+            from torch.utils.data.distributed import DistributedSampler
+
+            return DistributedSampler(eval_dataset, num_replicas=1, rank=0, seed=self.args.seed)
+        return super()._get_eval_sampler(eval_dataset)
 
     def _save(self, output_dir=None, state_dict=None):
         super()._save(output_dir, state_dict)
@@ -201,6 +232,10 @@ def train(config, path, kind):
         else:
             tokenizer.pad_token = tokenizer.eos_token
         raw = load_data(config)
+        if config["dataset"] == "lora/e2e-original" and not config.get("local_data"):
+            from utils.paper_resources import manifest
+
+            write_json(path / "paper_sources.json", manifest())
         train_data = subset(raw["train"], config["train_samples"])
         eval_data = subset(raw["validation"], config["eval_samples"])
         write_json(
@@ -230,6 +265,16 @@ def train(config, path, kind):
 
             train_data = train_data.map(encode, remove_columns=train_data.column_names)
             eval_data = eval_data.map(encode, remove_columns=eval_data.column_names)
+            source_lora = (
+                config.get("source_training")
+                and kind == "lora"
+                and config.get("protocol") == "lora_e2e"
+            )
+            if source_lora:
+                from utils.source_training import FullBatchDataset, SourceCollator
+
+                train_data = FullBatchDataset(train_data, config["batch_size"])
+                eval_data = FullBatchDataset(eval_data, config["eval_batch_size"])
             # 官方 LoRA GPT-2 仅在 LoRA 输入使用 dropout；FFT 使用原生 dropout。
             model_dropout = 0.0 if kind == "lora" else config["dropout"]
             model = AutoModelForCausalLM.from_pretrained(
@@ -244,7 +289,13 @@ def train(config, path, kind):
             if len(tokenizer) != model.config.vocab_size:
                 model.resize_token_embeddings(len(tokenizer), mean_resizing=False)
             if kind == "lora":
-                attach(model, config["ranks"], config["alpha"], config["dropout"])
+                attach(
+                    model,
+                    config["ranks"],
+                    config["alpha"],
+                    config["dropout"],
+                    shared_dropout=bool(source_lora),
+                )
                 if config["gradient_checkpointing"]:
                     model.enable_input_require_grads()
             write_json(
@@ -300,7 +351,9 @@ def train(config, path, kind):
                 processing_class=tokenizer,
                 train_dataset=train_data,
                 eval_dataset=eval_data,
-                data_collator=DataCollatorForSeq2Seq(
+                data_collator=SourceCollator(config["max_length"])
+                if source_lora
+                else DataCollatorForSeq2Seq(
                     tokenizer=tokenizer, padding=True, label_pad_token_id=-100
                 ),
                 callbacks=[TensorBoardCallback(tb_writer=writer), Progress(path)],

@@ -7,7 +7,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 OUTPUT_ROOT = PROJECT_ROOT / "outputs"
 MODEL_NAME = "openai-community/gpt2-medium"
-DATASET_NAME = "GEM/e2e_nlg"
+DATASET_NAME = "lora/e2e-original"
 METRICS = ["BLEU", "NIST", "METEOR", "ROUGE-L", "CIDEr"]
 TRAIN_DEFAULTS = dict(
     model=MODEL_NAME,
@@ -20,6 +20,7 @@ TRAIN_DEFAULTS = dict(
     weight_decay=0.01,
     warmup_steps=500,
     protocol="lora_e2e",
+    source_training=True,
     optimizer="source_adamw",
     adam_beta1=0.9,
     adam_beta2=0.999,
@@ -60,7 +61,8 @@ FFT_DEFAULTS = {
 }
 EVAL_DEFAULTS = dict(
     dataset=DATASET_NAME,
-    split="validation",
+    split="test",
+    scoring_profile="e2e_official",
     samples=None,  # noqa: C408
     metrics=METRICS.copy(),
     generation_profile="auto",

@@ -119,6 +119,7 @@ def task_details(record):
         frame = pd.read_json(scores, lines=True)
         st.dataframe(frame, alt="逐样本预测、参考答案及测试成绩")
     if (path / "predictions.jsonl").exists():
+        st.caption("重新评分只计算已有预测，不补生成。预测不完整时请重新启动完整评测。")
         rescore = st.multiselect(
             "重新评分指标",
             METRICS,
@@ -245,6 +246,15 @@ if page == "训练":
             st.button("全部冻结", key="freeze_qkv", on_click=freeze_qkv)
         config["ranks"] = dict(q=int(q or 0), k=int(k or 0), v=int(v or 0))
     with st.form(f"training_config_{kind}_{profile}"):
+        config["dataset"] = st.selectbox(
+            "训练数据", ["lora/e2e-original", "GEM/e2e_nlg"], key=f"train_dataset_{kind}"
+        )
+        repeat_seeds = st.text_input(
+            "重复实验 seeds（逗号分隔；留空使用下方 Seed）",
+            "",
+            help="论文使用3个种子取均值；具体种子组合未公开，例如可用110,111,112。",
+            key=f"repeat_seeds_{kind}_{profile}",
+        )
         a, b, c = st.columns(3)
         # 加减按钮每次调整 1e-6；更小的学习率仍可直接输入。
         config["learning_rate"] = a.number_input(
@@ -342,13 +352,29 @@ if page == "训练":
     st.caption(f"有效 batch size：{config['batch_size'] * config['gradient_accumulation']}。")
     duration(config, kind)
     if submitted or enqueue:
+        try:
+            seeds = (
+                [int(s.strip()) for s in repeat_seeds.split(",")]
+                if repeat_seeds.strip()
+                else [config["seed"]]
+            )
+            if len(set(seeds)) != len(seeds) or any(s < 0 for s in seeds):
+                raise ValueError("seeds 必须为互不重复的非负整数")
+        except ValueError as exc:
+            st.error(f"Seed 输入错误：{exc}")
+            st.stop()
         if kind == "lora" and not any(config["ranks"].values()):
             st.error("全部投影已冻结，没有可训练参数；请启用至少一个 rank，或使用 Base 测试。")
         elif submitted:
-            start([(kind, config)])
+            start([(kind, {**deepcopy(config), "seed": seed}) for seed in seeds])
         else:
             try:
-                training_pool.add(kind, config, pool_name)
+                for seed in seeds:
+                    training_pool.add(
+                        kind,
+                        {**deepcopy(config), "seed": seed},
+                        f"{pool_name} seed={seed}" if len(seeds) > 1 else pool_name,
+                    )
                 st.success("已保存参数快照到待训练池。")
             except Exception as exc:
                 st.error(str(exc))
@@ -410,8 +436,14 @@ elif page == "测试 / benchmark":
     preset = GENERATION.get(config["generation_profile"], GENERATION["lora_paper"])
     st.caption("LoRA 论文档：beam=10、长度惩罚=0.9；Prefix FT：beam=5、长度惩罚=1.0。")
     with st.form("evaluation_config"):
+        config["dataset"] = st.selectbox("评测数据", ["lora/e2e-original", "GEM/e2e_nlg"])
+        config["scoring_profile"] = st.selectbox(
+            "评分协议",
+            ["e2e_official", "legacy_single"],
+            help="官方：全部参考、MTEval、PTB与Java METEOR；legacy仅用于历史对照。",
+        )
         kind = st.selectbox("任务", ["benchmarks", "tests"])
-        config["split"] = st.selectbox("数据 split", ["validation", "test"])
+        config["split"] = st.selectbox("数据 split", ["test", "validation"])
         config["metrics"] = st.multiselect("评测指标", METRICS, default=METRICS)
         config["samples"] = st.number_input("样本数，0=全部", min_value=0, value=0) or None
         if manual_generation:

@@ -5,6 +5,7 @@ import json
 import os
 import re
 import sys
+import tempfile
 import time
 import traceback
 from contextlib import contextmanager, redirect_stderr, redirect_stdout
@@ -46,11 +47,21 @@ def elapsed_between(started, ended):
 def write_json(path, value):
     """先写临时文件再原子替换 JSON，避免前端读到半写入的状态。"""
     path = Path(path)
-    temporary = path.with_suffix(path.suffix + ".tmp")
-    temporary.write_text(
-        json.dumps(value, ensure_ascii=False, indent=2, default=str), encoding="utf-8"
-    )
-    os.replace(temporary, path)
+    fd, name = tempfile.mkstemp(prefix=path.name + ".", suffix=".tmp", dir=path.parent)
+    temporary = Path(name)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as stream:
+            json.dump(value, stream, ensure_ascii=False, indent=2, default=str)
+        for attempt in range(8):
+            try:
+                os.replace(temporary, path)
+                break
+            except PermissionError:
+                if attempt == 7:
+                    raise
+                time.sleep(0.05 * (attempt + 1))
+    finally:
+        temporary.unlink(missing_ok=True)
 
 
 def read_json(path, default=None):
@@ -205,9 +216,15 @@ def history(include_smoke=False):
     """读取正式运行状态及配置并排序；内部测试可显式包含冒烟记录。"""
     records = []
     if OUTPUT_ROOT.exists():
-        for path in OUTPUT_ROOT.rglob("status.json"):
-            if not include_smoke and "smoke" in path.relative_to(OUTPUT_ROOT).parts:
+        for directory, folders, files in os.walk(OUTPUT_ROOT, followlinks=False):
+            folders[:] = [
+                f
+                for f in folders
+                if f not in ("resources", ".git", "__pycache__") and (include_smoke or f != "smoke")
+            ]
+            if "status.json" not in files:
                 continue
+            path = Path(directory) / "status.json"
             try:
                 inside_project(path)
             except ValueError:

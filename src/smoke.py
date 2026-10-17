@@ -731,7 +731,7 @@ def medium_pipeline(kind):
     evaluation = new_run("benchmarks", config)
     evaluate(config, evaluation)
     assert read_json(evaluation / "status.json")["status"] == "completed"
-    assert len(read_json(evaluation / "metrics.json")["metrics"]) == 8
+    assert len(read_json(evaluation / "metrics.json")["metrics"]) == 5
     write_json(OUTPUT_ROOT / f"smoke/medium-{kind}-eval.json", dict(path=str(evaluation)))
     print(f"PASS: ACTUAL GPT-2 Medium {kind}, E2E samples, all metrics, telemetry and logs")
 

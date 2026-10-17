@@ -14,7 +14,55 @@ def load_data(config):
         path = inside_project(config["local_data"])
         raw = json.loads(path.read_text(encoding="utf-8"))
         return DatasetDict({key: Dataset.from_list(rows) for key, rows in raw.items()})
+    if config["dataset"] == "lora/e2e-original":
+        return original_data(config.get("local_files_only", False))
     return load_dataset(config["dataset"], trust_remote_code=True)
+
+
+def original_data(offline=False):
+    """Keep official train/valid reference rows; expose grouped splits for generation."""
+    from utils.paper_resources import data_files
+
+    result = {}
+    for split, path in data_files(offline).items():
+        rows, groups = [], {}
+        for i, line in enumerate(path.read_text(encoding="utf-8").splitlines()):
+            # Identical to format_converting_e2e.py: context spacing is meaningful for BPE.
+            ctx, target = line.strip().split("||")
+            target = target.strip("\n")
+            rows.append(
+                dict(
+                    id=f"original-{split}-row-{i}",
+                    context=ctx,
+                    meaning_representation=ctx,
+                    target=target,
+                    references=[target],
+                )
+            )
+            clean = target.split("<|endoftext|>")[0].split("\n\n")[0].strip()
+            groups.setdefault(ctx, []).append(clean)
+        grouped = [
+            dict(
+                id=f"original-{split}-{i}",
+                context=ctx,
+                meaning_representation=ctx,
+                target=refs[0],
+                references=refs,
+            )
+            for i, (ctx, refs) in enumerate(groups.items())
+        ]
+        result[split] = Dataset.from_list(grouped if split == "test" else rows)
+        if split == "validation":
+            result["validation_generation"] = Dataset.from_list(grouped)
+    return DatasetDict(result)
+
+
+def evaluation_data(config):
+    raw = load_data(config)
+    split = config["split"]
+    if split == "validation" and "validation_generation" in raw:
+        split = "validation_generation"
+    return subset(raw[split], config["samples"])
 
 
 def subset(dataset, count):

@@ -14,7 +14,7 @@ def discover(include_smoke=False, include_checkpoints=False):
         folders[:] = [
             f
             for f in folders
-            if f not in (".git", "nltk_data", "notebooks", "__pycache__")
+            if f not in (".git", "nltk_data", "resources", "notebooks", "__pycache__")
             and (include_smoke or f != "smoke")
             and (include_checkpoints or (f != "checkpoints" and not f.startswith("checkpoint-")))
             and (Path(directory) / f).resolve().is_relative_to(PROJECT_ROOT)

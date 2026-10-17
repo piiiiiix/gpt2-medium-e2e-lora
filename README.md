@@ -30,7 +30,7 @@ python -s -m streamlit run src/app.py
 
 如果 ProgramData 安装权限不足，在管理员终端执行安装，仍安装到 lora，不能改装到用户目录或 base。CUDA 版本的 torch 已单独安装；requirements 中 torch 版本不指定 CUDA wheel 索引。
 
-首次运行需要获取官方 `openai-community/gpt2-medium` 和 `GEM/e2e_nlg`。模型及数据使用 Hugging Face 缓存；项目模型扫描只扫描本项目内目录，Base 独立使用模型标识。
+首次运行需要获取官方 `openai-community/gpt2-medium`，模型使用 Hugging Face 缓存。新训练/评测默认 `lora/e2e-original`，原始数据与官方评分器按固定提交及 SHA256 下载到 `outputs/resources`。GEM 仅保留为显式历史对照选项。项目模型扫描只扫描本项目内目录，Base 独立使用模型标识。
 
 ## 独立启动 TensorBoard
 
@@ -143,11 +143,11 @@ GPU 数据为 **整张设备** 的占用率（%）、核心温度（°C）、显
 
 E2E 测试与 benchmark 默认最多生成 64 个新 token，对齐官方 LoRA E2E 示例的 `--eval_len 64`。前端与 CLI 共用此默认值，可通过“最大新 token 数”或配置字段 `max_new_tokens` 调整；已有配置和历史结果保留原值。
 
-延续 small：pycocoevalcap BLEU-1…4、ROUGE-L、CIDEr，NLTK NIST-5、METEOR。选择 BLEU 会保留四种 n-gram 分数。NIST 是语料级指标；逐样本栏明确为 null。CIDEr 的逐样本分数依赖本次语料文档频率，不能拿一个样本单独评分后拼接替代整体评分。
+默认 `e2e_official`：直接运行作者链接的 E2E 评分器，Perl MTEval 计算 BLEU/NIST，PTB 分词后由 Java METEOR 1.5 / COCO 计算 METEOR、ROUGE-L、CIDEr，使用全部参考。BLEU 以 `BLEU-4` 保存（0–1），不再伪造 BLEU-1…3；BLEU、METEOR、ROUGE-L 展示成论文百分尺度时乘100，NIST/CIDEr 不乘。BLEU/NIST 是语料级分数，不提供伪造的逐句值；METEOR 总分也不拿句均值代替。CIDEr 的文档频率在整次评测内计算。显式 `legacy_single` 保留旧的8项单参考评分，仅供历史对照。
 
 当前采用 small 的按数据行、单 target 评分口径，并另存原始完整 references；它不是论文官方多参考评测脚本。分数不能直接当作论文表 3 的同口径成绩。
 
-METEOR 会自动准备 WordNet，无需单独运行下载脚本。评分模块优先复用项目内资源；缺失时通过系统代理从 NLTK 官方固定 HTTPS 地址直接下载到 `outputs/resources/nltk_data/corpora/wordnet.zip`，保留默认 TLS 校验，不调用 `nltk.download()`，不修改 NLTK 安全开关。
+仅 `legacy_single` 的 NLTK METEOR 会自动准备 WordNet；默认官方 Java METEOR 不使用这套实现。评分模块优先复用项目内资源；缺失时通过系统代理从 NLTK 官方固定 HTTPS 地址直接下载到 `outputs/resources/nltk_data/corpora/wordnet.zip`，保留默认 TLS 校验，不调用 `nltk.download()`，不修改 NLTK 安全开关。
 
 下载先写临时文件，通过 ZIP CRC 与必需文件检查后原子替换目标文件，并实际加载语料、查询验证；失败会清理临时文件并保存评分错误。已有 ZIP 也会检查，损坏时需移走后重试。也支持手动放入官方 ZIP 或解压后的 `corpora/wordnet` 目录。资源位于被 Git 忽略的 outputs 中，迁移代码不会自动带上，运行时不读取 small 项目。WordNet 准备仍在 METEOR 评分阶段执行。
 
@@ -223,7 +223,7 @@ VSCode 可安装 Ruff 扩展并选择其作为 Python 格式化器；检查规�
 
 新模型和 checkpoint 旁保存 `training_protocol.json`，旧模型没有标记时自动沿用 MR/Text 格式。历史排队任务和断点续训缺少新字段时使用旧默认值；新建训练配置使用新默认值。已有权重不会因修改代码而变成新协议训练的权重。
 
-默认数据仍是 GEM，评分仍为原有单参考流程。本次解决第 8 节的配置与协议问题，不代表已复现论文分数，也未覆盖历史数据分析或启动完整正式训练。
+以上为 2026-10-17 的历史实施范围：当时默认数据仍是 GEM、评分为单参考。2026-10-18 更新已替换新任务默认数据与评分，见下节；历史报告和记录保持原样。
 
 ```powershell
 python -s src/verify_protocols.py
@@ -231,3 +231,36 @@ python -s src/verify_protocols.py
 python -s src/train_lora.py --config <项目内配置.json>
 python -s src/train_fft.py --config <项目内配置.json>
 ```
+
+
+## 2026-10-18：原始 E2E 数据与官方评测
+
+家里拉取后先准备依赖（使用现有 `lora` 环境）：
+
+```powershell
+conda run -n lora python -m pip install -r requirements.txt
+# Java 已在 PATH / JAVA_HOME 中时不用 --install-java；该选项仅下载 Windows x64 便携 JRE 到项目内。
+conda run -n lora python src/prepare_paper.py --install-java
+```
+
+官方评分还需要 Perl（Windows 可安装 Strawberry Perl，并让 `perl -v` 可执行）。`prepare_paper.py` 验证数据校验和、评分器 Python 导入、Java 与 Perl；缺依赖明确失败，不回退为 NLTK 近似评分。数据/评分器来自固定提交，下载保留 TLS 校验；`local_files_only=true` 要求资源已准备好。便携运行时、下载和冒烟产物不提交 Git。
+
+- **数据**：训练 42,061 行、验证损失 4,672 行；生成评测按原始 context 分组，validation=547 组、test=630 组，test 共4,693条参考。完全保留原始 context/目标空格，不再用 GEM 字段转换代替原始输入。没有另做随机划分。
+- **LoRA 训练**：`source_training=true` 使用作者目标 token 损失与分母 `mask.sum()+1e-4`；训练平滑0.1、验证不平滑；固定长度补0、尾批 Random(911) 补样、作者分布式 sampler 的单卡顺序与训练 epoch 从1计数；Q/V 共享同一次 adapter dropout。按论文 D.3 每 epoch 选最佳；保留原先已对齐的优化器及超参数。
+- **生成**：`lora_paper/lora_readme` 使用移植的作者 beam 候选逻辑，只在生成历史内禁重复 ngram；EOS=[50256,628]，长度惩罚分母只计生成长度。论文档0.9、README档0.8。FFT 保持 Prefix FT 独立协议，不能套 LoRA beam。
+- **评测**：默认 test、全部样本、`e2e_official`。会保存 `paper_sources.json`、`scoring_source.json`、`generation_config.json`、`coverage.json`、官方原始分数与日志以及可供官方 CLI 直接评分的 references/hypotheses 文本。
+- **完整性**：生成及重评分都核对目标 split 的数量、顺序、输入、target 和完整 references；613条不能冒充完整测试。`completed` 表示所配置样本范围完成，`coverage.full_split` 说明是不是全量。进度文件使用独立临时文件，并对 Windows 短暂文件锁重试；持续拒绝访问仍保留失败状态。
+
+**正式对照需要重新训练。** 旧 GEM 权重不会因为换测试集变成原始数据训练模型。新训练保持默认原始数据，完整跑5轮，再选 final 测试；不要恢复旧 GEM checkpoint。旧记录与旧分析报告不覆盖，重评分也不补生成。Base 是未微调对照，不是论文 FT 基线。
+
+论文报告3个训练种子的均值，但没有公开完整种子组合。训练页可填 `110,111,112`（项目约定，不声称是作者组合），串行启动/入池；留空只跑下方单个 Seed。完成3个模型的完整官方 test 后运行：
+
+```powershell
+conda run -n lora python src/summarize_paper.py outputs/benchmarks/RUN1 outputs/benchmarks/RUN2 outputs/benchmarks/RUN3
+```
+
+汇总器要求3个不同训练种子、原始数据、完整630组、相同训练/生成/评分配置，输出均值及样本标准差。不会混入部分评测、GEM、不同长度/参数或旧评分记录。
+
+验证命令：`python src/verify_paper.py`、`python src/verify_protocols.py`、`python src/smoke.py medium-lora`。`verify_paper.py` 会取得固定校验的作者参考源码；测试 BPE、分组、损失、作者 beam 原循环一致性和文件锁重试。真实 Medium 冒烟使用少量样本/1步，只证明链路可运行，不代表论文性能复现。HF 模型内核、现代 PyTorch/CUDA 与作者旧软件栈存在浮点差异；不承诺逐位相同权重，也不凭冒烟宣称达到70.4 BLEU。
+
+终止符核对补充：官方 `gpt2_beam.py` 的 argparse 使用 `action="append", default=[50256]`，所以 README 传入628后实际为 `[50256,628]`；新LoRA生成档已修正，前文只写628的历史描述不再代表当前设置。

@@ -89,7 +89,7 @@ class ProtocolTests(unittest.TestCase):
 
     def test_profiles_and_cleaning(self):
         cfg = deepcopy(EVAL_DEFAULTS)
-        self.assertEqual(resolve_generation(cfg)["eos_token_id"], 628)
+        self.assertEqual(resolve_generation(cfg)["eos_token_id"], [50256, 628])
         cfg["generation_profile"] = "prefix_ft"
         self.assertEqual(resolve_generation(cfg)["num_beams"], 5)
         self.assertEqual(resolve_generation(cfg)["max_new_tokens"], 100)

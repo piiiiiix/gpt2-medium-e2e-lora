@@ -20,7 +20,7 @@ GENERATION = {
         num_beams=10,
         length_penalty=0.9,
         no_repeat_ngram_size=4,
-        eos_token_id=628,
+        eos_token_id=[50256, 628],
     ),
     "lora_readme": dict(
         protocol="lora_e2e",
@@ -28,7 +28,7 @@ GENERATION = {
         num_beams=10,
         length_penalty=0.8,
         no_repeat_ngram_size=4,
-        eos_token_id=628,
+        eos_token_id=[50256, 628],
     ),
     "prefix_ft": dict(
         protocol="prefix_ft",

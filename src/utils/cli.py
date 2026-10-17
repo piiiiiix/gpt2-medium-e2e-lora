@@ -33,10 +33,13 @@ def arguments(defaults, kind):
                 max_grad_norm=1.0,
             )
             if kind in ("lora", "fft"):
+                config["source_training"] = overrides.get("source_training", False)
                 for key, value in legacy.items():
                     config[key] = overrides.get(key, value)
             elif "generation_profile" not in overrides:
                 config["generation_profile"] = "legacy"
+            if kind not in ("lora", "fft"):
+                config["scoring_profile"] = overrides.get("scoring_profile", "legacy_single")
     path = inside_project(args.run_dir) if args.run_dir else new_run(kind, config)
     if args.run_dir and read_json(path / "status.json", {}).get("status") != "queued":
         raise ValueError("Only queued run directories may be started; never overwrite a prior run")
