@@ -1,0 +1,27 @@
+{
+  "dataset": "GEM/e2e_nlg",
+  "split": "test",
+  "samples": null,
+  "metrics": [
+    "BLEU",
+    "NIST",
+    "METEOR",
+    "ROUGE-L",
+    "CIDEr"
+  ],
+  "generation_profile": "auto",
+  "max_new_tokens": null,
+  "num_beams": null,
+  "length_penalty": null,
+  "no_repeat_ngram_size": null,
+  "seed": 42,
+  "local_data": null,
+  "local_files_only": false,
+  "model": {
+    "type": "base",
+    "path": "openai-community/gpt2-medium",
+    "name": "GPT-2 Medium (Base)"
+  },
+  "predictions": null,
+  "smoke": false
+}
