@@ -1,0 +1,4 @@
+{
+  "source": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\benchmarks\\20261017_210126_094806_lora_0b266e84_test_nall_tNone_beamNone_BLEU-NIST-METEOR-ROUGE-L-CIDEr_ea7be1f4\\predictions.jsonl",
+  "source_config": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\benchmarks\\20261017_210126_094806_lora_0b266e84_test_nall_tNone_beamNone_BLEU-NIST-METEOR-ROUGE-L-CIDEr_ea7be1f4\\config.json"
+}

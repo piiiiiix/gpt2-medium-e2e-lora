@@ -1,0 +1,1847 @@
+{
+  "summary": {
+    "NIST": 4.049584441142194
+  },
+  "scope": "corpus NIST-5 only; per-sample score unavailable in this scoring profile",
+  "per_sample": [
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    },
+    {
+      "NIST": null
+    }
+  ]
+}
