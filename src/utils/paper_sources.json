@@ -3,15 +3,15 @@
   "data": {
     "train": {
       "url": "https://raw.githubusercontent.com/microsoft/LoRA/c4593f060e6a368d7bb5af5273b8e42810cdef90/examples/NLG/data/e2e/train.txt",
-      "sha256": "e577f46b5f8c01fb7e7ec792c577265a65eec0131994915efd720c0ab570d7d1"
+      "sha256": "eae319082237310913d9f37f6a891d48fb3f821f29d86870d2cb4f92ddd72c5a"
     },
     "validation": {
       "url": "https://raw.githubusercontent.com/microsoft/LoRA/c4593f060e6a368d7bb5af5273b8e42810cdef90/examples/NLG/data/e2e/valid.txt",
-      "sha256": "e35a61140a0d060a48cde808d81de850226c6c87ead1e95d7c2bc03497bef154"
+      "sha256": "ba963113c8401d3d26216c0dc0a6dae1ea6ea927de3bf830e32c41f65401c80d"
     },
     "test": {
       "url": "https://raw.githubusercontent.com/microsoft/LoRA/c4593f060e6a368d7bb5af5273b8e42810cdef90/examples/NLG/data/e2e/test.txt",
-      "sha256": "f8c9dc1f70bb541a6b221ed00fc85497e42a21d6d67f065f8da85dea8ba6a26a"
+      "sha256": "81b1bcd40c4f12845ec4eb61a77bf43765d112483cd9b2f91ef10bfc1b3d8f13"
     }
   },
   "evaluator": {

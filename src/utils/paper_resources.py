@@ -36,8 +36,13 @@ def fetch(item, destination, offline=False):
             urllib.request.urlopen(item["url"], timeout=120) as response,
         ):
             shutil.copyfileobj(response, stream)
-        if sha256(name) != item["sha256"]:
-            raise ValueError(f"Checksum mismatch: {item['url']}")
+        actual = sha256(name)
+        if actual != item["sha256"]:
+            raise ValueError(
+                f"Checksum mismatch: {item['url']}; "
+                f"expected {item['sha256']}, got {actual} "
+                f"({Path(name).stat().st_size} bytes)"
+            )
         os.replace(name, destination)
     finally:
         Path(name).unlink(missing_ok=True)

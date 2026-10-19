@@ -245,6 +245,10 @@ conda run -n lora python src/prepare_paper.py --install-java
 
 官方评分还需要 Perl（Windows 可安装 Strawberry Perl，并让 `perl -v` 可执行）。`prepare_paper.py` 验证数据校验和、评分器 Python 导入、Java 与 Perl；缺依赖明确失败，不回退为 NLTK 近似评分。数据/评分器来自固定提交，下载保留 TLS 校验；`local_files_only=true` 要求资源已准备好。便携运行时、下载和冒烟产物不提交 Git。
 
+数据下载到 `outputs/resources/paper_e2e/{train,validation,test}.txt` 后持续缓存，训练/测试校验通过即复用，缺失或损坏才重新下载。清单 SHA-256 必须按远端原始字节（LF 换行）计算，不能使用 Windows Git 检出后 CRLF 文件的哈希；下载校验错误会显示预期/实际哈希及字节数。
+
+若旧任务日志出现 `PermissionError: [WinError 5]`，且路径是 `progress.json.tmp -> progress.json`，表示更新本地进度文件时替换失败。当前实现使用每次唯一的临时文件，并对 PermissionError 最多尝试 8 次（总等待 1.4 秒），保留原子替换；持续占用或真实权限问题仍明确报错，保留旧 JSON。更新代码后需重启界面，重新启动失败任务，已运行的 Python 进程不会自动载入修复；历史失败日志也不会被改写。可运行 `python src/verify_file_io.py` 独立验证短暂占用、持续占用、并发写入和 Windows 实际文件句柄占用，无需模型或联网。
+
 - **数据**：训练 42,061 行、验证损失 4,672 行；生成评测按原始 context 分组，validation=547 组、test=630 组，test 共4,693条参考。完全保留原始 context/目标空格，不再用 GEM 字段转换代替原始输入。没有另做随机划分。
 - **LoRA 训练**：`source_training=true` 使用作者目标 token 损失与分母 `mask.sum()+1e-4`；训练平滑0.1、验证不平滑；固定长度补0、尾批 Random(911) 补样、作者分布式 sampler 的单卡顺序与训练 epoch 从1计数；Q/V 共享同一次 adapter dropout。按论文 D.3 每 epoch 选最佳；保留原先已对齐的优化器及超参数。
 - **生成**：`lora_paper/lora_readme` 使用移植的作者 beam 候选逻辑，只在生成历史内禁重复 ngram；EOS=[50256,628]，长度惩罚分母只计生成长度。论文档0.9、README档0.8。FFT 保持 Prefix FT 独立协议，不能套 LoRA beam。
