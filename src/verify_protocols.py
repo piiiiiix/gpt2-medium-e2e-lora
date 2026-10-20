@@ -64,6 +64,26 @@ class ProtocolTests(unittest.TestCase):
         self.assertEqual((FFT_DEFAULTS["max_grad_norm"], FFT_DEFAULTS["adam_epsilon"]), (1.0, 1e-8))
         self.assertEqual(FFT_DEFAULTS["warmup_steps"], 0)
         self.assertEqual((FFT_DEFAULTS["learning_rate"], FFT_DEFAULTS["batch_size"]), (5e-5, 10))
+        self.assertTrue(FFT_DEFAULTS["source_ft"])
+
+    def test_prefix_ft_preserves_raw_whitespace(self):
+        """作者 FT 整句编码保留目标末尾空格，旧 LoRA 字段不受影响。"""
+        tok = self.tokenizer
+        row = {
+            "context": "name : Test",
+            "target": "A pub.",
+            "ft_context": "name : Test",
+            "ft_target": "A pub. ",
+        }
+        actual = tokenize(row, tok, 1024, "prefix_ft", source_ft=True)
+        expected = tok(
+            " name : Test " + tok.bos_token + " A pub.  " + tok.eos_token,
+            add_special_tokens=True,
+        )["input_ids"]
+        boundary = expected.index(tok.bos_token_id) + 1
+        self.assertEqual(actual["input_ids"], expected)
+        self.assertEqual(actual["labels"], [-100] * boundary + expected[boundary:])
+        self.assertNotEqual(actual["input_ids"], tokenize(row, tok, 1024, "prefix_ft")["input_ids"])
 
     def test_optimizer_numeric_and_resume(self):
         # 独立标量公式，包含近零梯度（能区分 epsilon 放置位置）和非零衰减。
@@ -97,6 +117,45 @@ class ProtocolTests(unittest.TestCase):
         self.assertEqual(resolve_generation(cfg)["num_beams"], 2)
         self.assertEqual(clean_prediction(" first\n\nsecond", "lora_e2e"), "first")
         self.assertEqual(clean_prediction(" first<|endoftext|>second", "prefix_ft"), "first")
+
+    def test_prefix_ft_loss_and_last_step(self):
+        """FT 使用有效目标 token 平均 CE，末步不额外选最佳 checkpoint。"""
+        from types import SimpleNamespace
+
+        from transformers import GPT2Config, GPT2LMHeadModel
+
+        from utils.training import PrefixFTFlow, SourceTrainer
+
+        model = GPT2LMHeadModel(
+            GPT2Config(
+                vocab_size=16,
+                n_layer=1,
+                n_head=1,
+                n_embd=8,
+                n_positions=8,
+                bos_token_id=1,
+                eos_token_id=2,
+            )
+        ).eval()
+        trainer = object.__new__(SourceTrainer)
+        trainer.run_config = {"source_ft": True}
+        inputs = {
+            "input_ids": torch.tensor([[1, 2, 3, 0], [1, 4, 5, 6]]),
+            "labels": torch.tensor([[-100, -100, 3, -100], [-100, 4, 5, 6]]),
+        }
+        loss, output = trainer.compute_loss(model, inputs, True, num_items_in_batch=999)
+        expected = torch.nn.functional.cross_entropy(
+            output.logits[:, :-1].reshape(-1, 16), inputs["labels"][:, 1:].reshape(-1)
+        )
+        torch.testing.assert_close(loss, expected)
+        control = SimpleNamespace(should_evaluate=True, should_save=True)
+        PrefixFTFlow().on_step_end(
+            SimpleNamespace(eval_steps=5000, save_steps=500000),
+            SimpleNamespace(global_step=21035, max_steps=21035, eval_steps=5000, save_steps=500000),
+            control,
+        )
+        self.assertFalse(control.should_evaluate)
+        self.assertFalse(control.should_save)
 
     def test_saved_and_legacy_models(self):
         with tempfile.TemporaryDirectory(dir=OUTPUT_ROOT / "smoke") as tmp:
@@ -132,6 +191,11 @@ class ProtocolTests(unittest.TestCase):
             self.assertEqual(resolved["protocol"], "legacy")
             self.assertEqual(resolved["optimizer"], "adamw_torch")
             self.assertEqual(resolved["max_grad_norm"], 1.0)
+            with patch(
+                "sys.argv", ["train", "--config", str(path / "config.json"), "--run-dir", str(path)]
+            ):
+                resolved, _ = arguments(FFT_DEFAULTS, "fft")
+            self.assertFalse(resolved["source_ft"])
 
 
 if __name__ == "__main__":

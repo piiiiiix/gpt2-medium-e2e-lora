@@ -1,0 +1,141 @@
+{
+  "paper": "https://arxiv.org/pdf/2101.00190v1",
+  "repository_commit": "6519d30e69b15a180f23e2cd41b766d3f62b8e82",
+  "before": {
+    "commit": "6519d30e69b15a180f23e2cd41b766d3f62b8e82",
+    "splits": {
+      "train": {
+        "count": 42061,
+        "raw_bytes_equal": true,
+        "source_sha256": "eae319082237310913d9f37f6a891d48fb3f821f29d86870d2cb4f92ddd72c5a",
+        "token_or_label_mismatch_count": 42061,
+        "first_mismatches": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "mean_unpadded_length": 55.32790470982621,
+        "max_unpadded_length": 117,
+        "sequential_batch10_mean_padded_length": 76.32945091514144,
+        "first_batch_input_equal": false,
+        "first_batch_labels_equal": false,
+        "author_batch_keys": [
+          "input_ids",
+          "labels",
+          "src_attn",
+          "tgt_attn",
+          "src"
+        ],
+        "local_batch_keys": [
+          "input_ids",
+          "attention_mask",
+          "labels"
+        ]
+      },
+      "validation": {
+        "count": 4672,
+        "raw_bytes_equal": true,
+        "source_sha256": "ba963113c8401d3d26216c0dc0a6dae1ea6ea927de3bf830e32c41f65401c80d",
+        "token_or_label_mismatch_count": 4672,
+        "first_mismatches": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "mean_unpadded_length": 61.15453767123287,
+        "max_unpadded_length": 127,
+        "sequential_batch10_mean_padded_length": 69.97008547008546,
+        "first_batch_input_equal": false,
+        "first_batch_labels_equal": false,
+        "author_batch_keys": [
+          "input_ids",
+          "labels",
+          "src_attn",
+          "tgt_attn",
+          "src"
+        ],
+        "local_batch_keys": [
+          "input_ids",
+          "attention_mask",
+          "labels"
+        ]
+      }
+    }
+  },
+  "after": {
+    "commit": "6519d30e69b15a180f23e2cd41b766d3f62b8e82",
+    "splits": {
+      "train": {
+        "count": 42061,
+        "raw_bytes_equal": true,
+        "source_sha256": "eae319082237310913d9f37f6a891d48fb3f821f29d86870d2cb4f92ddd72c5a",
+        "token_or_label_mismatch_count": 0,
+        "first_mismatches": [],
+        "mean_unpadded_length": 56.32790470982621,
+        "max_unpadded_length": 118,
+        "sequential_batch10_mean_padded_length": 77.32945091514144,
+        "first_batch_input_equal": true,
+        "first_batch_labels_equal": true,
+        "author_batch_keys": [
+          "input_ids",
+          "labels",
+          "src_attn",
+          "tgt_attn",
+          "src"
+        ],
+        "local_batch_keys": [
+          "input_ids",
+          "attention_mask",
+          "labels"
+        ]
+      },
+      "validation": {
+        "count": 4672,
+        "raw_bytes_equal": true,
+        "source_sha256": "ba963113c8401d3d26216c0dc0a6dae1ea6ea927de3bf830e32c41f65401c80d",
+        "token_or_label_mismatch_count": 0,
+        "first_mismatches": [],
+        "mean_unpadded_length": 62.15453767123287,
+        "max_unpadded_length": 128,
+        "sequential_batch10_mean_padded_length": 70.97008547008546,
+        "first_batch_input_equal": true,
+        "first_batch_labels_equal": true,
+        "author_batch_keys": [
+          "input_ids",
+          "labels",
+          "src_attn",
+          "tgt_attn",
+          "src"
+        ],
+        "local_batch_keys": [
+          "input_ids",
+          "attention_mask",
+          "labels"
+        ]
+      }
+    }
+  },
+  "sources": {
+    "args.py": "faa18e18362b3844431beb294bc85f6f3196e87781992d3b4c562768ba60cfe7",
+    "collator.py": "11fc47aee9720fe13cbd932550ab1452e5ef36537eebf4bbd5bb357aaddf6a73",
+    "dataset.py": "6a63820d22f30f2a89514b840a1c956212db4bc09935c7bde3bf3ee1eea1efde",
+    "model.py": "92fad964ae7e4cac277a25da3dea591138b3917af4de5cbd22e69f0d4105f3f2",
+    "run.py": "dda1849561194b69719ed52d5a4bfad69c4488470b4231535e23ac00f28c603f",
+    "train.py": "c8b39364b334869fda316ccf76197f9a1652f0d2fc1605e87a8ca98f0f30533d",
+    "trainer.py": "3068046c5ade9bea2583aff2fa036a9d8186ddfd8e31ffe6f12444531363c979"
+  }
+}

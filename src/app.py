@@ -91,6 +91,8 @@ def duration(config, kind):
 def task_details(record):
     """展示单条任务的结果、下载、续训、进度、日志和 GPU 采样。"""
     path = Path(record["path"])
+    if (path / "model_removal.json").exists():
+        st.warning("此运行的模型及断点已清理；配置和日志仅保留用于追溯。")
     st.json({k: v for k, v in record.items() if k != "config"})
     if record["config"].get("smoke"):
         st.caption("冒烟测试记录")
@@ -208,6 +210,35 @@ def task_details(record):
                     chart = gpu[["time", "gpu", column]].copy()
                     chart[column] = pd.to_numeric(chart[column], errors="coerce")
                     st.line_chart(chart, x="time", y=column, color="gpu", alt=label + "随时间变化")
+            if "wddm_memory" in gpu:
+                rows, reasons = [], set()
+                for _, sample in gpu.iterrows():
+                    memory = sample.get("wddm_memory")
+                    if not isinstance(memory, dict):
+                        continue
+                    if memory.get("unavailable_reason"):
+                        reasons.add(memory["unavailable_reason"])
+                    for adapter in memory.get("adapters", []):
+                        rows.append({"time": sample["time"], "pid": memory["pid"], **adapter})
+                st.caption("WDDM 按适配器 LUID 区分；进程值仅包含本任务 PID，缺失不代表零。")
+                if rows:
+                    memory_frame = pd.DataFrame(rows)
+                    st.dataframe(memory_frame.tail(20), alt="WDDM 专用与共享 GPU 内存")
+                    for column, label in [
+                        ("adapter_shared_mib", "整卡共享 GPU 内存（MiB）"),
+                        ("process_shared_mib", "本任务共享 GPU 内存（MiB）"),
+                        ("adapter_dedicated_mib", "整卡专用 GPU 内存（MiB）"),
+                        ("process_dedicated_mib", "本任务专用 GPU 内存（MiB）"),
+                    ]:
+                        if column in memory_frame:
+                            st.caption(label)
+                            st.line_chart(
+                                memory_frame, x="time", y=column, color="adapter", alt=label
+                            )
+                for reason in sorted(reasons):
+                    st.caption(f"WDDM 内存采样不可用：{reason}")
+            else:
+                st.caption("此历史记录未采集共享 GPU 内存。")
         except ValueError:
             st.caption("GPU 采样正在写入。")
 
@@ -228,6 +259,11 @@ if page == "训练":
             gradient_checkpointing=True,
         )
     st.caption("LoRA 默认值来自 V2 表 11；FFT 默认值参考 Prefix-Tuning 的 E2E FT 及作者代码。")
+    if kind == "fft":
+        st.caption(
+            "FT：保留作者原始文本空白、动态 padding；每 5000 步验证，"
+            "每 500000 步保存断点，final 使用训练结束权重（不重载最佳 epoch）。"
+        )
     if kind == "lora":
         st.subheader("Q、K、V 的 LoRA rank")
         st.caption("三个设置统一应用到所有 Transformer 层。rank=0：冻结该投影，不挂 LoRA。")
@@ -313,6 +349,8 @@ if page == "训练":
                 index=protocols.index(config["protocol"]),
                 key=f"protocol_{kind}_{profile}",
             )
+            if kind == "fft":
+                config["source_ft"] = config["protocol"] == "prefix_ft"
             config["optimizer"] = st.selectbox(
                 "AdamW 实现", ["source_adamw", "adamw_torch"], key=f"optimizer_{kind}_{profile}"
             )

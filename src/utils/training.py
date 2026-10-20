@@ -69,13 +69,25 @@ class Progress(TrainerCallback):
         )
 
 
+class PrefixFTFlow(TrainerCallback):
+    """撤销现代 Trainer 额外的末步验证/断点，保留作者的步数调度。"""
+
+    def on_step_end(self, args, state, control, **kwargs):
+        if state.global_step >= state.max_steps:
+            control.should_evaluate = state.global_step % state.eval_steps == 0
+            control.should_save = state.global_step % state.save_steps == 0
+        return control
+
+
 class SourceTrainer(Trainer):
     """显式选择作者版 AdamW，历史配置继续使用 torch AdamW。"""
 
     def __init__(self, *args, run_config=None, **kwargs):
         self.run_config = run_config or {}
         super().__init__(*args, **kwargs)
-        if self.run_config.get("source_training") and self.run_config.get("protocol") == "lora_e2e":
+        if self.run_config.get("source_ft") or (
+            self.run_config.get("source_training") and self.run_config.get("protocol") == "lora_e2e"
+        ):
             self.model_accepts_loss_kwargs = False
 
     def create_optimizer(self):
@@ -107,6 +119,10 @@ class SourceTrainer(Trainer):
         return self.optimizer
 
     def compute_loss(self, model, inputs, return_outputs=False, num_items_in_batch=None):
+        if self.run_config.get("source_ft"):
+            # 作者普通 FT 是每批有效目标 token 的平均 CE；不使用跨累积批的分母。
+            outputs = model(**{k: v for k, v in inputs.items() if k != "attention_mask"})
+            return (outputs.loss, outputs) if return_outputs else outputs.loss
         if self.run_config.get("source_training") and self.run_config.get("protocol") == "lora_e2e":
             from utils.source_training import source_loss
 
@@ -167,6 +183,10 @@ class AdapterTrainer(SourceTrainer):
 
 def validate(config, kind):
     """训练前检查 batch、精度、label smoothing 和 QKV 配置，拒绝无可训练参数。"""
+    if config.get("source_ft") and (kind != "fft" or config.get("protocol") != "prefix_ft"):
+        raise ValueError("source_ft requires fft with prefix_ft protocol")
+    if config.get("source_ft") and config.get("label_smoothing", 0) != 0:
+        raise ValueError("Author source_ft uses label_smoothing=0")
     for key in [
         "batch_size",
         "eval_batch_size",
@@ -260,7 +280,11 @@ def train(config, path, kind):
             def encode(row):
                 """将单条 E2E 数据编码为训练输入与仅覆盖目标文本的标签。"""
                 return tokenize(
-                    row, tokenizer, config["max_length"], config.get("protocol", "legacy")
+                    row,
+                    tokenizer,
+                    config["max_length"],
+                    config.get("protocol", "legacy"),
+                    source_ft=config.get("source_ft", False),
                 )
 
             train_data = train_data.map(encode, remove_columns=train_data.column_names)
@@ -328,10 +352,12 @@ def train(config, path, kind):
                 warmup_steps=config["warmup_steps"],
                 label_smoothing_factor=config["label_smoothing"],
                 logging_steps=config["logging_steps"],
-                eval_strategy="epoch",
-                save_strategy="epoch",
+                eval_strategy="steps" if config.get("source_ft") else "epoch",
+                eval_steps=5000,
+                save_strategy="steps" if config.get("source_ft") else "epoch",
+                save_steps=500000,
                 save_total_limit=None,
-                load_best_model_at_end=True,
+                load_best_model_at_end=not config.get("source_ft", False),
                 metric_for_best_model="eval_loss",
                 greater_is_better=False,
                 report_to="none",
@@ -356,7 +382,11 @@ def train(config, path, kind):
                 else DataCollatorForSeq2Seq(
                     tokenizer=tokenizer, padding=True, label_pad_token_id=-100
                 ),
-                callbacks=[TensorBoardCallback(tb_writer=writer), Progress(path)],
+                callbacks=[
+                    TensorBoardCallback(tb_writer=writer),
+                    *([PrefixFTFlow()] if config.get("source_ft") else []),
+                    Progress(path),
+                ],
                 **extras,
             )
             try:
@@ -375,6 +405,7 @@ def train(config, path, kind):
                     )
                 trainer.save_model(str(path / "final"))
                 tokenizer.save_pretrained(path / "final")
+                final_eval = trainer.evaluate() if config.get("source_ft") else None
                 write_json(
                     path / "result.json",
                     dict(
@@ -383,6 +414,7 @@ def train(config, path, kind):
                         best_eval_loss=trainer.state.best_metric,
                         final=str(path / "final"),
                         weight_update_verified=updated,
+                        final_eval=final_eval,
                     ),
                 )
             finally:

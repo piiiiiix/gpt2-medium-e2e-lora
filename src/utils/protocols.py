@@ -84,5 +84,9 @@ def save_protocol(path, config):
     from utils.runs import write_json
 
     write_json(
-        Path(path) / "training_protocol.json", {"protocol": config.get("protocol", "legacy")}
+        Path(path) / "training_protocol.json",
+        {
+            "protocol": config.get("protocol", "legacy"),
+            "source_ft": config.get("source_ft", False),
+        },
     )

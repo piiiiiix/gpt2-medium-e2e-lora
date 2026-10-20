@@ -27,6 +27,7 @@ def original_data(offline=False):
     for split, path in data_files(offline).items():
         rows, groups = [], {}
         for i, line in enumerate(path.read_text(encoding="utf-8").splitlines()):
+            ft_context, ft_target = line.split("||")
             # Identical to format_converting_e2e.py: context spacing is meaningful for BPE.
             ctx, target = line.strip().split("||")
             target = target.strip("\n")
@@ -37,6 +38,8 @@ def original_data(offline=False):
                     meaning_representation=ctx,
                     target=target,
                     references=[target],
+                    ft_context=ft_context,
+                    ft_target=ft_target,
                 )
             )
             clean = target.split("<|endoftext|>")[0].split("\n\n")[0].strip()
@@ -107,8 +110,20 @@ def prompt(sample, protocol="legacy", tokenizer=None):
     raise ValueError(f"Unknown protocol: {protocol}")
 
 
-def tokenize(sample, tokenizer, max_length, protocol="legacy"):
+def tokenize(sample, tokenizer, max_length, protocol="legacy", source_ft=False):
     """拼接提示词与目标文本，用 -100 屏蔽提示词损失，并检查上下文长度。"""
+    if protocol == "prefix_ft" and source_ft:
+        # 作者直接读取 splitlines()，不 strip 目标末尾空白；整句一次 BPE。
+        ctx = sample.get("ft_context", context(sample))
+        target = sample.get("ft_target", sample["target"])
+        text = f" {ctx} {tokenizer.bos_token} " + target + f" {tokenizer.eos_token}"
+        tokens = tokenizer(text, add_special_tokens=True, truncation=True, max_length=max_length)[
+            "input_ids"
+        ]
+        boundary = tokens.index(tokenizer.bos_token_id) + 1
+        if boundary >= len(tokens):
+            raise ValueError("Prompt consumes max_length; no target labels remain")
+        return dict(input_ids=tokens, labels=[-100] * boundary + tokens[boundary:])
     prefix = tokenizer(prompt(sample, protocol, tokenizer), add_special_tokens=False)["input_ids"]
     text = " " + sample["target"]
     if protocol == "prefix_ft":

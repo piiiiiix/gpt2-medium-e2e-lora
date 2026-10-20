@@ -97,12 +97,21 @@ class GPUMonitor:
 
     def _loop(self):
         """周期采样并逐行写入 JSONL，直到收到停止事件。"""
-        with self.path.open("a", encoding="utf-8", buffering=1) as stream:
-            while True:
-                for record in self.sample():
-                    stream.write(json.dumps(record, ensure_ascii=False) + "\n")
-                if self.stop_event.wait(self.interval):
-                    break
+        from utils.windows_gpu_memory import WindowsGPUMemory
+
+        memory = WindowsGPUMemory()
+        try:
+            with self.path.open("a", encoding="utf-8", buffering=1) as stream:
+                while True:
+                    records = self.sample()
+                    # 独立 LUID 命名空间，每轮只保存一次，不重复归属给不同 NVIDIA GPU。
+                    records[0]["wddm_memory"] = memory.sample()
+                    for record in records:
+                        stream.write(json.dumps(record, ensure_ascii=False) + "\n")
+                    if self.stop_event.wait(self.interval):
+                        break
+        finally:
+            memory.close()
 
     def start(self):
         """启动本次任务的后台 GPU 采样线程。"""

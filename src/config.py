@@ -58,6 +58,8 @@ FFT_DEFAULTS = {
     "protocol": "prefix_ft",
     "adam_epsilon": 1e-8,
     "max_grad_norm": 1.0,
+    # v1 / 作者普通全量 FT 路径：原始空白、每 5000 步验证、最终步模型。
+    "source_ft": True,
 }
 EVAL_DEFAULTS = dict(
     dataset=DATASET_NAME,

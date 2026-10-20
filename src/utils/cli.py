@@ -34,6 +34,8 @@ def arguments(defaults, kind):
             )
             if kind in ("lora", "fft"):
                 config["source_training"] = overrides.get("source_training", False)
+                if kind == "fft":
+                    config["source_ft"] = overrides.get("source_ft", False)
                 for key, value in legacy.items():
                     config[key] = overrides.get(key, value)
             elif "generation_profile" not in overrides:
