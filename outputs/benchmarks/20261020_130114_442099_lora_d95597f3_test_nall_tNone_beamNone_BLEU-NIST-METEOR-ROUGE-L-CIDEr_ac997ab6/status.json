@@ -1,0 +1,36 @@
+{
+  "kind": "benchmarks",
+  "status": "failed",
+  "started": "2026-10-20T13:01:59.736192+08:00",
+  "pid": 26360,
+  "config_hash": "ac997ab6",
+  "hardware": [
+    {
+      "time": "2026-10-20T05:01:59.736192+00:00",
+      "gpu": "0",
+      "uuid": "GPU-5d61c0ea-0ecb-0a82-2091-8fcac7ea2b90",
+      "name": "NVIDIA GeForce RTX 3080",
+      "utilization_percent": "0",
+      "temperature_celsius": "54",
+      "memory_used_mib": "1686",
+      "memory_total_mib": "10240",
+      "scope": "whole_device",
+      "power_draw_watts": "105.41",
+      "power_limit_watts": "320.00",
+      "core_clock_mhz": "1710",
+      "sm_clock_mhz": "1710",
+      "memory_clock_mhz": "9501",
+      "performance_state": "P0",
+      "clock_event_reasons_active": "0x0000000000000001",
+      "voltage_unavailable_reason": "Command '['nvidia-smi', '-q', '-x', '-d', 'VOLTAGE']' returned non-zero exit status 2.",
+      "core_voltage_mv": null
+    }
+  ],
+  "python": "C:\\Users\\pix\\.conda\\envs\\lora\\python.exe",
+  "created": "2026-10-20T13:01:14.444100+08:00",
+  "first_started": "2026-10-20T13:01:59.736192+08:00",
+  "error": "Official E2E scoring requires perl on PATH (see README).",
+  "ended": "2026-10-20T13:02:00.477992+08:00",
+  "elapsed_seconds": 0.5859385000076145,
+  "total_elapsed_seconds": 0.5859385000076145
+}
