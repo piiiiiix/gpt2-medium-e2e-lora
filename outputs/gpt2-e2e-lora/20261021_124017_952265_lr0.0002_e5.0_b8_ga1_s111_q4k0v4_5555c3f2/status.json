@@ -1,6 +1,6 @@
 {
   "kind": "lora",
-  "status": "running",
+  "status": "completed",
   "started": "2026-10-21T12:40:54.755715+08:00",
   "pid": 22944,
   "config_hash": "5555c3f2",
@@ -28,5 +28,8 @@
   ],
   "python": "C:\\Users\\pix\\.conda\\envs\\lora\\python.exe",
   "created": "2026-10-21T12:40:17.955268+08:00",
-  "first_started": "2026-10-21T12:40:54.755715+08:00"
+  "first_started": "2026-10-21T12:40:54.755715+08:00",
+  "ended": "2026-10-22T17:19:25.921130+08:00",
+  "elapsed_seconds": 103110.6262264,
+  "total_elapsed_seconds": 103110.6262264
 }
