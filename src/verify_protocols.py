@@ -180,6 +180,7 @@ class ProtocolTests(unittest.TestCase):
                     "adam_beta2",
                     "adam_epsilon",
                     "max_grad_norm",
+                    "padding_mode",
                 )
             }
             (path / "config.json").write_text(json.dumps(cfg))

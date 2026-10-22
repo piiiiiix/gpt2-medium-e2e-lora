@@ -9,7 +9,6 @@ from torch.utils.tensorboard import SummaryWriter
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
-    DataCollatorForSeq2Seq,
     Trainer,
     TrainerCallback,
     TrainingArguments,
@@ -18,6 +17,7 @@ from transformers import (
 from transformers.integrations import TensorBoardCallback
 
 from utils.data import load_data, subset, tokenize
+from utils.padding import resolve_padding, training_collator
 from utils.protocols import save_protocol
 from utils.qkv_lora import attach, restore, save_adapter
 from utils.runs import running, write_json
@@ -183,6 +183,7 @@ class AdapterTrainer(SourceTrainer):
 
 def validate(config, kind):
     """训练前检查 batch、精度、label smoothing 和 QKV 配置，拒绝无可训练参数。"""
+    resolve_padding(config, kind)
     if config.get("source_ft") and (kind != "fft" or config.get("protocol") != "prefix_ft"):
         raise ValueError("source_ft requires fft with prefix_ft protocol")
     if config.get("source_ft") and config.get("label_smoothing", 0) != 0:
@@ -269,6 +270,8 @@ def train(config, path, kind):
                 validation_fingerprint=eval_data._fingerprint,
                 protocol=config.get("protocol", "legacy"),
                 loss="target only",
+                padding_mode=resolve_padding(config, kind),
+                max_length=config["max_length"],
                 examples=[train_data[i] for i in range(min(3, len(train_data)))],
             ),
         )
@@ -295,7 +298,7 @@ def train(config, path, kind):
                 and config.get("protocol") == "lora_e2e"
             )
             if source_lora:
-                from utils.source_training import FullBatchDataset, SourceCollator
+                from utils.source_training import FullBatchDataset
 
                 train_data = FullBatchDataset(train_data, config["batch_size"])
                 eval_data = FullBatchDataset(eval_data, config["eval_batch_size"])
@@ -377,11 +380,7 @@ def train(config, path, kind):
                 processing_class=tokenizer,
                 train_dataset=train_data,
                 eval_dataset=eval_data,
-                data_collator=SourceCollator(config["max_length"])
-                if source_lora
-                else DataCollatorForSeq2Seq(
-                    tokenizer=tokenizer, padding=True, label_pad_token_id=-100
-                ),
+                data_collator=training_collator(config, kind, tokenizer),
                 callbacks=[
                     TensorBoardCallback(tb_writer=writer),
                     *([PrefixFTFlow()] if config.get("source_ft") else []),

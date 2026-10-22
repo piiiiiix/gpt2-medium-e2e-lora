@@ -4,6 +4,7 @@ import argparse
 import copy
 
 from config import inside_project
+from utils.padding import resolve_padding
 from utils.runs import new_run, read_json
 
 
@@ -38,6 +39,10 @@ def arguments(defaults, kind):
                     config["source_ft"] = overrides.get("source_ft", False)
                 for key, value in legacy.items():
                     config[key] = overrides.get(key, value)
+                # Infer from the resolved historical protocol, not today's defaults.
+                if "padding_mode" not in overrides:
+                    config.pop("padding_mode", None)
+                    config["padding_mode"] = resolve_padding(config, kind)
             elif "generation_profile" not in overrides:
                 config["generation_profile"] = "legacy"
             if kind not in ("lora", "fft"):

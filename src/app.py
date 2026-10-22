@@ -372,8 +372,25 @@ if page == "训练":
         config["gradient_checkpointing"] = st.checkbox(
             "梯度检查点", value=config["gradient_checkpointing"]
         )
-        config["max_length"] = st.number_input(
-            "最大训练长度", min_value=32, max_value=1024, value=config["max_length"]
+        length_col, padding_col = st.columns([3, 2], vertical_alignment="bottom")
+        config["max_length"] = length_col.number_input(
+            "训练长度上限 / 固定补齐长度",
+            min_value=32,
+            max_value=1024,
+            value=config["max_length"],
+            key=f"max_length_{kind}_{profile}",
+            help="固定：每批补到该长度。动态：每批只补到本批最长；此值仍限制输入长度。",
+        )
+        dynamic_padding = padding_col.toggle(
+            "动态补齐（关闭为固定补齐）",
+            value=config["padding_mode"] == "dynamic",
+            key=f"dynamic_padding_{kind}_{profile}",
+            help="仅切换补齐方式，不改变输入协议、损失函数或采样规则。",
+        )
+        config["padding_mode"] = "dynamic" if dynamic_padding else "fixed"
+        st.caption(
+            "LoRA 默认固定 512；FT 默认动态、长度上限 1024。"
+            "固定模式改变补齐长度；动态模式改变截断上限。切换为对照实验，不代表评分已验证保持。"
         )
         config["logging_steps"] = st.number_input(
             "日志间隔（steps）", min_value=1, value=config["logging_steps"]

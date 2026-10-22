@@ -1,5 +1,13 @@
 # GPT-2 Medium E2E LoRA
 
+## 2026-10-22：独立切换补齐方式
+
+训练页在共用的“训练长度上限 / 固定补齐长度”输入框旁增加“动态补齐”开关，关闭即固定补齐。LoRA 缺省仍固定512；FT缺省仍动态补齐、长度上限1024。固定模式每批补到输入长度；动态模式每批只补到本批最长，此值仅作为token化截断上限。不要把改小固定长度当成动态补齐；长度太小可能截断目标，提示词已占满时会拒绝训练。
+
+新配置字段 `padding_mode` 可取 `fixed` / `dynamic`，CLI的JSON配置同样支持；例如LoRA只覆盖 `{"padding_mode":"dynamic","max_length":512}`，FT固定对照覆盖 `{"padding_mode":"fixed","max_length":512}`。设置随任务/训练池配置快照保存，训练 `data_summary.json` 也记录实际模式及长度。切换不会更改输入协议、源损失、采样、优化器或生成配置。旧队列/续训缺字段时按旧规则推断：source LoRA固定，其余动态。
+
+动态padding属于独立性能对照设置，不保证完整训练评分不变，也不宣称逐位复现作者固定512实现。可先保持seed、数据、有效batch、精度和长度上限不变，仅切换LoRA补齐方式，完成全量训练后再用相同生成参数与官方评分比较。`python src/verify_padding.py` 验证mask、损失/梯度、历史配置和前端提交；`python src/smoke_padding.py tiny`覆盖两种方法×两种补齐，`medium-fixed` / `medium-dynamic`只做真实Medium四步耗时探测，产物均在 `outputs/smoke`。
+
 ## 2026-10-21：FT 核验修正与共享 GPU 内存
 
 新 FFT 默认按 **Prefix-Tuning arXiv:2101.00190v1 表 5** 与作者普通全量 FT 路径处理：5e-5 / 5 epochs / batch=10 保持；新增 `source_ft=true`，保留原始目标末尾空白、整句编码、动态 padding、每 5000 步验证、每 500000 步保存断点，最终保存训练结束权重并验证。完整 5 轮通常不到自动 checkpoint 间隔；主动停止仍尝试保存断点。前文“FFT 每 epoch 保存并选最佳”属于旧行为。旧排队/续训未带 source_ft 的配置保持旧语义。

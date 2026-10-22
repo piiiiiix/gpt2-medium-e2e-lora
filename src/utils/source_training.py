@@ -1,4 +1,4 @@
-"""LoRA source loss, fixed padding and full-batch tail sampling."""
+"""LoRA source loss, selectable padding and full-batch tail sampling."""
 
 import random
 
@@ -41,12 +41,19 @@ class FullBatchDataset(Dataset):
 
 
 class SourceCollator:
-    def __init__(self, length):
+    def __init__(self, length, padding_mode="fixed"):
         self.length = length
+        if padding_mode not in ("fixed", "dynamic"):
+            raise ValueError("padding_mode must be fixed or dynamic")
+        self.padding_mode = padding_mode
 
     def __call__(self, rows):
         # Official padding id=0; causal attention makes padded future tokens irrelevant.
+        longest = max(len(row["input_ids"]) for row in rows)
+        if longest > self.length:
+            raise ValueError("Tokenized input exceeds max_length")
+        length = self.length if self.padding_mode == "fixed" else longest
         return {
-            key: torch.tensor([r[key] + [pad] * (self.length - len(r[key])) for r in rows])
+            key: torch.tensor([r[key] + [pad] * (length - len(r[key])) for r in rows])
             for key, pad in (("input_ids", 0), ("labels", -100))
         }
