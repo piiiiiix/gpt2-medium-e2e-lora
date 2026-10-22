@@ -3,10 +3,22 @@
 /outputs/**
 !/outputs/.gitkeep
 !/outputs/benchmarks/
+!/outputs/benchmarks/**
 !/outputs/pics/
 !/outputs/pics/**
+# Track all training parameters and records, including checkpoint metadata.
+!/outputs/gpt2-e2e-full-ft/
+!/outputs/gpt2-e2e-full-ft/**
+!/outputs/gpt2-e2e-lora/
+!/outputs/gpt2-e2e-lora/**
+# Exclude model weights, but retain training_args.bin and training state.
+/outputs/**/*.safetensors
+/outputs/**/pytorch_model*.bin
+/outputs/**/adapter_model.bin
+/outputs/**/model.pt
+/outputs/**/model.pth
+/outputs/**/model.bin
 __pycache__/
 *.py[cod]
 .env
 .streamlit/secrets.toml
-!/outputs/benchmarks/**

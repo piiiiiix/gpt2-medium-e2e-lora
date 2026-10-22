@@ -1,0 +1,13 @@
+{
+  "metrics": {
+    "train_runtime": 100231.1293,
+    "train_samples_per_second": 2.098,
+    "train_steps_per_second": 0.262,
+    "train_loss": 2.5638263143754902,
+    "epoch": 5.0
+  },
+  "best_checkpoint": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\gpt2-e2e-lora\\20261018_234022_034578_lr0.0002_e5.0_b8_ga1_s110_q4k0v4_c84d3f4c\\checkpoints\\checkpoint-21032",
+  "best_eval_loss": 1.1668074131011963,
+  "final": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\gpt2-e2e-lora\\20261018_234022_034578_lr0.0002_e5.0_b8_ga1_s110_q4k0v4_c84d3f4c\\final",
+  "weight_update_verified": true
+}

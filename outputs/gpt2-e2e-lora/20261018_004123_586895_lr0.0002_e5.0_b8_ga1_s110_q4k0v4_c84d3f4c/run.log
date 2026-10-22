@@ -1,0 +1,17 @@
+{"model": "openai-community/gpt2-medium", "dataset": "lora/e2e-original", "learning_rate": 0.0002, "epochs": 5.0, "batch_size": 8, "eval_batch_size": 4, "gradient_accumulation": 1, "weight_decay": 0.01, "warmup_steps": 500, "protocol": "lora_e2e", "source_training": true, "optimizer": "source_adamw", "adam_beta1": 0.9, "adam_beta2": 0.999, "adam_epsilon": 1e-06, "max_grad_norm": 0.0, "label_smoothing": 0.1, "dropout": 0.1, "alpha": 32, "seed": 110, "precision": "fp32", "max_length": 512, "gradient_checkpointing": false, "logging_steps": 100, "max_steps": -1, "smoke": false, "train_samples": null, "eval_samples": null, "local_data": null, "local_files_only": false, "ranks": {"q": 4, "k": 0, "v": 4}}
+Traceback (most recent call last):
+  File "D:\Source\gpt2-medium-e2e-lora\src\utils\runs.py", line 199, in running
+    yield
+  File "D:\Source\gpt2-medium-e2e-lora\src\utils\training.py", line 234, in train
+    raw = load_data(config)
+  File "D:\Source\gpt2-medium-e2e-lora\src\utils\data.py", line 18, in load_data
+    return original_data(config.get("local_files_only", False))
+  File "D:\Source\gpt2-medium-e2e-lora\src\utils\data.py", line 27, in original_data
+    for split, path in data_files(offline).items():
+  File "D:\Source\gpt2-medium-e2e-lora\src\utils\paper_resources.py", line 52, in data_files
+    return {
+  File "D:\Source\gpt2-medium-e2e-lora\src\utils\paper_resources.py", line 53, in <dictcomp>
+    split: fetch(item, OUTPUT_ROOT / "resources/paper_e2e" / f"{split}.txt", offline)
+  File "D:\Source\gpt2-medium-e2e-lora\src\utils\paper_resources.py", line 40, in fetch
+    raise ValueError(f"Checksum mismatch: {item['url']}")
+ValueError: Checksum mismatch: https://raw.githubusercontent.com/microsoft/LoRA/c4593f060e6a368d7bb5af5273b8e42810cdef90/examples/NLG/data/e2e/train.txt

@@ -1,0 +1,39 @@
+{
+  "dataset": "lora/e2e-original",
+  "local_data": null,
+  "train_count": 42061,
+  "validation_count": 4672,
+  "train_fingerprint": "b5792cb91d150c56",
+  "validation_fingerprint": "14c3a3168182f72f",
+  "protocol": "lora_e2e",
+  "loss": "target only",
+  "examples": [
+    {
+      "id": "original-train-row-0",
+      "context": "name : The Vaults | Type : pub | price : more than £ 30 | customer rating : 5 out of 5 | near : Café Adriatic",
+      "meaning_representation": "name : The Vaults | Type : pub | price : more than £ 30 | customer rating : 5 out of 5 | near : Café Adriatic",
+      "target": "The Vaults pub near Café Adriatic has a 5 star rating . Prices start at £ 30 .",
+      "references": [
+        "The Vaults pub near Café Adriatic has a 5 star rating . Prices start at £ 30 ."
+      ]
+    },
+    {
+      "id": "original-train-row-1",
+      "context": "name : The Cambridge Blue | Type : pub | food : English | price : cheap | near : Café Brazil",
+      "meaning_representation": "name : The Cambridge Blue | Type : pub | food : English | price : cheap | near : Café Brazil",
+      "target": "Close to Café Brazil , The Cambridge Blue pub serves delicious Tuscan Beef for the cheap price of £ 10.50 . Delicious Pub food .",
+      "references": [
+        "Close to Café Brazil , The Cambridge Blue pub serves delicious Tuscan Beef for the cheap price of £ 10.50 . Delicious Pub food ."
+      ]
+    },
+    {
+      "id": "original-train-row-2",
+      "context": "name : The Eagle | Type : coffee shop | food : Japanese | price : less than £ 20 | customer rating : low | area : riverside | family friendly : yes | near : Burger King",
+      "meaning_representation": "name : The Eagle | Type : coffee shop | food : Japanese | price : less than £ 20 | customer rating : low | area : riverside | family friendly : yes | near : Burger King",
+      "target": "The Eagle is a low rated coffee shop near Burger King and the riverside that is family friendly and is less than £ 20 for Japanese food .",
+      "references": [
+        "The Eagle is a low rated coffee shop near Burger King and the riverside that is family friendly and is less than £ 20 for Japanese food ."
+      ]
+    }
+  ]
+}

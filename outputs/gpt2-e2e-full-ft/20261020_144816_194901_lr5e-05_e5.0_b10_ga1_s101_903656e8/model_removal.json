@@ -1,0 +1,15 @@
+{
+  "reason": "User-requested removal after FT source audit: stripped target whitespace and best-epoch selection differed from author FT",
+  "removed_at": "2026-10-21T07:15:11.1928527+08:00",
+  "targets": [
+    {
+      "path": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\gpt2-e2e-full-ft\\20261020_144816_194901_lr5e-05_e5.0_b10_ga1_s101_903656e8\\final",
+      "bytes": 1422891750.0
+    },
+    {
+      "path": "D:\\Source\\gpt2-medium-e2e-lora\\outputs\\gpt2-e2e-full-ft\\20261020_144816_194901_lr5e-05_e5.0_b10_ga1_s101_903656e8\\checkpoints",
+      "bytes": 21308496660.0
+    }
+  ],
+  "logs_retained": true
+}

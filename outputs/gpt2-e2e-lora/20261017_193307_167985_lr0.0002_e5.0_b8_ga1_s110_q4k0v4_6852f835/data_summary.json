@@ -1,0 +1,33 @@
+{
+  "dataset": "GEM/e2e_nlg",
+  "local_data": null,
+  "train_count": 33525,
+  "validation_count": 1484,
+  "train_fingerprint": "fe6dfacdf472f8d7",
+  "validation_fingerprint": "076bcac092e1fb5a",
+  "protocol": "lora_e2e",
+  "loss": "target only",
+  "examples": [
+    {
+      "gem_id": "e2e_nlg-train-0",
+      "gem_parent_id": "e2e_nlg-train-0",
+      "meaning_representation": "name[The Eagle], eatType[coffee shop], food[Japanese], priceRange[less than £20], customer rating[low], area[riverside], familyFriendly[yes], near[Burger King]",
+      "target": "The Eagle is a low rated coffee shop near Burger King and the riverside that is family friendly and is less than £20 for Japanese food.",
+      "references": []
+    },
+    {
+      "gem_id": "e2e_nlg-train-1",
+      "gem_parent_id": "e2e_nlg-train-1",
+      "meaning_representation": "name[The Mill], eatType[coffee shop], food[French], area[riverside], near[The Sorrento]",
+      "target": "Located near The Sorrento is a French Theme eatery and coffee shop called The Mill, with a price range at £20-£25 it is in the riverside area.",
+      "references": []
+    },
+    {
+      "gem_id": "e2e_nlg-train-2",
+      "gem_parent_id": "e2e_nlg-train-2",
+      "meaning_representation": "name[Loch Fyne], food[French], area[riverside], near[The Rice Boat]",
+      "target": "For luxurious French food, the Loch Fyne is located by the river next to The Rice Boat.",
+      "references": []
+    }
+  ]
+}
