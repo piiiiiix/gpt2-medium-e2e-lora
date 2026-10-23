@@ -1,0 +1,47 @@
+{
+  "dataset": "lora/e2e-original",
+  "local_data": null,
+  "train_count": 42061,
+  "validation_count": 4672,
+  "train_fingerprint": "9e94f778d1bf08b3",
+  "validation_fingerprint": "a47377ce6fb9c3e0",
+  "protocol": "prefix_ft",
+  "loss": "target only",
+  "padding_mode": "dynamic",
+  "max_length": 1024,
+  "examples": [
+    {
+      "id": "original-train-row-0",
+      "context": "name : The Vaults | Type : pub | price : more than £ 30 | customer rating : 5 out of 5 | near : Café Adriatic",
+      "meaning_representation": "name : The Vaults | Type : pub | price : more than £ 30 | customer rating : 5 out of 5 | near : Café Adriatic",
+      "target": "The Vaults pub near Café Adriatic has a 5 star rating . Prices start at £ 30 .",
+      "references": [
+        "The Vaults pub near Café Adriatic has a 5 star rating . Prices start at £ 30 ."
+      ],
+      "ft_context": "name : The Vaults | Type : pub | price : more than £ 30 | customer rating : 5 out of 5 | near : Café Adriatic",
+      "ft_target": "The Vaults pub near Café Adriatic has a 5 star rating . Prices start at £ 30 . "
+    },
+    {
+      "id": "original-train-row-1",
+      "context": "name : The Cambridge Blue | Type : pub | food : English | price : cheap | near : Café Brazil",
+      "meaning_representation": "name : The Cambridge Blue | Type : pub | food : English | price : cheap | near : Café Brazil",
+      "target": "Close to Café Brazil , The Cambridge Blue pub serves delicious Tuscan Beef for the cheap price of £ 10.50 . Delicious Pub food .",
+      "references": [
+        "Close to Café Brazil , The Cambridge Blue pub serves delicious Tuscan Beef for the cheap price of £ 10.50 . Delicious Pub food ."
+      ],
+      "ft_context": "name : The Cambridge Blue | Type : pub | food : English | price : cheap | near : Café Brazil",
+      "ft_target": "Close to Café Brazil , The Cambridge Blue pub serves delicious Tuscan Beef for the cheap price of £ 10.50 . Delicious Pub food . "
+    },
+    {
+      "id": "original-train-row-2",
+      "context": "name : The Eagle | Type : coffee shop | food : Japanese | price : less than £ 20 | customer rating : low | area : riverside | family friendly : yes | near : Burger King",
+      "meaning_representation": "name : The Eagle | Type : coffee shop | food : Japanese | price : less than £ 20 | customer rating : low | area : riverside | family friendly : yes | near : Burger King",
+      "target": "The Eagle is a low rated coffee shop near Burger King and the riverside that is family friendly and is less than £ 20 for Japanese food .",
+      "references": [
+        "The Eagle is a low rated coffee shop near Burger King and the riverside that is family friendly and is less than £ 20 for Japanese food ."
+      ],
+      "ft_context": "name : The Eagle | Type : coffee shop | food : Japanese | price : less than £ 20 | customer rating : low | area : riverside | family friendly : yes | near : Burger King",
+      "ft_target": "The Eagle is a low rated coffee shop near Burger King and the riverside that is family friendly and is less than £ 20 for Japanese food . "
+    }
+  ]
+}

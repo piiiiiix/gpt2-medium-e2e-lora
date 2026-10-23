@@ -1,0 +1,49 @@
+Running MS-COCO evaluator...
+creating index...
+index created!
+Loading and preparing results...     
+DONE (t=0.00s)
+creating index...
+index created!
+tokenization...
+PTBTokenizer tokenized 132573 tokens at 1112402.37 tokens per second.
+PTBTokenizer tokenized 18869 tokens at 289280.72 tokens per second.
+setting up scorers...
+computing METEOR score...
+METEOR: 0.468
+computing Rouge score...
+ROUGE_L: 0.722
+computing CIDEr score...
+CIDEr: 2.514
+Creating temp directory  D:\Source\gpt2-medium-e2e-lora\outputs\benchmarks\20261023_211354_800746_lora_bb8ee1f3_test_nall_tNone_beamNone_BLEU-NIST-METEOR-ROUGE-L-CIDEr_930a4591\scoring_tmp\e2e-eval-p79apcvv
+Running MTEval to compute BLEU & NIST...
+Use of 'Hyphen' in \p{} or \P{} is deprecated because: Supplanted by Line_Break property values; see www.unicode.org/reports/tr14 at D:\Source\gpt2-medium-e2e-lora\outputs\resources\e2e-metrics-1b9c4d87fd0bbb171ea966741cdc012588581ed4\mteval\mteval-v13a-sig.pl line 993.
+Use of 'Hyphen' in \p{} or \P{} is deprecated because: Supplanted by Line_Break property values; see www.unicode.org/reports/tr14 at D:\Source\gpt2-medium-e2e-lora\outputs\resources\e2e-metrics-1b9c4d87fd0bbb171ea966741cdc012588581ed4\mteval\mteval-v13a-sig.pl line 993.
+MT evaluation scorer began on 2026 Oct 23 at 21:55:17
+command line:  D:\Source\gpt2-medium-e2e-lora\outputs\resources\e2e-metrics-1b9c4d87fd0bbb171ea966741cdc012588581ed4\mteval\mteval-v13a-sig.pl -r D:\Source\gpt2-medium-e2e-lora\outputs\benchmarks\20261023_211354_800746_lora_bb8ee1f3_test_nall_tNone_beamNone_BLEU-NIST-METEOR-ROUGE-L-CIDEr_930a4591\scoring_tmp\e2e-eval-p79apcvv\mteval_ref.sgm -s D:\Source\gpt2-medium-e2e-lora\outputs\benchmarks\20261023_211354_800746_lora_bb8ee1f3_test_nall_tNone_beamNone_BLEU-NIST-METEOR-ROUGE-L-CIDEr_930a4591\scoring_tmp\e2e-eval-p79apcvv\mteval_src.sgm -t D:\Source\gpt2-medium-e2e-lora\outputs\benchmarks\20261023_211354_800746_lora_bb8ee1f3_test_nall_tNone_beamNone_BLEU-NIST-METEOR-ROUGE-L-CIDEr_930a4591\scoring_tmp\e2e-eval-p79apcvv\mteval_sys.sgm -f D:\Source\gpt2-medium-e2e-lora\outputs\benchmarks\20261023_211354_800746_lora_bb8ee1f3_test_nall_tNone_beamNone_BLEU-NIST-METEOR-ROUGE-L-CIDEr_930a4591\scoring_tmp\e2e-eval-p79apcvv\mteval_log.txt
+  Evaluation of any-to-en translation using:
+    src set "e2e" (1 docs, 630 segs)
+    ref set "e2e" (45 refs)
+    tst set "e2e" (1 systems)
+
+NIST score = 8.7847  BLEU score = 0.6987 for system "tst"
+
+# ------------------------------------------------------------------------
+
+Individual N-gram scoring
+        1-gram   2-gram   3-gram   4-gram   5-gram   6-gram   7-gram   8-gram   9-gram
+        ------   ------   ------   ------   ------   ------   ------   ------   ------
+ NIST:  5.5880   1.4569   0.8093   0.5284   0.4020   0.2188   0.1455   0.0991   0.0731  "tst"
+
+ BLEU:  0.9342   0.7835   0.6373   0.5109   0.3979   0.3132   0.2598   0.2183   0.1875  "tst"
+
+# ------------------------------------------------------------------------
+Cumulative N-gram scoring
+        1-gram   2-gram   3-gram   4-gram   5-gram   6-gram   7-gram   8-gram   9-gram
+        ------   ------   ------   ------   ------   ------   ------   ------   ------
+ NIST:  5.5880   7.0450   7.8543   8.3827   8.7847   9.0035   9.1490   9.2481   9.3212  "tst"
+
+ BLEU:  0.9342   0.8555   0.7755   0.6987   0.6243   0.5565   0.4991   0.4501   0.4084  "tst"
+MT evaluation scorer ended on 2026 Oct 23 at 21:55:27
+
+Removing temp directory

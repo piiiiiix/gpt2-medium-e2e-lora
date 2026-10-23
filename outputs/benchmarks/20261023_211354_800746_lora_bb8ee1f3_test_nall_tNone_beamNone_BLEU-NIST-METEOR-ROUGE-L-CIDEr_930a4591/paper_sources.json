@@ -1,0 +1,73 @@
+{
+  "lora_commit": "c4593f060e6a368d7bb5af5273b8e42810cdef90",
+  "data": {
+    "train": {
+      "url": "https://raw.githubusercontent.com/microsoft/LoRA/c4593f060e6a368d7bb5af5273b8e42810cdef90/examples/NLG/data/e2e/train.txt",
+      "sha256": "eae319082237310913d9f37f6a891d48fb3f821f29d86870d2cb4f92ddd72c5a"
+    },
+    "validation": {
+      "url": "https://raw.githubusercontent.com/microsoft/LoRA/c4593f060e6a368d7bb5af5273b8e42810cdef90/examples/NLG/data/e2e/valid.txt",
+      "sha256": "ba963113c8401d3d26216c0dc0a6dae1ea6ea927de3bf830e32c41f65401c80d"
+    },
+    "test": {
+      "url": "https://raw.githubusercontent.com/microsoft/LoRA/c4593f060e6a368d7bb5af5273b8e42810cdef90/examples/NLG/data/e2e/test.txt",
+      "sha256": "81b1bcd40c4f12845ec4eb61a77bf43765d112483cd9b2f91ef10bfc1b3d8f13"
+    }
+  },
+  "evaluator": {
+    "commit": "1b9c4d87fd0bbb171ea966741cdc012588581ed4",
+    "url": "https://codeload.github.com/tuetschek/e2e-metrics/zip/1b9c4d87fd0bbb171ea966741cdc012588581ed4",
+    "sha256": "ef227858ef7be61821c63739e17fe46e9d113b2bbf3406e02634796e09114a2a",
+    "files": {
+      ".gitignore": "01ac902f80827a7a3ee8ac56fdb60b200599b0a2e79a0e65ec2df9012acee458",
+      "README.md": "f042d26470cb327c5a44222bc9d7b63fc56b31570930bce2db4a1818fe927410",
+      "example-inputs/README.md": "a57c09fb003874892f0626bedbc2ba7a2cf07f96728c51cd43d38fa01c46f5fa",
+      "example-inputs/baseline-output.txt": "40509421149c20af64ebd3d797ccd6b4b5e00f117f0e0b7acc4634e8e950c722",
+      "example-inputs/devel-conc.txt": "bd1b8dc58ad36d1c9b8c576802436a63571c43f34603a86ab55fbb193bb94620",
+      "license.txt": "26d99182a77e6084f94dd82692f31c84745cb0a055944b14f6ea7297f4f40c09",
+      "measure_scores.py": "7cd962ea3ea6457ea49aacf940c34e72c68d8109c70fd0c2387e2c4303be9081",
+      "metrics/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "metrics/pymteval.py": "89fa624ddf605d519365a7f273e802406ff6f24345aef5ce59bd54229fef218c",
+      "mteval/mteval-v13a-sig.pl": "c4127608b8263b738e80a141c0685fc8ddd25dda259ed3c231d4c7389df70e7b",
+      "pycocoevalcap/__init__.py": "d02e91fe125b82e6e5f0642b897f7439094506d06f32771b40d00170deb8eae1",
+      "pycocoevalcap/bleu/LICENSE": "f830ffb6b163eeced2bcab2acbb8526fe365e40e865c364db691620a5840a252",
+      "pycocoevalcap/bleu/__init__.py": "d02e91fe125b82e6e5f0642b897f7439094506d06f32771b40d00170deb8eae1",
+      "pycocoevalcap/bleu/bleu.py": "b891afd03a863ec9545e2c4ae1e31b5db39d4d704a5768b1fbb2c6cc30644b8b",
+      "pycocoevalcap/bleu/bleu_scorer.py": "af7723855b3d7fbd014b8e7f0cde4ad9c8a08f77ebd1710d077df3e53d9dede6",
+      "pycocoevalcap/cider/__init__.py": "d02e91fe125b82e6e5f0642b897f7439094506d06f32771b40d00170deb8eae1",
+      "pycocoevalcap/cider/cider.py": "edbbfb95a1cb072fc3f98c4c24a6e8a2130ab0a5e83d3f026ef5c35c3404f863",
+      "pycocoevalcap/cider/cider_scorer.py": "78ca4f51a55c3f0359c9622bd425667906fd660990b32984aa0a47be68ff6163",
+      "pycocoevalcap/eval.py": "86c4c5a5f19cc2f9b7300fad25375ee1243235dbfa6b9003feba6466dd41a89f",
+      "pycocoevalcap/meteor/__init__.py": "d02e91fe125b82e6e5f0642b897f7439094506d06f32771b40d00170deb8eae1",
+      "pycocoevalcap/meteor/data/paraphrase-en.gz": "c147ac7d2c91f2fbb3ad31e4b352235061eb83145e0434daf217ee9ca5975f48",
+      "pycocoevalcap/meteor/meteor-1.5.jar": "1e57b4c72c0830ebe68558f1c799a624e96cbc1b6045c9f6330e26dcff6eafc2",
+      "pycocoevalcap/meteor/meteor.py": "635e8d0f19e7ecdff7b65feab1012eb083412e1d7afab4b1e3d32e4657849aee",
+      "pycocoevalcap/rouge/__init__.py": "2d1098934cdf7b3e648c88708942987828d6eb1c4a0c64051570bd222566d4ed",
+      "pycocoevalcap/rouge/rouge.py": "06330b90ace7c0d22b935f402aead8f370a7b8d71395c640e383342ee59433d7",
+      "pycocoevalcap/tokenizer/__init__.py": "055f2924b6d518dd5d51272ad3b361663b500808c69bca7d931337344eeabbc2",
+      "pycocoevalcap/tokenizer/ptbtokenizer.py": "c06fef5d93d53016ef3a4b603e28a9f89bb1d56390092fd438afe04bceb1afe7",
+      "pycocoevalcap/tokenizer/stanford-corenlp-3.4.1.jar": "2fcb91bb7a111f93d71e264f4ee0e3afd19ba0dde6d21b38605088df9e940399",
+      "pycocotools/__init__.py": "d02e91fe125b82e6e5f0642b897f7439094506d06f32771b40d00170deb8eae1",
+      "pycocotools/coco.py": "41a93243d312477d15b70a66af0e637ece23b0bbde28381644e5c3014af02342",
+      "requirements.txt": "e53943f3fafb3a806ecc7b3b04984aae08112e8e3764351ff75b4da9e6f1d715"
+    }
+  },
+  "verification": {
+    "gpt2_beam.py": {
+      "url": "https://raw.githubusercontent.com/microsoft/LoRA/c4593f060e6a368d7bb5af5273b8e42810cdef90/examples/NLG/src/gpt2_beam.py",
+      "sha256": "8ecf65d444bcdc724609dbf044f8aba84506fea8fd9b8e7965be88b29ed53a18"
+    },
+    "encoder.py": {
+      "url": "https://raw.githubusercontent.com/microsoft/LoRA/c4593f060e6a368d7bb5af5273b8e42810cdef90/examples/NLG/src/encoder.py",
+      "sha256": "0640b9e5c5688c0eeefd28e88f794f989d81dbd36b4369730e8dd4b41542ef88"
+    },
+    "model.py": {
+      "url": "https://raw.githubusercontent.com/microsoft/LoRA/c4593f060e6a368d7bb5af5273b8e42810cdef90/examples/NLG/src/model.py",
+      "sha256": "6ae66a8a2645f9ae79b8e4d63d71706e77dcde2cb83b61f66e3bc1e4d88c1c87"
+    },
+    "data_utils.py": {
+      "url": "https://raw.githubusercontent.com/microsoft/LoRA/c4593f060e6a368d7bb5af5273b8e42810cdef90/examples/NLG/src/data_utils.py",
+      "sha256": "ccc93cf5d8340869f23c8a9b15370fffe2c5c8f91a5ba1d3d66451afb4211e0b"
+    }
+  }
+}

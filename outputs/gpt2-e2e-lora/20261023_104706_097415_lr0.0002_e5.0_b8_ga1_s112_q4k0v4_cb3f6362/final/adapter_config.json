@@ -1,0 +1,12 @@
+{
+  "format": "medium-qkv-lora-v1",
+  "base_model_name_or_path": "openai-community/gpt2-medium",
+  "ranks": {
+    "q": 4,
+    "k": 0,
+    "v": 4
+  },
+  "alpha": 32,
+  "dropout": 0.1,
+  "shared_dropout": true
+}

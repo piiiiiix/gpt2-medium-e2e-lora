@@ -1,0 +1,35 @@
+{
+  "kind": "benchmarks",
+  "status": "completed",
+  "started": "2026-10-23T22:04:53.186325+08:00",
+  "pid": 8484,
+  "config_hash": "6e651160",
+  "hardware": [
+    {
+      "time": "2026-10-23T14:04:53.186325+00:00",
+      "gpu": "0",
+      "uuid": "GPU-5d61c0ea-0ecb-0a82-2091-8fcac7ea2b90",
+      "name": "NVIDIA GeForce RTX 3080",
+      "utilization_percent": "3",
+      "temperature_celsius": "48",
+      "memory_used_mib": "864",
+      "memory_total_mib": "10240",
+      "scope": "whole_device",
+      "power_draw_watts": "39.33",
+      "power_limit_watts": "320.00",
+      "core_clock_mhz": "210",
+      "sm_clock_mhz": "210",
+      "memory_clock_mhz": "405",
+      "performance_state": "P8",
+      "clock_event_reasons_active": "0x0000000000000001",
+      "voltage_unavailable_reason": "Command '['nvidia-smi', '-q', '-x', '-d', 'VOLTAGE']' returned non-zero exit status 2.",
+      "core_voltage_mv": null
+    }
+  ],
+  "python": "C:\\Users\\pix\\.conda\\envs\\lora\\python.exe",
+  "created": "2026-10-23T21:13:54.809833+08:00",
+  "first_started": "2026-10-23T22:04:53.186325+08:00",
+  "ended": "2026-10-23T22:13:40.782973+08:00",
+  "elapsed_seconds": 527.4445444000012,
+  "total_elapsed_seconds": 527.4445444000012
+}

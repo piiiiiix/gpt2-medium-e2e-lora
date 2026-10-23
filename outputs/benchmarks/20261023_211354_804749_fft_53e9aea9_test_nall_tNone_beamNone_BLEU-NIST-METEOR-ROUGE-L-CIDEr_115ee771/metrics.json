@@ -1,0 +1,26 @@
+{
+  "metrics": {
+    "NIST": 8.5362,
+    "BLEU-4": 0.6728,
+    "METEOR": 0.4621400541638005,
+    "ROUGE-L": 0.706144421881932,
+    "CIDEr": 2.4278698538895753
+  },
+  "errors": {},
+  "samples": 630,
+  "selected": [
+    "BLEU",
+    "NIST",
+    "METEOR",
+    "ROUGE-L",
+    "CIDEr"
+  ],
+  "profile": "e2e_official",
+  "scope": {
+    "BLEU": "corpus MTEval v13a-sig (Perl), all references, fraction 0..1",
+    "NIST": "corpus MTEval v13a-sig (Perl), all references",
+    "METEOR": "official Java METEOR 1.5 corpus score after PTB",
+    "ROUGE-L": "official COCO after PTB, all references",
+    "CIDEr": "official COCO after PTB, corpus document frequencies"
+  }
+}
